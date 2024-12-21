@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.pnpm
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.pnpm
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+    restart: unless-stopped 
