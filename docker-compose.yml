@@ -9,6 +9,11 @@ services:
       - "4000:4000"
     environment:
       - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=kiwi
+      - DB_PASSWORD=kiwi123
+      - DB_NAME=standup_kiwi
     restart: unless-stopped
 
   web:
@@ -22,3 +27,17 @@ services:
     depends_on:
       - api
     restart: unless-stopped 
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: kiwi
+      POSTGRES_PASSWORD: kiwi123
+      POSTGRES_DB: standup_kiwi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
