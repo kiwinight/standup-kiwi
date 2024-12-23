@@ -1,23 +1,10 @@
-import {
-  pgTable,
-  serial,
-  varchar,
-  timestamp,
-  text,
-  boolean,
-} from 'drizzle-orm/pg-core';
+import { integer, pgTable, varchar } from 'drizzle-orm/pg-core';
 
-export const tasks = pgTable('tasks', {
-  id: serial('id').primaryKey(),
-  title: varchar('title', { length: 255 }).notNull(),
-  description: text('description'),
-  status: varchar('status', { length: 50 }).notNull().default('pending'),
-  isCompleted: boolean('is_completed').default(false).notNull(),
-  dueDate: timestamp('due_date'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const usersTable = pgTable('users', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar({ length: 255 }).notNull(),
+  email: varchar({ length: 255 }).notNull().unique(),
 });
 
-// Export types for better type inference
-export type Task = typeof tasks.$inferSelect;
-export type NewTask = typeof tasks.$inferInsert;
+export type User = typeof usersTable.$inferSelect;
+export type NewUser = typeof usersTable.$inferInsert;
