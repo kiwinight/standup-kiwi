@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml ./
+COPY apps/web/package.json ./apps/web/
+
+# Install dependencies
+RUN pnpm install
+
+# Copy source code
+COPY . .
+
+# Build
+WORKDIR /app/apps/web
+RUN pnpm run build
+
+EXPOSE 4001
+
+CMD ["pnpm", "run", "start"]

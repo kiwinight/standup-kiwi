@@ -1,0 +1,5 @@
+node_modules
+
+# Docker
+.docker
+docker-compose.override.yml
