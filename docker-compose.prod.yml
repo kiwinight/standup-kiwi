@@ -11,8 +11,8 @@ services:
       - NODE_ENV=production
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=kiwi
-      - DB_PASSWORD=kiwi123
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
       - DB_NAME=standup_kiwi
     restart: unless-stopped
 
@@ -29,10 +29,10 @@ services:
     restart: unless-stopped 
 
   postgres:
-    image: postgres:15
+    image: postgres:16
     environment:
-      POSTGRES_USER: kiwi
-      POSTGRES_PASSWORD: kiwi123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: standup_kiwi
     ports:
       - "5432:5432"
