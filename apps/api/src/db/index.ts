@@ -6,7 +6,7 @@ if (process.env.NODE_ENV === 'development') {
   dotenv.config({ path: '.env.development.local' });
 }
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env.local' });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

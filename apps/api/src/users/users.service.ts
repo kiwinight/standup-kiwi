@@ -20,6 +20,20 @@ export class UsersService {
     return user[0];
   }
 
+  async findByEmail(email: string): Promise<User> {
+    console.log('findByEmail', { email });
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+    console.log('findByEmail', { user });
+    if (!user.length) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    return user[0];
+  }
+
   async create(newUser: NewUser): Promise<User> {
     const result = await db.insert(usersTable).values(newUser).returning();
     return result[0];
