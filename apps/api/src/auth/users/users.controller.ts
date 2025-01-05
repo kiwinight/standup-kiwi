@@ -1,30 +1,45 @@
 import {
   Controller,
+  createParamDecorator,
+  ExecutionContext,
   Get,
-  Headers,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { UsersService } from './users.service';
+
+export const AuthorizationToken = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<Request>();
+
+    const authorization: string | undefined = request.headers['authorization'];
+
+    if (!authorization) {
+      return null;
+    }
+
+    const token = authorization.split('Bearer ')[1];
+
+    if (!token) {
+      return null;
+    }
+
+    return token;
+  },
+);
 
 @Controller('auth/users')
 export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
   @Get('/me')
-  async getMe(@Headers('authorization') authorization: string) {
-    const token = authorization.split('Bearer ')[1];
+  async getMe(@AuthorizationToken() token: string | null) {
+    if (!token) {
+      throw new UnauthorizedException('Token is missing');
+    }
 
     try {
-      const response = await fetch(
-        'https://api.stack-auth.com/api/v1/users/me',
-        {
-          method: 'GET',
-          headers: {
-            'X-Stack-Access-Token': token,
-            'x-stack-access-type': 'server',
-            'X-Stack-Project-Id': process.env.STACK_PROJECT_ID,
-            'X-Stack-Secret-Server-Key': process.env.STACK_SECRET_SERVER_KEY,
-          },
-        },
-      );
-      const data = await response.json();
+      const data = await this.usersService.getCurrentUser(token);
       return data;
     } catch (error) {
       console.error(error);
