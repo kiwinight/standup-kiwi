@@ -125,7 +125,7 @@ function NavBar({ userEmail }: { userEmail: string }) {
             </DropdownMenu.Sub>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
-        <Flex gap="1">
+        <Flex gap="2">
           <KiwinightSymbol width={24} height={24} />
           <Text size="3" weight="bold" className="!tracking-tight">
             Kiwi Standup

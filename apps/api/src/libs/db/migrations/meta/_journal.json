@@ -22,6 +22,20 @@
       "when": 1735808734489,
       "tag": "0002_massive_madame_web",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736144379085,
+      "tag": "0003_aspiring_jamie_braddock",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1736218212021,
+      "tag": "0004_fat_toro",
+      "breakpoints": true
     }
   ]
 }

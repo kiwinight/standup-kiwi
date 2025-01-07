@@ -1,0 +1,1 @@
+ALTER TABLE "boards" ADD COLUMN "form_schemas" jsonb NOT NULL;
