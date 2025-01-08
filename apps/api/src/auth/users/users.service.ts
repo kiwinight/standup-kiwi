@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { db } from 'src/libs/db';
 import { boards, usersToBoards, Board } from 'src/libs/db/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { User } from 'src/auth/auth-service.types';
 
 @Injectable()
@@ -23,19 +23,21 @@ export class UsersService {
     return data;
   }
 
-  async getBoardsByUserId(userId: string): Promise<Board[]> {
-    const results = await db
+  async getBoardsOfUser(
+    userId: string,
+  ): Promise<(Board & { usersCount: number })[]> {
+    return await db
       .select({
         id: boards.id,
         name: boards.name,
         formSchemas: boards.formSchemas,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
+        usersCount: count(usersToBoards.userId),
       })
       .from(boards)
       .innerJoin(usersToBoards, eq(boards.id, usersToBoards.boardId))
-      .where(eq(usersToBoards.userId, userId));
-
-    return results;
+      .where(eq(usersToBoards.userId, userId))
+      .groupBy(boards.id);
   }
 }

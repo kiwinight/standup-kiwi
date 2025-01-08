@@ -3,12 +3,10 @@
 /**
  * Schemas
  */
-export type User = {
+export type Board = {
   id: number;
+  formSchemas: unknown;
   name: string;
-  email: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
-
-/**
- * Schemas
- */

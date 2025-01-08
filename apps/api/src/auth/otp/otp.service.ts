@@ -10,10 +10,10 @@ export class OtpService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Stack-Project-Id': process.env.AUTH_SERVICE_PROJECT_ID,
+          'X-Stack-Project-Id': process.env.AUTH_SERVICE_PROJECT_ID!,
           'X-Stack-Access-Type': 'server',
           'X-Stack-Secret-Server-Key':
-            process.env.AUTH_SERVICE_SECRET_SERVER_KEY,
+            process.env.AUTH_SERVICE_SECRET_SERVER_KEY!,
         },
         body: JSON.stringify({
           email,
@@ -33,10 +33,10 @@ export class OtpService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Stack-Project-Id': process.env.AUTH_SERVICE_PROJECT_ID,
+          'X-Stack-Project-Id': process.env.AUTH_SERVICE_PROJECT_ID!,
           'X-Stack-Access-Type': 'server',
           'X-Stack-Secret-Server-Key':
-            process.env.AUTH_SERVICE_SECRET_SERVER_KEY,
+            process.env.AUTH_SERVICE_SECRET_SERVER_KEY!,
         },
         body: JSON.stringify({
           code,

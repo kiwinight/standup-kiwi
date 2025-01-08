@@ -1,6 +1,7 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedRequest, AuthGuard } from '../guards/auth.guard';
+import { Board } from '../../libs/db/schema';
 
 @Controller('auth/users')
 export class UsersController {
@@ -15,8 +16,8 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('me/boards')
-  getMyBoards(@Req() request: AuthenticatedRequest) {
+  getMyBoards(@Req() request: AuthenticatedRequest): Promise<Board[]> {
     const userId = request.userId;
-    return this.usersService.getBoardsByUserId(userId);
+    return this.usersService.getBoardsOfUser(userId);
   }
 }

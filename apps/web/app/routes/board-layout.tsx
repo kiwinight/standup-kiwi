@@ -1,23 +1,28 @@
-import React from "react";
-import { Outlet, useNavigate } from "react-router";
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  DropdownMenu,
-  Flex,
-  Select,
-  Text,
-  TextArea,
-} from "@radix-ui/themes";
-import { CheckIcon, ListBulletIcon, PlusIcon } from "@radix-ui/react-icons";
+import { Link, Outlet, useLoaderData, useParams } from "react-router";
+import { Box, Button, DropdownMenu, Flex, Text } from "@radix-ui/themes";
+import { ListBulletIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import type { Route } from "./+types/board-layout";
 import { getSession } from "~/sessions.server";
+import type { Board } from "types";
 
-function NavBar({ userEmail }: { userEmail: string }) {
-  const navigate = useNavigate();
+function NavBar() {
+  const { currentUserBoards, currentUser } =
+    useLoaderData<Route.ComponentProps["loaderData"]>();
+
+  const { boardId } = useParams();
+
+  const personalBoards: (Board & { usersCount: number })[] = [];
+  const sharedBoards: (Board & { usersCount: number })[] = [];
+
+  currentUserBoards.forEach((board) => {
+    if (board.usersCount > 1) {
+      sharedBoards.push(board);
+    } else {
+      personalBoards.push(board);
+    }
+  });
+
   return (
     <Flex
       className="h-[56px] px-4 z-10 bg-[var(--color-background)]"
@@ -36,40 +41,65 @@ function NavBar({ userEmail }: { userEmail: string }) {
               radius="medium"
               className="!pl-[8px] !pr-[8px]"
             >
-              <ListBulletIcon
-                fontSize={24}
-                width={16}
-                height={16}
-                // width={20} height={20}
-              />
+              <ListBulletIcon fontSize={24} width={16} height={16} />
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
-            <DropdownMenu.Group>
-              <DropdownMenu.Item
-                onClick={() => {
-                  navigate("/boards/create");
-                }}
-              >
+            <Link to="/boards/create">
+              <DropdownMenu.Item>
                 <PlusIcon /> Create a new board
               </DropdownMenu.Item>
+            </Link>
 
-              <DropdownMenu.Separator />
+            {personalBoards.length > 0 && (
+              <>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                {personalBoards.map((board) => {
+                  const isActive = boardId
+                    ? parseInt(boardId, 10) === board.id
+                    : false;
+                  return (
+                    <Link to={`/boards/${board.id}`}>
+                      <DropdownMenu.Item
+                        key={board.id}
+                        className={isActive ? "[&]:bg-[var(--accent-a3)]" : ""}
+                      >
+                        <Text weight={isActive ? "medium" : "regular"}>
+                          {board.name}
+                        </Text>
+                      </DropdownMenu.Item>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
 
-              <DropdownMenu.Label>Boards</DropdownMenu.Label>
-              <DropdownMenu.Item className="bg-[var(--accent-a3);]">
-                <Text weight="medium">Personal</Text>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item>Personal B</DropdownMenu.Item>
-            </DropdownMenu.Group>
+            {sharedBoards.length > 0 && (
+              <>
+                <DropdownMenu.Separator />
 
-            <DropdownMenu.Separator />
+                <DropdownMenu.Label>Shared boards</DropdownMenu.Label>
 
-            <DropdownMenu.Label>Shared boards</DropdownMenu.Label>
-
-            <DropdownMenu.Item>Team A</DropdownMenu.Item>
-            <DropdownMenu.Item>Team B</DropdownMenu.Item>
-            <DropdownMenu.Item>Team C</DropdownMenu.Item>
+                {sharedBoards.map((board) => {
+                  const isActive = boardId
+                    ? parseInt(boardId, 10) === board.id
+                    : false;
+                  return (
+                    <Link to={`/boards/${board.id}`}>
+                      <DropdownMenu.Item
+                        key={board.id}
+                        className={isActive ? "!bg-[var(--accent-a3)]" : ""}
+                      >
+                        <Text weight={isActive ? "medium" : "regular"}>
+                          {board.name}
+                        </Text>
+                      </DropdownMenu.Item>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
@@ -98,12 +128,10 @@ function NavBar({ userEmail }: { userEmail: string }) {
                 </DropdownMenu.Item>
               </DropdownMenu.SubContent>
             </DropdownMenu.Sub>
-            {/* <DropdownMenu.Separator /> */}
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger>
-                <Text size="2" weight="medium">
-                  {userEmail}
-                </Text>
+                <PersonIcon />
+                <Text size="2">{currentUser.primary_email}</Text>
               </DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
@@ -138,30 +166,30 @@ function NavBar({ userEmail }: { userEmail: string }) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("Cookie"));
-
   const accessToken = session.get("access_token");
 
-  const response = await fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-  const currentUser: { primary_email: string } = await response.json();
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+  };
 
-  return { currentUser };
+  const [currentUser, currentUserBoards] = await Promise.all([
+    fetch(import.meta.env.VITE_API_URL + "/auth/users/me", { headers }).then(
+      (response) => response.json()
+    ) as Promise<{ primary_email: string }>,
+    fetch(import.meta.env.VITE_API_URL + "/auth/users/me/boards", {
+      headers,
+    }).then((response) => response.json()) as Promise<
+      (Board & { usersCount: number })[]
+    >,
+  ]);
+
+  return { currentUser, currentUserBoards };
 }
 
-type Props = {};
-
-function BoardLayout({ loaderData }: Route.ComponentProps) {
-  const { currentUser } = loaderData;
-
+function BoardLayout({}: Route.ComponentProps) {
   return (
     <div>
-      <NavBar userEmail={currentUser.primary_email} />
+      <NavBar />
       <Box>
         <Outlet />
       </Box>
