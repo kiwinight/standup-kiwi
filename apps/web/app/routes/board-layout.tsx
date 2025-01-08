@@ -1,27 +1,24 @@
-import { Link, Outlet, useLoaderData, useParams } from "react-router";
-import { Box, Button, DropdownMenu, Flex, Text } from "@radix-ui/themes";
+import { Await, Link, Outlet, useLoaderData, useParams } from "react-router";
+import {
+  Box,
+  Button,
+  DropdownMenu,
+  Flex,
+  Skeleton,
+  Text,
+} from "@radix-ui/themes";
 import { ListBulletIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import type { Route } from "./+types/board-layout";
 import { getSession } from "~/sessions.server";
 import type { Board } from "types";
+import { Suspense } from "react";
 
 function NavBar() {
-  const { currentUserBoards, currentUser } =
+  const { currentUserBoardsPromise, currentUserPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
 
   const { boardId } = useParams();
-
-  const personalBoards: (Board & { usersCount: number })[] = [];
-  const sharedBoards: (Board & { usersCount: number })[] = [];
-
-  currentUserBoards.forEach((board) => {
-    if (board.usersCount > 1) {
-      sharedBoards.push(board);
-    } else {
-      personalBoards.push(board);
-    }
-  });
 
   return (
     <Flex
@@ -51,7 +48,7 @@ function NavBar() {
               </DropdownMenu.Item>
             </Link>
 
-            {personalBoards.length > 0 && (
+            {/* {personalBoards.length > 0 && (
               <>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Label>Boards</DropdownMenu.Label>
@@ -60,12 +57,13 @@ function NavBar() {
                     ? parseInt(boardId, 10) === board.id
                     : false;
                   return (
-                    <Link to={`/boards/${board.id}`}>
+                    <Link key={board.id} to={`/boards/${board.id}`}>
                       <DropdownMenu.Item
-                        key={board.id}
                         className={isActive ? "[&]:bg-[var(--accent-a3)]" : ""}
                       >
-                        <Text weight={isActive ? "medium" : "regular"}>
+                        <Text
+                        // weight={isActive ? "medium" : "regular"}
+                        >
                           {board.name}
                         </Text>
                       </DropdownMenu.Item>
@@ -73,8 +71,97 @@ function NavBar() {
                   );
                 })}
               </>
-            )}
+            )} */}
 
+            <Suspense
+              fallback={
+                <>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                  <DropdownMenu.Item>
+                    <Text>
+                      <Skeleton>Example</Skeleton>
+                    </Text>
+                  </DropdownMenu.Item>
+                </>
+              }
+            >
+              <Await resolve={currentUserBoardsPromise}>
+                {(value) => {
+                  const sharedBoards = value.filter(
+                    (board) => board.usersCount > 1
+                  );
+                  const personalBoards = value.filter(
+                    (board) => board.usersCount === 1
+                  );
+
+                  return (
+                    <>
+                      {personalBoards.length > 0 && (
+                        <>
+                          <DropdownMenu.Separator />
+                          <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                          {personalBoards.map((board) => {
+                            const isActive = boardId
+                              ? parseInt(boardId, 10) === board.id
+                              : false;
+                            return (
+                              <Link key={board.id} to={`/boards/${board.id}`}>
+                                <DropdownMenu.Item
+                                  className={
+                                    isActive ? "[&]:bg-[var(--accent-a3)]" : ""
+                                  }
+                                >
+                                  <Text
+                                  // weight={isActive ? "medium" : "regular"}
+                                  >
+                                    {board.name}
+                                  </Text>
+                                </DropdownMenu.Item>
+                              </Link>
+                            );
+                          })}
+                          {sharedBoards.length > 0 && (
+                            <>
+                              <DropdownMenu.Separator />
+
+                              <DropdownMenu.Label>
+                                Shared boards
+                              </DropdownMenu.Label>
+
+                              {sharedBoards.map((board) => {
+                                const isActive = boardId
+                                  ? parseInt(boardId, 10) === board.id
+                                  : false;
+                                return (
+                                  <Link
+                                    key={board.id}
+                                    to={`/boards/${board.id}`}
+                                  >
+                                    <DropdownMenu.Item
+                                      className={
+                                        isActive ? "!bg-[var(--accent-a3)]" : ""
+                                      }
+                                    >
+                                      <Text
+                                      // weight={isActive ? "medium" : "regular"}
+                                      >
+                                        {board.name}
+                                      </Text>
+                                    </DropdownMenu.Item>
+                                  </Link>
+                                );
+                              })}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </>
+                  );
+                }}
+              </Await>
+            </Suspense>
+            {/* 
             {sharedBoards.length > 0 && (
               <>
                 <DropdownMenu.Separator />
@@ -86,12 +173,13 @@ function NavBar() {
                     ? parseInt(boardId, 10) === board.id
                     : false;
                   return (
-                    <Link to={`/boards/${board.id}`}>
+                    <Link key={board.id} to={`/boards/${board.id}`}>
                       <DropdownMenu.Item
-                        key={board.id}
                         className={isActive ? "!bg-[var(--accent-a3)]" : ""}
                       >
-                        <Text weight={isActive ? "medium" : "regular"}>
+                        <Text
+                        // weight={isActive ? "medium" : "regular"}
+                        >
                           {board.name}
                         </Text>
                       </DropdownMenu.Item>
@@ -99,7 +187,7 @@ function NavBar() {
                   );
                 })}
               </>
-            )}
+            )} */}
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
@@ -131,7 +219,13 @@ function NavBar() {
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger>
                 <PersonIcon />
-                <Text size="2">{currentUser.primary_email}</Text>
+                <Text size="2">
+                  <Suspense fallback={<Skeleton>Loading</Skeleton>}>
+                    <Await resolve={currentUserPromise}>
+                      {(value) => <>{value.primary_email}</>}
+                    </Await>
+                  </Suspense>
+                </Text>
               </DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
@@ -172,18 +266,29 @@ export async function loader({ request }: Route.LoaderArgs) {
     Authorization: `Bearer ${accessToken}`,
   };
 
-  const [currentUser, currentUserBoards] = await Promise.all([
-    fetch(import.meta.env.VITE_API_URL + "/auth/users/me", { headers }).then(
-      (response) => response.json()
-    ) as Promise<{ primary_email: string }>,
-    fetch(import.meta.env.VITE_API_URL + "/auth/users/me/boards", {
-      headers,
-    }).then((response) => response.json()) as Promise<
-      (Board & { usersCount: number })[]
-    >,
-  ]);
+  const currentUserPromise = fetch(
+    import.meta.env.VITE_API_URL + "/auth/users/me",
+    { headers }
+  ).then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to fetch current user");
+    }
+    return response.json();
+  }) as Promise<{ primary_email: string }>;
 
-  return { currentUser, currentUserBoards };
+  const currentUserBoardsPromise = fetch(
+    import.meta.env.VITE_API_URL + "/auth/users/me/boards",
+    {
+      headers,
+    }
+  ).then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to fetch boards");
+    }
+    return response.json();
+  }) as Promise<(Board & { usersCount: number })[]>;
+
+  return { currentUserBoardsPromise, currentUserPromise };
 }
 
 function BoardLayout({}: Route.ComponentProps) {

@@ -7,10 +7,78 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
+import {
+  redirect,
+  useActionData,
+  useFetcher,
+  type ActionFunctionArgs,
+  type ClientActionFunctionArgs,
+} from "react-router";
+import { getSession } from "~/sessions.server";
+
+function getFormName(formData: FormData): string | undefined {
+  return formData.get("name")?.toString().trim();
+}
+
+export async function clientAction({
+  request,
+  serverAction,
+}: ClientActionFunctionArgs) {
+  console.log("clientAction");
+  const clonedRequest = request.clone();
+  let formData = await clonedRequest.formData();
+
+  const name = getFormName(formData);
+
+  let errors: {
+    name?: string;
+  } = {};
+
+  if (!name) {
+    errors.name = "Board name is required";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { errors };
+  }
+
+  return await serverAction<typeof action>();
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  let formData = await request.formData();
+
+  const name = getFormName(formData);
+
+  const session = await getSession(request.headers.get("Cookie"));
+  const accessToken = session.get("access_token");
+
+  const board = await fetch(import.meta.env.VITE_API_URL + "/boards", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((response) => {
+    if (!response.ok) {
+      return {
+        errors: {
+          name: "Failed to create board",
+        },
+      };
+    }
+    return response.json();
+  });
+
+  return redirect("/boards/" + board.id);
+}
 
 type Props = {};
 
 function CreateNewBoardRoute({}: Props) {
+  const fetcher = useFetcher<typeof clientAction>();
+
   return (
     <Container my="7" maxWidth="672px" px="4">
       <Text size="6" weight="bold">
@@ -27,66 +95,32 @@ function CreateNewBoardRoute({}: Props) {
           New board
         </Text>
 
-        <form
-          // mt="24px"
-          className="mt-6"
-          onSubmit={(event) => {}}
-        >
-          <Box>
+        <fetcher.Form name="create-new-board" method="post" className="mt-6">
+          <Flex direction="column" gap="2">
             <label>
               <Text size="2" weight="medium">
                 Board name
               </Text>
-              <TextField.Root
-                name="yesterday"
-                // size="3"
-                mt="2"
-                variant="soft"
-                placeholder="Board name"
-              />
             </label>
-          </Box>
 
-          {/* <Box mt="5">
-            <label>
-              <Text size="2" weight="medium">
-                What will you do today?
+            <TextField.Root
+              name="name"
+              variant="soft"
+              placeholder="Enter the board name"
+            />
+            {fetcher.data?.errors?.name && (
+              <Text size="2" color="red">
+                {fetcher.data.errors.name}
               </Text>
-              <TextArea
-                name="today"
-                mt="2"
-                variant="soft"
-                placeholder="Write your reply here..."
-                className="w-full !min-h-[80px]"
-                resize="vertical"
-                // defaultValue={formState.today}
-              />
-            </label>
-          </Box> */}
-
-          {/* <Box mt="5">
-            <label>
-              <Text size="2" weight="medium">
-                Do you have any blockers?
-              </Text>
-              <TextArea
-                name="blockers"
-                mt="2"
-                variant="soft"
-                placeholder="Write your reply here..."
-                className="w-full !min-h-[80px]"
-                resize="vertical"
-                // defaultValue={formState.blockers}
-              />
-            </label>
-          </Box> */}
+            )}
+          </Flex>
 
           <Flex justify="end" mt="5" gap="2">
             <Button highContrast size="2" type="submit">
               Create
             </Button>
           </Flex>
-        </form>
+        </fetcher.Form>
       </Card>
     </Container>
   );

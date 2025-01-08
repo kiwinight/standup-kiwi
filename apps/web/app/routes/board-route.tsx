@@ -22,21 +22,11 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("Cookie"));
-
   const accessToken = session.get("access_token");
-  // const refreshToken = session.get("refresh_token");
 
-  const response = await fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-  const currentUser = await response.json();
+  // TODO: fetch board
 
-  return { currentUser };
+  return {};
 }
 
 export function HydrateFallback() {
@@ -44,10 +34,6 @@ export function HydrateFallback() {
 }
 
 export default function BoardRoute({ loaderData }: Route.ComponentProps) {
-  const { currentUser } = loaderData;
-
-  console.log("currentUser", currentUser);
-
   const [formState, setFormState] = useState({
     yesterday: "",
     today: "",
