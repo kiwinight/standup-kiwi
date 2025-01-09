@@ -115,7 +115,12 @@ function CreateNewBoardRoute({}: Props) {
           </Flex>
 
           <Flex justify="end" mt="5" gap="2">
-            <Button highContrast size="2" type="submit">
+            <Button
+              highContrast
+              size="2"
+              type="submit"
+              loading={fetcher.state !== "idle"}
+            >
               Create
             </Button>
           </Flex>
