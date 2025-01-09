@@ -1,4 +1,13 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Get,
+  Param,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { Board } from 'src/libs/db/schema';
@@ -29,10 +38,24 @@ export class BoardsController {
   //   return this.boardsService.list();
   // }
 
-  // @Get(':id')
-  // get(@Param('id') id: string) {
-  //   return this.boardsService.get(+id);
-  // }
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  async get(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    const userId = request.userId;
+
+    const hasAccess = await this.boardsService.verifyUserAccess(
+      parseInt(id, 10),
+      userId,
+    );
+
+    if (!hasAccess) {
+      throw new UnauthorizedException(
+        'You are not authorized to access this board',
+      );
+    }
+
+    return this.boardsService.get(parseInt(id, 10));
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {

@@ -15,13 +15,14 @@ export interface User {
   signed_up_at_millis: number;
   last_active_at_millis: number;
   primary_email: string;
-  display_name: string;
-  selected_team: Team;
+  display_name: string | null;
+  selected_team: Team | null;
   selected_team_id: string;
   profile_image_url: string;
   client_metadata: Record<string, any>;
   client_read_only_metadata: Record<string, any>;
   server_metadata: Record<string, any>;
+  has_password: boolean;
 }
 
 export interface OtpSignInResponse {

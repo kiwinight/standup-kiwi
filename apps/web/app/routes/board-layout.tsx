@@ -11,11 +11,12 @@ import { ListBulletIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import type { Route } from "./+types/board-layout";
 import { getSession } from "~/sessions.server";
-import type { Board } from "types";
+import type { ApiResponse, Board, User } from "types";
 import { Suspense } from "react";
+import { RouteErrorResponse } from "~/root";
 
 function NavBar() {
-  const { currentUserBoardsPromise, currentUserPromise } =
+  const { currentUserBoardsDataPromise, currentUserDataPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
 
   const { boardId } = useParams();
@@ -48,31 +49,6 @@ function NavBar() {
               </DropdownMenu.Item>
             </Link>
 
-            {/* {personalBoards.length > 0 && (
-              <>
-                <DropdownMenu.Separator />
-                <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                {personalBoards.map((board) => {
-                  const isActive = boardId
-                    ? parseInt(boardId, 10) === board.id
-                    : false;
-                  return (
-                    <Link key={board.id} to={`/boards/${board.id}`}>
-                      <DropdownMenu.Item
-                        className={isActive ? "[&]:bg-[var(--accent-a3)]" : ""}
-                      >
-                        <Text
-                        // weight={isActive ? "medium" : "regular"}
-                        >
-                          {board.name}
-                        </Text>
-                      </DropdownMenu.Item>
-                    </Link>
-                  );
-                })}
-              </>
-            )} */}
-
             <Suspense
               fallback={
                 <>
@@ -86,12 +62,20 @@ function NavBar() {
                 </>
               }
             >
-              <Await resolve={currentUserBoardsPromise}>
-                {(value) => {
-                  const sharedBoards = value.filter(
+              <Await resolve={currentUserBoardsDataPromise}>
+                {(data) => {
+                  if ("message" in data) {
+                    throw new RouteErrorResponse(
+                      data.statusCode,
+                      data.message,
+                      Error(data.error)
+                    );
+                  }
+
+                  const sharedBoards = data.filter(
                     (board) => board.usersCount > 1
                   );
-                  const personalBoards = value.filter(
+                  const personalBoards = data.filter(
                     (board) => board.usersCount === 1
                   );
 
@@ -161,33 +145,6 @@ function NavBar() {
                 }}
               </Await>
             </Suspense>
-            {/* 
-            {sharedBoards.length > 0 && (
-              <>
-                <DropdownMenu.Separator />
-
-                <DropdownMenu.Label>Shared boards</DropdownMenu.Label>
-
-                {sharedBoards.map((board) => {
-                  const isActive = boardId
-                    ? parseInt(boardId, 10) === board.id
-                    : false;
-                  return (
-                    <Link key={board.id} to={`/boards/${board.id}`}>
-                      <DropdownMenu.Item
-                        className={isActive ? "!bg-[var(--accent-a3)]" : ""}
-                      >
-                        <Text
-                        // weight={isActive ? "medium" : "regular"}
-                        >
-                          {board.name}
-                        </Text>
-                      </DropdownMenu.Item>
-                    </Link>
-                  );
-                })}
-              </>
-            )} */}
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
@@ -221,8 +178,17 @@ function NavBar() {
                 <PersonIcon />
                 <Text size="2">
                   <Suspense fallback={<Skeleton>Loading</Skeleton>}>
-                    <Await resolve={currentUserPromise}>
-                      {(value) => <>{value.primary_email}</>}
+                    <Await resolve={currentUserDataPromise}>
+                      {(data) => {
+                        if ("message" in data) {
+                          throw new RouteErrorResponse(
+                            data.statusCode,
+                            data.message,
+                            Error(data.error)
+                          );
+                        }
+                        return <>{data.primary_email}</>;
+                      }}
                     </Await>
                   </Suspense>
                 </Text>
@@ -266,29 +232,24 @@ export async function loader({ request }: Route.LoaderArgs) {
     Authorization: `Bearer ${accessToken}`,
   };
 
-  const currentUserPromise = fetch(
+  const currentUserDataPromise = fetch(
     import.meta.env.VITE_API_URL + "/auth/users/me",
     { headers }
-  ).then((response) => {
-    if (!response.ok) {
-      throw new Error("Failed to fetch current user");
-    }
-    return response.json();
-  }) as Promise<{ primary_email: string }>;
+  ).then((response) => response.json() as Promise<ApiResponse<User>>);
 
-  const currentUserBoardsPromise = fetch(
+  const currentUserBoardsDataPromise = fetch(
     import.meta.env.VITE_API_URL + "/auth/users/me/boards",
     {
       headers,
     }
-  ).then((response) => {
-    if (!response.ok) {
-      throw new Error("Failed to fetch boards");
-    }
-    return response.json();
-  }) as Promise<(Board & { usersCount: number })[]>;
+  ).then(
+    (response) =>
+      response.json() as Promise<
+        ApiResponse<(Board & { usersCount: number })[]>
+      >
+  );
 
-  return { currentUserBoardsPromise, currentUserPromise };
+  return { currentUserBoardsDataPromise, currentUserDataPromise };
 }
 
 function BoardLayout({}: Route.ComponentProps) {

@@ -3,15 +3,18 @@ import {
   Button,
   Card,
   Container,
-  DropdownMenu,
   Flex,
+  Skeleton,
   Text,
   TextArea,
 } from "@radix-ui/themes";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { GearIcon, ListBulletIcon, Share1Icon } from "@radix-ui/react-icons";
 import { getSession } from "~/sessions.server";
 import type { Route } from "./+types/board-route";
+import { Await } from "react-router";
+import { NotFoundRouteErrorResponse, RouteErrorResponse } from "~/root";
+import type { ApiResponse, Board } from "types";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -20,20 +23,27 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("Cookie"));
   const accessToken = session.get("access_token");
 
-  // TODO: fetch board
+  const boardId = params.boardId;
 
-  return {};
-}
+  const boardDataPromise = fetch(
+    import.meta.env.VITE_API_URL + `/boards/${boardId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  ).then((response) => response.json() as Promise<ApiResponse<Board>>);
 
-export function HydrateFallback() {
-  return <p>Loading Game...</p>;
+  return { boardDataPromise };
 }
 
 export default function BoardRoute({ loaderData }: Route.ComponentProps) {
+  const { boardDataPromise } = loaderData;
+
   const [formState, setFormState] = useState({
     yesterday: "",
     today: "",
@@ -43,12 +53,7 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
   const [isFormVisible, setIsFormVisible] = useState(true);
 
   return (
-    <Container
-      my="7"
-      maxWidth="672px"
-      // maxWidth="568px"
-      px="4"
-    >
+    <Container my="7" maxWidth="672px" px="4">
       <Flex
         justify="between"
         align={{
@@ -61,7 +66,25 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
         }}
       >
         <Text size="6" weight="bold">
-          Personal
+          <Suspense fallback={<Skeleton>Sample name</Skeleton>}>
+            <Await resolve={boardDataPromise}>
+              {(data) => {
+                if ("message" in data) {
+                  if (data.statusCode === 401) {
+                    throw new NotFoundRouteErrorResponse();
+                  }
+
+                  throw new RouteErrorResponse(
+                    data.statusCode,
+                    data.message,
+                    Error(data.error)
+                  );
+                }
+
+                return <>{data.name}</>;
+              }}
+            </Await>
+          </Suspense>
         </Text>
 
         <Flex
@@ -91,11 +114,7 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
           }}
           mt="7"
         >
-          <Text
-            // size="5"
-            size="4"
-            weight="bold"
-          >
+          <Text size="4" weight="bold">
             Today's standup
           </Text>
 

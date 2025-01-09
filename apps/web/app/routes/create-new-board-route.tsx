@@ -24,7 +24,6 @@ export async function clientAction({
   request,
   serverAction,
 }: ClientActionFunctionArgs) {
-  console.log("clientAction");
   const clonedRequest = request.clone();
   let formData = await clonedRequest.formData();
 

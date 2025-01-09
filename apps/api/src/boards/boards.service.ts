@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../libs/db';
 import { boards, InsertBoard, usersToBoards, Board } from '../libs/db/schema';
+import { and, count, eq } from 'drizzle-orm';
 
 @Injectable()
 export class BoardsService {
@@ -56,9 +57,26 @@ export class BoardsService {
   //   return `This action returns all boards`;
   // }
 
-  // get(id: number) {
-  //   return `This action returns a #${id} board`;
-  // }
+  async get(id: number) {
+    const [result] = await db.select().from(boards).where(eq(boards.id, id));
+    return result;
+  }
+
+  async verifyUserAccess(boardId: number, userId: string): Promise<boolean> {
+    const [result] = await db
+      .select({
+        count: count(),
+      })
+      .from(usersToBoards)
+      .where(
+        and(
+          eq(usersToBoards.boardId, boardId),
+          eq(usersToBoards.userId, userId),
+        ),
+      );
+
+    return result.count > 0;
+  }
 
   // update(id: number, updateBoardDto: UpdateBoardDto) {
   //   return `This action updates a #${id} board`;
