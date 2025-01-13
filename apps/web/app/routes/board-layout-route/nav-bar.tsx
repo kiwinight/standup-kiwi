@@ -1,19 +1,10 @@
-import { Await, Link, Outlet, useLoaderData, useParams } from "react-router";
-import {
-  Box,
-  Button,
-  DropdownMenu,
-  Flex,
-  Skeleton,
-  Text,
-} from "@radix-ui/themes";
-import { ListBulletIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
-import KiwinightSymbol from "~/components/kiwinight-symbol";
-import type { Route } from "./+types/board-layout";
-import { getSession } from "~/sessions.server";
-import type { ApiResponse, Board, User } from "types";
 import { Suspense } from "react";
-import { RouteErrorResponse } from "~/root";
+import type { Route } from "./+types/board-layout-route";
+import { Await, Link, useLoaderData } from "react-router";
+import { useParams } from "react-router";
+import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
+import { Flex, DropdownMenu, Button, Skeleton, Text } from "@radix-ui/themes";
+import KiwinightSymbol from "~/components/kiwinight-symbol";
 
 function NavBar() {
   const { currentUserBoardsDataPromise, currentUserDataPromise } =
@@ -64,14 +55,6 @@ function NavBar() {
             >
               <Await resolve={currentUserBoardsDataPromise}>
                 {(data) => {
-                  if ("message" in data) {
-                    throw new RouteErrorResponse(
-                      data.statusCode,
-                      data.message,
-                      Error(data.error)
-                    );
-                  }
-
                   const sharedBoards = data.filter(
                     (board) => board.usersCount > 1
                   );
@@ -180,13 +163,6 @@ function NavBar() {
                   <Suspense fallback={<Skeleton>Loading</Skeleton>}>
                     <Await resolve={currentUserDataPromise}>
                       {(data) => {
-                        if ("message" in data) {
-                          throw new RouteErrorResponse(
-                            data.statusCode,
-                            data.message,
-                            Error(data.error)
-                          );
-                        }
                         return <>{data.primary_email}</>;
                       }}
                     </Await>
@@ -224,43 +200,4 @@ function NavBar() {
   );
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await getSession(request.headers.get("Cookie"));
-  const accessToken = session.get("access_token");
-
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-  };
-
-  const currentUserDataPromise = fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me",
-    { headers }
-  ).then((response) => response.json() as Promise<ApiResponse<User>>);
-
-  const currentUserBoardsDataPromise = fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me/boards",
-    {
-      headers,
-    }
-  ).then(
-    (response) =>
-      response.json() as Promise<
-        ApiResponse<(Board & { usersCount: number })[]>
-      >
-  );
-
-  return { currentUserBoardsDataPromise, currentUserDataPromise };
-}
-
-function BoardLayout({}: Route.ComponentProps) {
-  return (
-    <div>
-      <NavBar />
-      <Box>
-        <Outlet />
-      </Box>
-    </div>
-  );
-}
-
-export default BoardLayout;
+export default NavBar;

@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Card,
   Container,
@@ -8,13 +7,20 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import {
+  data,
   redirect,
-  useActionData,
   useFetcher,
   type ActionFunctionArgs,
   type ClientActionFunctionArgs,
 } from "react-router";
-import { getSession } from "~/sessions.server";
+import verifyAuthentication from "~/libs/auth";
+import { commitSession } from "~/libs/auth-session.server";
+import type { Route } from "./+types/create-new-board-route";
+import { isApiErrorResponse, type ApiResponse, type Board } from "types";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await verifyAuthentication(request);
+}
 
 function getFormName(formData: FormData): string | undefined {
   return formData.get("name")?.toString().trim();
@@ -45,12 +51,12 @@ export async function clientAction({
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const { accessToken, refreshed, session } =
+    await verifyAuthentication(request);
+
   let formData = await request.formData();
 
   const name = getFormName(formData);
-
-  const session = await getSession(request.headers.get("Cookie"));
-  const accessToken = session.get("access_token");
 
   const board = await fetch(import.meta.env.VITE_API_URL + "/boards", {
     method: "POST",
@@ -59,18 +65,31 @@ export async function action({ request }: ActionFunctionArgs) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-  }).then((response) => {
-    if (!response.ok) {
-      return {
+  }).then(async (response) => {
+    const data: ApiResponse<Board> = await response.json();
+    return data;
+  });
+
+  if (isApiErrorResponse(board)) {
+    return data(
+      {
         errors: {
           name: "Failed to create board",
         },
-      };
-    }
-    return response.json();
-  });
+      },
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 
-  return redirect("/boards/" + board.id);
+  return redirect("/boards/" + board.id, {
+    headers: {
+      ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
+    },
+  });
 }
 
 type Props = {};

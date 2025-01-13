@@ -44,4 +44,15 @@ interface ApiErrorResponse {
   error?: string;
 }
 
+export function isApiErrorResponse(
+  response: unknown
+): response is ApiErrorResponse {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "message" in response &&
+    "statusCode" in response
+  );
+}
+
 export type ApiResponse<T> = T | ApiErrorResponse;

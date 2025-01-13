@@ -10,11 +10,11 @@ import {
 } from "@radix-ui/themes";
 import { Suspense, useState } from "react";
 import { GearIcon, ListBulletIcon, Share1Icon } from "@radix-ui/react-icons";
-import { getSession } from "~/sessions.server";
 import type { Route } from "./+types/board-route";
-import { Await } from "react-router";
+import { Await, redirect } from "react-router";
 import { NotFoundRouteErrorResponse, RouteErrorResponse } from "~/root";
 import type { ApiResponse, Board } from "types";
+import verifyAuthentication from "~/libs/auth";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,8 +24,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const session = await getSession(request.headers.get("Cookie"));
-  const accessToken = session.get("access_token");
+  const { accessToken } = await verifyAuthentication(request);
 
   const boardId = params.boardId;
 

@@ -19,7 +19,7 @@ export class UsersService {
         },
       },
     );
-    const data: User = await response.json();
+    const data: User = await response.json(); // TODO: handle error case
     return data;
   }
 

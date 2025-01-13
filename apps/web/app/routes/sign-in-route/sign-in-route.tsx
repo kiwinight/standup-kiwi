@@ -1,5 +1,5 @@
 import { Button, Container, Heading, TextField } from "@radix-ui/themes";
-import type { Route } from "../+types/root";
+import type { Route } from "../../+types/root";
 import { redirect, useFetcher } from "react-router";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
