@@ -1,4 +1,4 @@
-import { data, Outlet } from "react-router";
+import { data, Outlet, type ShouldRevalidateFunctionArgs } from "react-router";
 import { Box } from "@radix-ui/themes";
 import {
   isApiErrorResponse,
@@ -62,6 +62,18 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     currentUserBoardsDataPromise,
     currentUserDataPromise,
   });
+}
+
+export function shouldRevalidate(arg: ShouldRevalidateFunctionArgs) {
+  if (
+    arg.currentParams.boardId &&
+    arg.nextParams.boardId &&
+    arg.currentParams.boardId !== arg.nextParams.boardId
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 function BoardLayoutRoute({}: Route.ComponentProps) {
