@@ -82,7 +82,7 @@ export default async function verifyAuthentication(request: Request) {
   }
 
   if (refreshed && request.method === "GET") {
-    retriggerLoader(request.url, session);
+    await retriggerLoader(request.url, session);
   }
 
   return {

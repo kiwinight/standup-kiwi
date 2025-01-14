@@ -24,8 +24,7 @@ function NavBar() {
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
             <Button
-              variant="soft"
-              highContrast
+              variant="surface"
               size="2"
               radius="medium"
               className="!pl-[8px] !pr-[8px]"

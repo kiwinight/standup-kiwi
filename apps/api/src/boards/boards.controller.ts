@@ -43,6 +43,7 @@ export class BoardsController {
   async get(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
     const userId = request.userId;
 
+    // TODO: I think this logic can be registered as a guard
     const hasAccess = await this.boardsService.verifyUserAccess(
       parseInt(id, 10),
       userId,

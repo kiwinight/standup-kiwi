@@ -11,10 +11,11 @@ import {
 import { Suspense, useState } from "react";
 import { GearIcon, ListBulletIcon, Share1Icon } from "@radix-ui/react-icons";
 import type { Route } from "./+types/board-route";
-import { Await, redirect } from "react-router";
-import { NotFoundRouteErrorResponse, RouteErrorResponse } from "~/root";
-import type { ApiResponse, Board } from "types";
+import { Await } from "react-router";
+import { RouteErrorResponse } from "~/root";
+import { isApiErrorResponse, type ApiResponse, type Board } from "types";
 import verifyAuthentication from "~/libs/auth";
+import FormRenderer, { formSchema, FormSkeleton } from "./form-renderer";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -35,7 +36,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         Authorization: `Bearer ${accessToken}`,
       },
     }
-  ).then((response) => response.json() as Promise<ApiResponse<Board>>);
+  ).then(async (response) => {
+    const data = (await response.json()) as ApiResponse<Board>;
+
+    if (isApiErrorResponse(data)) {
+      throw new RouteErrorResponse(
+        data.statusCode,
+        data.message,
+        Error(data.error)
+      );
+    }
+
+    return data;
+  });
 
   return { boardDataPromise };
 }
@@ -68,18 +81,6 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
           <Suspense fallback={<Skeleton>Sample name</Skeleton>}>
             <Await resolve={boardDataPromise}>
               {(data) => {
-                if ("message" in data) {
-                  if (data.statusCode === 401) {
-                    throw new NotFoundRouteErrorResponse();
-                  }
-
-                  throw new RouteErrorResponse(
-                    data.statusCode,
-                    data.message,
-                    Error(data.error)
-                  );
-                }
-
                 return <>{data.name}</>;
               }}
             </Await>
@@ -113,153 +114,14 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
           }}
           mt="7"
         >
-          <Text size="4" weight="bold">
-            Today's standup
-          </Text>
-
-          <Box mt="5">
-            {!isFormVisible && (
-              <div>
-                <Flex direction="column">
-                  <Text
-                    size="2"
-                    weight="medium"
-                    className="!leading-[var(--line-height-3)]"
-                  >
-                    What did you do yesterday?
-                  </Text>
-                  <Text mt="2" size="2">
-                    {formState.yesterday}
-                  </Text>
-                </Flex>
-
-                <Flex direction="column" mt="5">
-                  <Text
-                    size="2"
-                    weight="medium"
-                    className="!leading-[var(--line-height-3)]"
-                  >
-                    What will you do today?
-                  </Text>
-                  <Text mt="2" size="2">
-                    {formState.today}
-                  </Text>
-                </Flex>
-
-                <Flex direction="column" mt="5">
-                  <Text
-                    size="2"
-                    weight="medium"
-                    className="!leading-[var(--line-height-3)]"
-                  >
-                    Do you have any blockers?
-                  </Text>
-                  <Text mt="2" size="2">
-                    {formState.blockers}
-                  </Text>
-                </Flex>
-
-                <Flex justify="end" mt="5" gap="2">
-                  <Button
-                    variant="soft"
-                    size="2"
-                    highContrast
-                    onClick={() => setIsFormVisible(true)}
-                  >
-                    Edit
-                  </Button>
-                </Flex>
-              </div>
-            )}
-            {isFormVisible && (
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const formData = new FormData(
-                    event.target as HTMLFormElement
-                  );
-                  setFormState({
-                    yesterday: formData.get("yesterday") as string,
-                    today: formData.get("today") as string,
-                    blockers: formData.get("blockers") as string,
-                  });
-                  setIsFormVisible(false);
-                }}
-              >
-                <Box>
-                  <label>
-                    <Text size="2" weight="medium">
-                      What did you do yesterday?
-                    </Text>
-                    <TextArea
-                      name="yesterday"
-                      mt="2"
-                      variant="soft"
-                      placeholder="Write your reply here..."
-                      className="w-full !min-h-[80px]"
-                      resize="vertical"
-                      defaultValue={formState.yesterday}
-                    />
-                  </label>
-                </Box>
-
-                <Box mt="5">
-                  <label>
-                    <Text size="2" weight="medium">
-                      What will you do today?
-                    </Text>
-                    <TextArea
-                      name="today"
-                      mt="2"
-                      variant="soft"
-                      placeholder="Write your reply here..."
-                      className="w-full !min-h-[80px]"
-                      resize="vertical"
-                      defaultValue={formState.today}
-                    />
-                  </label>
-                </Box>
-
-                <Box mt="5">
-                  <label>
-                    <Text size="2" weight="medium">
-                      Do you have any blockers?
-                    </Text>
-                    <TextArea
-                      name="blockers"
-                      mt="2"
-                      variant="soft"
-                      placeholder="Write your reply here..."
-                      className="w-full !min-h-[80px]"
-                      resize="vertical"
-                      defaultValue={formState.blockers}
-                    />
-                  </label>
-                </Box>
-
-                <Flex justify="end" mt="5" gap="2">
-                  {formState.yesterday ||
-                  formState.today ||
-                  formState.blockers ? (
-                    <Button
-                      type="button"
-                      highContrast
-                      size="2"
-                      variant="soft"
-                      onClick={() => {
-                        setIsFormVisible(false);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  ) : null}
-                  <Button highContrast size="2" type="submit">
-                    Save
-                  </Button>
-                </Flex>
-              </form>
-            )}
-          </Box>
+          <Suspense fallback={<FormSkeleton />}>
+            <Await resolve={boardDataPromise} errorElement={<div>Error</div>}>
+              {(data) => {
+                const formStructure = formSchema.parse(data.formSchemas);
+                return <FormRenderer schema={formStructure} />;
+              }}
+            </Await>
+          </Suspense>
         </Card>
 
         <Box mt="7">

@@ -30,10 +30,33 @@ export class BoardsService {
     },
     userId: string,
   ): Promise<Board> {
-    // TODO: change the schema to be an actual form structure
     const defaultStandupFormSchema = {
-      jsonSchema: {},
-      uiSchema: {},
+      title: "Today's Standup",
+      fields: [
+        {
+          name: 'yesterday',
+          label: 'What did you do yesterday?',
+          placeholder: 'Write your reply here...',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'today',
+          label: 'What will you do today?',
+          placeholder: 'Write your reply here...',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'blockers',
+          label: 'Do you have any blockers?',
+          placeholder: 'Write your reply here...',
+          description:
+            'Share any challenges or obstacles that might slow down your progress',
+          type: 'textarea',
+          required: false,
+        },
+      ],
     };
 
     const result = await this.create({
