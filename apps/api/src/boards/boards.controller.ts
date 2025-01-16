@@ -6,31 +6,39 @@ import {
   Req,
   Get,
   Param,
-  UnauthorizedException,
+  ParseIntPipe,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { Board } from 'src/libs/db/schema';
 import { AuthenticatedRequest, AuthGuard } from 'src/auth/guards/auth.guard';
+import { BoardAccessGuard } from './guards/board-access.guard';
 
 @Controller('boards')
+@UseGuards(AuthGuard)
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
-  @UseGuards(AuthGuard)
+  // POST /boards
   @Post()
-  create(
+  async create(
     @Req() request: AuthenticatedRequest,
     @Body() createBoardDto: CreateBoardDto,
   ): Promise<Board> {
     const userId = request.userId;
 
-    return this.boardsService.createWithUserAssociation(
-      {
-        name: createBoardDto.name,
-      },
-      userId,
-    );
+    try {
+      return await this.boardsService.createWithUserAssociation(
+        {
+          name: createBoardDto.name,
+        },
+        userId,
+      );
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   // @Get()
@@ -38,24 +46,16 @@ export class BoardsController {
   //   return this.boardsService.list();
   // }
 
-  @UseGuards(AuthGuard)
-  @Get(':id')
-  async get(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
-    const userId = request.userId;
-
-    // TODO: I think this logic can be registered as a guard
-    const hasAccess = await this.boardsService.verifyUserAccess(
-      parseInt(id, 10),
-      userId,
-    );
-
-    if (!hasAccess) {
-      throw new UnauthorizedException(
-        'You are not authorized to access this board',
-      );
+  // GET /boards/:boardId
+  @UseGuards(BoardAccessGuard)
+  @Get(':boardId')
+  async get(@Param('boardId', ParseIntPipe) boardId: number) {
+    try {
+      return await this.boardsService.get(boardId);
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
     }
-
-    return this.boardsService.get(parseInt(id, 10));
   }
 
   // @Patch(':id')

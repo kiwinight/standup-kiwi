@@ -15,6 +15,7 @@
     "@react-router/node": "^7.1.0",
     "@react-router/serve": "^7.1.0",
     "isbot": "^5.1.17",
+    "luxon": "^3.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@react-router/dev": "^7.1.0",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",

@@ -20,7 +20,11 @@ export const boards = pgTable('boards', {
 
 export const boardsRelations = relations(boards, ({ many }) => ({
   usersToBoards: many(usersToBoards),
+  standups: many(standups), // Add this line
 }));
+
+export type Board = typeof boards.$inferSelect;
+export type InsertBoard = typeof boards.$inferInsert;
 
 export const usersToBoards = pgTable(
   'users_to_boards',
@@ -45,5 +49,27 @@ export const usersToBoardsRelations = relations(usersToBoards, ({ one }) => ({
   }),
 }));
 
-export type Board = typeof boards.$inferSelect;
-export type InsertBoard = typeof boards.$inferInsert;
+export const standups = pgTable('standups', {
+  id: serial('id').primaryKey(),
+  boardId: integer('board_id')
+    .notNull()
+    .references(() => boards.id),
+  userId: uuid('user_id').notNull(), // User who submitted the standup
+  formData: jsonb('form_data').notNull(), // The actual standup responses
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const standupsRelations = relations(standups, ({ one }) => ({
+  board: one(boards, {
+    fields: [standups.boardId],
+    references: [boards.id],
+  }),
+}));
+
+export type Standup = typeof standups.$inferSelect;
+export type InsertStandup = typeof standups.$inferInsert;

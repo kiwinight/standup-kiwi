@@ -7,6 +7,15 @@ export default [
       "routes/create-new-board-route/create-new-board-route.tsx"
     ),
     route("/boards/:boardId", "routes/board-route/board-route.tsx"),
+
+    route(
+      "/boards/:boardId/standups/create",
+      "routes/create-board-standup/create-board-standup.tsx"
+    ),
+    route(
+      "/boards/:boardId/standups/:standupId/update",
+      "routes/update-board-standup/update-board-standup.tsx"
+    ),
   ]),
   route("/sign-in", "routes/sign-in-route/sign-in-route.tsx"),
   route(

@@ -3,59 +3,73 @@ import { Flex, Box, TextArea, Button, Text, Skeleton } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
-const fieldSchema = z.object({
-  name: z.string().nonempty(), // Field identifier
-  label: z.string().optional(), // Label for the field
-  description: z.string().optional(), // Field description/helper text
-  type: z
-    .enum([
-      // "text",
-      // "number",
-      // "email",
-      // "password",
-      // "checkbox",
-      // "radio",
-      // "select",
-      "textarea",
-    ])
-    .default("textarea"), // Type of field
-  placeholder: z.string().optional(), // Placeholder text
-  required: z.boolean().default(true), // Is field required?
-  defaultValue: z.any().optional(), // Default value
-  validations: z
-    .object({
-      minLength: z.number().optional(),
-      maxLength: z.number().optional(),
-      min: z.number().optional(),
-      max: z.number().optional(),
-      regex: z.instanceof(RegExp).optional(),
-    })
-    .optional(), // Validation rules
-  options: z
-    .array(
-      z.object({
-        value: z.any(),
-        label: z.string(),
-      })
-    )
-    .optional(), // Options for select or radio buttons
-});
-
 export const formSchema = z.object({
   title: z.string().optional(), // Form title
   description: z.string().optional(), // Form description
-  fields: z.array(fieldSchema).min(1), // Array of fields
+  fields: z
+    .array(
+      z.object({
+        name: z.string().nonempty(), // Field identifier
+        label: z.string().optional(), // Label for the field
+        description: z.string().optional(), // Field description/helper text
+        type: z
+          .enum([
+            // "text",
+            // "number",
+            // "email",
+            // "password",
+            // "checkbox",
+            // "radio",
+            // "select",
+            "textarea",
+          ])
+          .default("textarea"), // Type of field
+        placeholder: z.string().optional(), // Placeholder text
+        required: z.boolean().default(true), // Is field required?
+        defaultValue: z.any().optional(), // Default value
+        validations: z
+          .object({
+            minLength: z.number().optional(),
+            maxLength: z.number().optional(),
+            min: z.number().optional(),
+            max: z.number().optional(),
+            regex: z.instanceof(RegExp).optional(),
+          })
+          .optional(), // Validation rules
+        options: z
+          .array(
+            z.object({
+              value: z.any(),
+              label: z.string(),
+            })
+          )
+          .optional(), // Options for select or radio buttons
+      })
+    )
+    .min(1), // Array of fields
 });
 
-type FormInputs = {
+export type DynamicFormInputs = {
   [key: string]: any; // Allows dynamic field names
 };
 
-function FormRenderer({ schema }: { schema: z.infer<typeof formSchema> }) {
+function DynamicForm({
+  schema,
+  defaultValues,
+  onSubmit,
+  onCancel,
+  loading,
+}: {
+  schema: z.infer<typeof formSchema>;
+  defaultValues?: DynamicFormInputs;
+  onSubmit: (data: DynamicFormInputs) => void;
+  onCancel?: () => void;
+  loading?: boolean;
+}) {
+  // TODO: handle case when schema is not valid
   const { title, description, fields } = formSchema.parse(schema);
 
-  // Create a dynamic validation schema based on the fields
-  const dynamicSchema = z.object(
+  const dynamicFormSchema = z.object(
     fields.reduce((acc, field) => {
       if (field.type === "textarea") {
         let fieldValidation = z.string();
@@ -79,18 +93,21 @@ function FormRenderer({ schema }: { schema: z.infer<typeof formSchema> }) {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormInputs>({
-    resolver: zodResolver(dynamicSchema),
-    defaultValues: fields.reduce((acc, field) => {
-      acc[field.name] = field.defaultValue || "";
-      return acc;
-    }, {} as FormInputs),
+  } = useForm<DynamicFormInputs>({
+    resolver: zodResolver(dynamicFormSchema),
+    defaultValues:
+      defaultValues ||
+      fields.reduce((acc, field) => {
+        acc[field.name] = field.defaultValue || "";
+        return acc;
+      }, {} as DynamicFormInputs),
   });
 
   return (
     <form
+      method="post"
       onSubmit={handleSubmit((data) => {
-        console.log("Form Data:", data);
+        onSubmit(data);
       })}
     >
       <Flex direction="column">
@@ -102,19 +119,21 @@ function FormRenderer({ schema }: { schema: z.infer<typeof formSchema> }) {
             {description}
           </Text>
         )}
-        <Box mt="5">
-          {fields.map((field, index) => {
+        <Flex direction="column" mt="5" gap="5">
+          {fields.map((field) => {
             return (
-              <Flex
-                key={field.name}
-                mt={index === 0 ? "0" : "5"}
-                direction="column"
-                gap="2"
-              >
+              <Flex key={field.name} direction="column" gap="2">
                 <label>
-                  <Text size="2" weight="medium">
-                    {field.label} {field.required && "*"}
-                  </Text>
+                  <Flex align="center" gap="2">
+                    <Text size="2" weight="medium">
+                      {field.label}
+                    </Text>
+                    {field.required && (
+                      <Text size="1" color="gray">
+                        Required
+                      </Text>
+                    )}
+                  </Flex>
                 </label>
                 {field.type === "textarea" && (
                   <Controller
@@ -147,15 +166,20 @@ function FormRenderer({ schema }: { schema: z.infer<typeof formSchema> }) {
               </Flex>
             );
           })}
-        </Box>
+        </Flex>
         <Flex justify="end" mt="5" gap="2">
-          {false && (
-            // TODO: If already submitted, show cancel button
-            <Button highContrast size="2" variant="soft" onClick={() => {}}>
+          {defaultValues && (
+            <Button
+              highContrast
+              type="button"
+              size="2"
+              variant="surface"
+              onClick={onCancel}
+            >
               Cancel
             </Button>
           )}
-          <Button highContrast size="2" type="submit">
+          <Button highContrast size="2" type="submit" loading={loading}>
             Save
           </Button>
         </Flex>
@@ -164,7 +188,7 @@ function FormRenderer({ schema }: { schema: z.infer<typeof formSchema> }) {
   );
 }
 
-export default FormRenderer;
+export default DynamicForm;
 
 export function FormSkeleton() {
   return (
@@ -176,27 +200,33 @@ export function FormSkeleton() {
         <Box mt="5">
           <Flex direction="column" gap="2">
             <label>
-              <Text size="2" weight="medium">
-                <Skeleton>What did you do yesterday? *</Skeleton>
-              </Text>
+              <Flex>
+                <Text size="2" weight="medium">
+                  <Skeleton>What did you do yesterday? *</Skeleton>
+                </Text>
+              </Flex>
             </label>
             <Skeleton height="80px" />
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
             <label>
-              <Text size="2" weight="medium">
-                <Skeleton>What will you do today? *</Skeleton>
-              </Text>
+              <Flex>
+                <Text size="2" weight="medium">
+                  <Skeleton>What will you do today? *</Skeleton>
+                </Text>
+              </Flex>
             </label>
             <Skeleton height="80px" />
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
             <label>
-              <Text size="2" weight="medium">
-                <Skeleton>Do you have any blockers?</Skeleton>
-              </Text>
+              <Flex>
+                <Text size="2" weight="medium">
+                  <Skeleton>Do you have any blockers?</Skeleton>
+                </Text>
+              </Flex>
             </label>
             <Skeleton height="80px" />
             <Text size="2" color="gray">

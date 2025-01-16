@@ -1,21 +1,17 @@
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Flex,
-  Skeleton,
-  Text,
-  TextArea,
-} from "@radix-ui/themes";
-import { Suspense, useState } from "react";
-import { GearIcon, ListBulletIcon, Share1Icon } from "@radix-ui/react-icons";
+import { Box, Card, Container, Flex, Text } from "@radix-ui/themes";
+
 import type { Route } from "./+types/board-route";
-import { Await } from "react-router";
 import { RouteErrorResponse } from "~/root";
-import { isApiErrorResponse, type ApiResponse, type Board } from "types";
+import {
+  isApiErrorResponse,
+  type ApiResponse,
+  type Board,
+  type Standup,
+} from "types";
 import verifyAuthentication from "~/libs/auth";
-import FormRenderer, { formSchema, FormSkeleton } from "./form-renderer";
+
+import Toolbar from "./toolbar";
+import TodaysStandup from "./todays-standup";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,107 +20,71 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+function getBoardData(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((response) => response.json() as Promise<ApiResponse<Board>>);
+}
+
+function listStandups(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/standups`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((response) => response.json() as Promise<ApiResponse<Standup[]>>);
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { accessToken } = await verifyAuthentication(request);
 
   const boardId = params.boardId;
 
-  const boardDataPromise = fetch(
-    import.meta.env.VITE_API_URL + `/boards/${boardId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+  const boardDataPromise = getBoardData(boardId, { accessToken }).then(
+    (data) => {
+      if (isApiErrorResponse(data)) {
+        throw new RouteErrorResponse(
+          data.statusCode,
+          data.message,
+          Error(data.error)
+        );
+      }
+      return data;
     }
-  ).then(async (response) => {
-    const data = (await response.json()) as ApiResponse<Board>;
+  );
 
-    if (isApiErrorResponse(data)) {
-      throw new RouteErrorResponse(
-        data.statusCode,
-        data.message,
-        Error(data.error)
-      );
+  const standupsPromise = listStandups(boardId, { accessToken }).then(
+    (data) => {
+      if (isApiErrorResponse(data)) {
+        throw new RouteErrorResponse(
+          data.statusCode,
+          data.message,
+          Error(data.error)
+        );
+      }
+      return data;
     }
+  );
 
-    return data;
-  });
-
-  return { boardDataPromise };
+  return { boardDataPromise, standupsPromise };
 }
 
 export default function BoardRoute({ loaderData }: Route.ComponentProps) {
-  const { boardDataPromise } = loaderData;
-
-  const [formState, setFormState] = useState({
-    yesterday: "",
-    today: "",
-    blockers: "",
-  });
-
-  const [isFormVisible, setIsFormVisible] = useState(true);
-
   return (
     <Container my="7" maxWidth="672px" px="4">
-      <Flex
-        justify="between"
-        align={{
-          initial: "start",
-          sm: "center",
-        }}
-        direction={{
-          initial: "column",
-          sm: "row",
-        }}
-      >
-        <Text size="6" weight="bold">
-          <Suspense fallback={<Skeleton>Sample name</Skeleton>}>
-            <Await resolve={boardDataPromise}>
-              {(data) => {
-                return <>{data.name}</>;
-              }}
-            </Await>
-          </Suspense>
-        </Text>
+      <Flex direction="column" gap="7">
+        <Toolbar />
 
-        <Flex
-          gap="5"
-          mt={{
-            initial: "4",
-            sm: "0",
-          }}
-        >
-          <Button variant="ghost" highContrast>
-            <Share1Icon />
-            Share
-          </Button>
-          <Button variant="ghost" highContrast>
-            <GearIcon />
-            Settings
-          </Button>
-        </Flex>
-      </Flex>
+        <TodaysStandup />
 
-      <Box>
-        <Card
-          variant="surface"
-          size={{
-            initial: "2",
-            sm: "4",
-          }}
-          mt="7"
-        >
-          <Suspense fallback={<FormSkeleton />}>
-            <Await resolve={boardDataPromise} errorElement={<div>Error</div>}>
-              {(data) => {
-                const formStructure = formSchema.parse(data.formSchemas);
-                return <FormRenderer schema={formStructure} />;
-              }}
-            </Await>
-          </Suspense>
-        </Card>
-
-        <Box mt="7">
+        <Box>
           <Text size="3" weight="bold">
             History
           </Text>
@@ -257,7 +217,7 @@ export default function BoardRoute({ loaderData }: Route.ComponentProps) {
             </Flex>
           </Card>
         </Box>
-      </Box>
+      </Flex>
     </Container>
   );
 }

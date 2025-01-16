@@ -36,6 +36,20 @@
       "when": 1736218212021,
       "tag": "0004_fat_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1736821660601,
+      "tag": "0005_petite_madelyne_pryor",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1736841532135,
+      "tag": "0006_new_saracen",
+      "breakpoints": true
     }
   ]
 }

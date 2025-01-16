@@ -38,6 +38,19 @@ export interface User {
   has_password: boolean;
 }
 
+export interface Standup {
+  id: number;
+  boardId: number;
+  userId: string;
+  formData: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * API
+ */
+
 interface ApiErrorResponse {
   message: string;
   statusCode: number;
