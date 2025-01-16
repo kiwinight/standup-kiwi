@@ -28,6 +28,8 @@ function updateStandup(
   ).then((response) => response.json() as Promise<ApiResponse<Standup>>);
 }
 
+export type ActionType = typeof action;
+
 export async function action({ request, params }: Route.ActionArgs) {
   const { accessToken, refreshed, session } = await verifyAuthentication(
     request
@@ -44,15 +46,18 @@ export async function action({ request, params }: Route.ActionArgs) {
     { formData },
     { accessToken }
   );
-  console.log("response", response);
-  if (isApiErrorResponse(response)) {
-    console.error("error", response);
-    // TODO: what's the best way to handle this?
-    return;
-  }
+
   return data(
     {
-      standup: response,
+      ...(isApiErrorResponse(response)
+        ? {
+            error: response.message,
+            standup: null,
+          }
+        : {
+            standup: response,
+            error: null,
+          }),
     },
     {
       headers: {

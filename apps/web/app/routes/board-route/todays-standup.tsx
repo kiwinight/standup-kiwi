@@ -4,6 +4,8 @@ import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, { formSchema, FormSkeleton } from "./dynamic-form";
+import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
+import type { Standup } from "types";
 
 type Props = {};
 
@@ -11,7 +13,7 @@ function CardContent() {
   const { boardDataPromise, standupsPromise } = useLoaderData<typeof loader>();
 
   const boardData = use(boardDataPromise);
-  const standups = use(standupsPromise);
+  const standups: Standup[] = use(standupsPromise);
 
   const boardTimezone = "Pacific/Honolulu";
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
@@ -19,7 +21,7 @@ function CardContent() {
   const schema = formSchema.parse(boardData.formSchemas);
 
   const createStandupFetcher = useFetcher();
-  const updateStandupFetcher = useFetcher();
+  const updateStandupFetcher = useFetcher<UpdateStandupActionType>();
 
   useEffect(() => {
     console.log("createStandupFetcher.data", createStandupFetcher.data);
@@ -50,16 +52,28 @@ function CardContent() {
     }
   }, [createStandupFetcher.data]);
 
-  if (updateStandupFetcher.data) {
-    const { standup } = updateStandupFetcher.data;
-    todayStandup = standup;
-  }
-
   useEffect(() => {
     if (updateStandupFetcher.data) {
-      setIsEditing(false);
+      const error = updateStandupFetcher.data.error;
+      if (error) {
+        // TODO: properly toast that there was an error updating the standup
+        alert(error);
+      }
     }
   }, [updateStandupFetcher.data]);
+
+  const pendingUpdateStandupFormData = updateStandupFetcher.formData
+    ? Object.fromEntries(updateStandupFetcher.formData.entries())
+    : undefined;
+
+  if (pendingUpdateStandupFormData) {
+    if (todayStandup) {
+      todayStandup = {
+        ...todayStandup,
+        formData: pendingUpdateStandupFormData as Standup["formData"],
+      };
+    }
+  }
 
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
 
@@ -72,7 +86,6 @@ function CardContent() {
             await createStandupFetcher.submit(
               {
                 ...data,
-                _action: "create",
               },
               {
                 method: "POST",
@@ -90,19 +103,18 @@ function CardContent() {
             schema={schema}
             defaultValues={todayStandup.formData}
             onSubmit={async (data) => {
-              await updateStandupFetcher.submit(
+              updateStandupFetcher.submit(
                 {
                   ...data,
-                  _action: "update",
                 },
                 {
                   method: "POST",
                   action: `/boards/${boardData.id}/standups/${todayStandup.id}/update`,
                 }
               );
+              setIsEditing(false);
             }}
             onCancel={() => setIsEditing(false)}
-            loading={updateStandupFetcher.state !== "idle"}
           />
         ) : (
           <Flex direction="column" gap="5">
