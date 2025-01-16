@@ -1,5 +1,5 @@
 import { Button, Card, Flex, Text } from "@radix-ui/themes";
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
@@ -16,7 +16,20 @@ function CardContent() {
   const boardTimezone = "Pacific/Honolulu";
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
 
-  const todayStandup = standups.find((standup) => {
+  const schema = formSchema.parse(boardData.formSchemas);
+
+  const createStandupFetcher = useFetcher();
+  const updateStandupFetcher = useFetcher();
+
+  useEffect(() => {
+    console.log("createStandupFetcher.data", createStandupFetcher.data);
+    if (createStandupFetcher.data) {
+      const { standup } = createStandupFetcher.data;
+      console.log("standup", standup);
+    }
+  }, [createStandupFetcher.data]);
+
+  let todayStandup = standups.find((standup) => {
     // Convert createdAt to the board's timezone
     const standupDate = DateTime.fromISO(standup.createdAt, {
       zone: "utc",
@@ -27,11 +40,28 @@ function CardContent() {
     return standupDate.equals(boardToday);
   });
 
+  if (createStandupFetcher.data) {
+    const { standup } = createStandupFetcher.data;
+    todayStandup = standup;
+  }
+  useEffect(() => {
+    if (createStandupFetcher.data) {
+      setIsEditing(false);
+    }
+  }, [createStandupFetcher.data]);
+
+  if (updateStandupFetcher.data) {
+    const { standup } = updateStandupFetcher.data;
+    todayStandup = standup;
+  }
+
+  useEffect(() => {
+    if (updateStandupFetcher.data) {
+      setIsEditing(false);
+    }
+  }, [updateStandupFetcher.data]);
+
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
-
-  const schema = formSchema.parse(boardData.formSchemas);
-
-  const fetcher = useFetcher();
 
   return (
     <>
@@ -39,7 +69,7 @@ function CardContent() {
         <DynamicForm
           schema={schema}
           onSubmit={async (data) => {
-            await fetcher.submit(
+            await createStandupFetcher.submit(
               {
                 ...data,
                 _action: "create",
@@ -49,10 +79,9 @@ function CardContent() {
                 action: `/boards/${boardData.id}/standups/create`,
               }
             );
-            setIsEditing(false);
           }}
           onCancel={() => setIsEditing(false)}
-          loading={fetcher.state !== "idle"}
+          loading={createStandupFetcher.state !== "idle"}
         />
       )}
       {todayStandup &&
@@ -61,7 +90,7 @@ function CardContent() {
             schema={schema}
             defaultValues={todayStandup.formData}
             onSubmit={async (data) => {
-              await fetcher.submit(
+              await updateStandupFetcher.submit(
                 {
                   ...data,
                   _action: "update",
@@ -71,10 +100,9 @@ function CardContent() {
                   action: `/boards/${boardData.id}/standups/${todayStandup.id}/update`,
                 }
               );
-              setIsEditing(false);
             }}
             onCancel={() => setIsEditing(false)}
-            loading={fetcher.state !== "idle"}
+            loading={updateStandupFetcher.state !== "idle"}
           />
         ) : (
           <Flex direction="column" gap="5">
