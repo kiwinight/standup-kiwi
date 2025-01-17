@@ -3,7 +3,12 @@ import { Suspense, use, useEffect, useState } from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
-import DynamicForm, { formSchema, FormSkeleton } from "./dynamic-form";
+import DynamicForm, {
+  formSchema,
+  FormSkeleton,
+  type DynamicFormValues,
+} from "./dynamic-form";
+import { type ActionType as CreateStandupActionType } from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 import type { Standup } from "types";
 
@@ -20,16 +25,8 @@ function CardContent() {
 
   const schema = formSchema.parse(boardData.formSchemas);
 
-  const createStandupFetcher = useFetcher();
+  const createStandupFetcher = useFetcher<CreateStandupActionType>();
   const updateStandupFetcher = useFetcher<UpdateStandupActionType>();
-
-  useEffect(() => {
-    console.log("createStandupFetcher.data", createStandupFetcher.data);
-    if (createStandupFetcher.data) {
-      const { standup } = createStandupFetcher.data;
-      console.log("standup", standup);
-    }
-  }, [createStandupFetcher.data]);
 
   let todayStandup = standups.find((standup) => {
     // Convert createdAt to the board's timezone
@@ -42,15 +39,32 @@ function CardContent() {
     return standupDate.equals(boardToday);
   });
 
-  if (createStandupFetcher.data) {
-    const { standup } = createStandupFetcher.data;
-    todayStandup = standup;
-  }
   useEffect(() => {
     if (createStandupFetcher.data) {
-      setIsEditing(false);
+      const { error } = createStandupFetcher.data;
+      if (error) {
+        // TODO: properly toast that there was an error creating the standup
+        alert(error);
+        todayStandup = undefined;
+        setIsEditing(true);
+      }
     }
   }, [createStandupFetcher.data]);
+
+  const pendingCreateStandupFormData = createStandupFetcher.formData
+    ? Object.fromEntries(createStandupFetcher.formData.entries())
+    : undefined;
+
+  if (pendingCreateStandupFormData) {
+    todayStandup = {
+      id: 0,
+      boardId: boardData.id,
+      userId: "",
+      formData: pendingCreateStandupFormData as Standup["formData"],
+      createdAt: "",
+      updatedAt: "",
+    };
+  }
 
   useEffect(() => {
     if (updateStandupFetcher.data) {
@@ -83,7 +97,7 @@ function CardContent() {
         <DynamicForm
           schema={schema}
           onSubmit={async (data) => {
-            await createStandupFetcher.submit(
+            createStandupFetcher.submit(
               {
                 ...data,
               },
@@ -92,16 +106,16 @@ function CardContent() {
                 action: `/boards/${boardData.id}/standups/create`,
               }
             );
+            setIsEditing(false);
           }}
           onCancel={() => setIsEditing(false)}
-          loading={createStandupFetcher.state !== "idle"}
         />
       )}
       {todayStandup &&
         (isEditing ? (
           <DynamicForm
             schema={schema}
-            defaultValues={todayStandup.formData}
+            defaultValues={todayStandup.formData as DynamicFormValues}
             onSubmit={async (data) => {
               updateStandupFetcher.submit(
                 {
@@ -109,7 +123,7 @@ function CardContent() {
                 },
                 {
                   method: "POST",
-                  action: `/boards/${boardData.id}/standups/${todayStandup.id}/update`,
+                  action: `/boards/${boardData.id}/standups/${todayStandup?.id}/update`,
                 }
               );
               setIsEditing(false);
@@ -122,13 +136,19 @@ function CardContent() {
               Today's Standup
             </Text>
             <Flex direction="column" gap="5">
-              {schema.fields.map((field, index) => {
+              {schema.fields.map((field) => {
+                const value = (todayStandup?.formData as DynamicFormValues)[
+                  field.name
+                ];
+                if (!value) {
+                  return null;
+                }
                 return (
                   <Flex key={field.name} direction="column" gap="2">
                     <Text size="2" weight="medium">
                       {field.label}
                     </Text>
-                    <Text size="2">{todayStandup?.formData?.[field.name]}</Text>
+                    <Text size="2">{value}</Text>
                   </Flex>
                 );
               })}

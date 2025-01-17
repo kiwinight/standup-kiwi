@@ -49,7 +49,7 @@ export const formSchema = z.object({
     .min(1), // Array of fields
 });
 
-export type DynamicFormInputs = {
+export type DynamicFormValues = {
   [key: string]: any; // Allows dynamic field names
 };
 
@@ -61,8 +61,8 @@ function DynamicForm({
   loading,
 }: {
   schema: z.infer<typeof formSchema>;
-  defaultValues?: DynamicFormInputs;
-  onSubmit: (data: DynamicFormInputs) => void;
+  defaultValues?: DynamicFormValues;
+  onSubmit: (data: DynamicFormValues) => void;
   onCancel?: () => void;
   loading?: boolean;
 }) {
@@ -93,14 +93,14 @@ function DynamicForm({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<DynamicFormInputs>({
+  } = useForm<DynamicFormValues>({
     resolver: zodResolver(dynamicFormSchema),
     defaultValues:
       defaultValues ||
       fields.reduce((acc, field) => {
         acc[field.name] = field.defaultValue || "";
         return acc;
-      }, {} as DynamicFormInputs),
+      }, {} as DynamicFormValues),
   });
 
   return (

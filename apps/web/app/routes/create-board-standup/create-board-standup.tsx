@@ -25,6 +25,8 @@ function createStandup(
   }).then((response) => response.json() as Promise<ApiResponse<Standup>>);
 }
 
+export type ActionType = typeof action;
+
 export async function action({ request, params }: Route.ActionArgs) {
   const { accessToken, refreshed, session } = await verifyAuthentication(
     request
@@ -42,25 +44,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
   );
 
-  if (isApiErrorResponse(response)) {
-    // TODO: what's the best way to handle this?
-    return data(
-      {
-        errors: {
-          name: "Failed to create standup",
-        },
-      },
-      {
-        headers: {
-          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
-        },
-      }
-    );
-  }
-
   return data(
     {
-      standup: response,
+      ...(isApiErrorResponse(response)
+        ? {
+            error: response.message,
+            standup: null,
+          }
+        : {
+            standup: response,
+            error: null,
+          }),
     },
     {
       headers: {
