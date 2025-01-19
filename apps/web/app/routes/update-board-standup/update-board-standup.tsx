@@ -5,14 +5,14 @@ import verifyAuthentication from "~/libs/auth";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
+interface UpdateStandupRequestBody {
+  formData: Standup["formData"];
+}
+
 function updateStandup(
   boardId: string,
   standupId: string,
-  {
-    formData,
-  }: {
-    formData: Standup["formData"];
-  },
+  { formData }: UpdateStandupRequestBody,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
@@ -38,7 +38,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   const boardId = params.boardId;
   const standupId = params.standupId;
 
-  const formData = Object.fromEntries((await request.formData()).entries());
+  const { formData } = (await request.json()) as UpdateStandupRequestBody;
 
   const response = await updateStandup(
     boardId,

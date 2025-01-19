@@ -29,7 +29,7 @@ export class BoardsController {
     const userId = request.userId;
 
     try {
-      return await this.boardsService.createWithUserAssociation(
+      return await this.boardsService.setup(
         {
           name: createBoardDto.name,
         },
@@ -49,7 +49,7 @@ export class BoardsController {
   // GET /boards/:boardId
   @UseGuards(BoardAccessGuard)
   @Get(':boardId')
-  async get(@Param('boardId', ParseIntPipe) boardId: number) {
+  async get(@Param('boardId', ParseIntPipe) boardId: number): Promise<Board> {
     try {
       return await this.boardsService.get(boardId);
     } catch (error) {

@@ -3,7 +3,16 @@ import { Flex, Box, TextArea, Button, Text, Skeleton } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
-export const formSchema = z.object({
+export function validateFormSchema(schema: unknown) {
+  try {
+    return formSchema.parse(schema);
+  } catch (error) {
+    console.error("Error parsing schema", error);
+    return undefined;
+  }
+}
+
+const formSchema = z.object({
   title: z.string().optional(), // Form title
   description: z.string().optional(), // Form description
   fields: z
@@ -66,8 +75,7 @@ function DynamicForm({
   onCancel?: () => void;
   loading?: boolean;
 }) {
-  // TODO: handle case when schema is not valid
-  const { title, description, fields } = formSchema.parse(schema);
+  const { title, description, fields } = schema;
 
   const dynamicFormSchema = z.object(
     fields.reduce((acc, field) => {
@@ -206,7 +214,15 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Skeleton height="80px" />
+            <Text
+              size="2"
+              color="gray"
+              className="max-h-[80px] overflow-hidden"
+            >
+              <Skeleton width="100%">
+                {Array.from({ length: 500 }).map((_, index) => "A")}
+              </Skeleton>
+            </Text>
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
@@ -217,7 +233,15 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Skeleton height="80px" />
+            <Text
+              size="2"
+              color="gray"
+              className="max-h-[80px] overflow-hidden"
+            >
+              <Skeleton width="100%">
+                {Array.from({ length: 500 }).map((_, index) => "A")}
+              </Skeleton>
+            </Text>
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
@@ -228,11 +252,13 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Skeleton height="80px" />
-            <Text size="2" color="gray">
-              <Skeleton>
-                Share any challenges or obstacles that might slow down your
-                progress
+            <Text
+              size="2"
+              color="gray"
+              className="max-h-[80px] overflow-hidden"
+            >
+              <Skeleton width="100%">
+                {Array.from({ length: 500 }).map((_, index) => "A")}
               </Skeleton>
             </Text>
           </Flex>

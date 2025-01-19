@@ -7,7 +7,7 @@ import type { loader } from "./board-route";
 type Props = {};
 
 function Toolbar({}: Props) {
-  const { boardDataPromise } = useLoaderData<typeof loader>();
+  const { boardPromise } = useLoaderData<typeof loader>();
 
   return (
     <Flex
@@ -23,7 +23,7 @@ function Toolbar({}: Props) {
     >
       <Text size="6" weight="bold">
         <Suspense fallback={<Skeleton>Sample name</Skeleton>}>
-          <Await resolve={boardDataPromise}>
+          <Await resolve={boardPromise}>
             {(data) => {
               return <>{data.name}</>;
             }}

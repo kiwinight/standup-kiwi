@@ -5,8 +5,16 @@
  */
 export type Board = {
   id: number;
-  formSchemas: unknown;
+  activeStandupFormSchemaId: number | null;
   name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type StandupFormSchema = {
+  id: number;
+  boardId: number;
+  schema: unknown;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -42,6 +50,7 @@ export interface Standup {
   id: number;
   boardId: number;
   userId: string;
+  formSchemaId: number;
   formData: unknown;
   createdAt: string;
   updatedAt: string;

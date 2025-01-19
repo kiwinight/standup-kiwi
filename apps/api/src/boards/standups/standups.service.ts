@@ -9,10 +9,12 @@ export class StandupsService {
     boardId,
     userId,
     formData,
+    formSchemaId,
   }: {
     boardId: InsertStandup['boardId'];
     userId: InsertStandup['userId'];
     formData: InsertStandup['formData'];
+    formSchemaId: InsertStandup['formSchemaId'];
   }): Promise<Standup> {
     return db
       .insert(standups)
@@ -20,6 +22,7 @@ export class StandupsService {
         boardId,
         userId,
         formData,
+        formSchemaId,
       })
       .returning()
       .then(([standup]) => standup);

@@ -36,6 +36,7 @@ export class StandupsController {
         boardId,
         userId,
         formData: createStandupDto.formData,
+        formSchemaId: createStandupDto.formSchemaId,
       });
     } catch (error) {
       console.error(error);

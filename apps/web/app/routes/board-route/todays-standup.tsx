@@ -1,11 +1,11 @@
 import { Button, Card, Flex, Text } from "@radix-ui/themes";
 import { Suspense, use, useEffect, useState } from "react";
-import { useFetcher, useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, type SubmitTarget } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
-  formSchema,
   FormSkeleton,
+  validateFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
 import { type ActionType as CreateStandupActionType } from "../create-board-standup/create-board-standup";
@@ -15,15 +15,24 @@ import type { Standup } from "types";
 type Props = {};
 
 function CardContent() {
-  const { boardDataPromise, standupsPromise } = useLoaderData<typeof loader>();
+  const { boardPromise, standupsPromise, boardActiveStandupFormSchemaPromise } =
+    useLoaderData<typeof loader>();
 
-  const boardData = use(boardDataPromise);
+  const board = use(boardPromise);
   const standups: Standup[] = use(standupsPromise);
+  const boardActiveStandupFormSchema = use(boardActiveStandupFormSchemaPromise);
 
+  const activeStandupFormSchema = validateFormSchema(
+    boardActiveStandupFormSchema?.schema
+  );
+
+  if (!activeStandupFormSchema) {
+    return null;
+  }
+
+  // TODO: save board timezone in db
   const boardTimezone = "Pacific/Honolulu";
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
-
-  const schema = formSchema.parse(boardData.formSchemas);
 
   const createStandupFetcher = useFetcher<CreateStandupActionType>();
   const updateStandupFetcher = useFetcher<UpdateStandupActionType>();
@@ -51,19 +60,23 @@ function CardContent() {
     }
   }, [createStandupFetcher.data]);
 
-  const pendingCreateStandupFormData = createStandupFetcher.formData
-    ? Object.fromEntries(createStandupFetcher.formData.entries())
-    : undefined;
-
-  if (pendingCreateStandupFormData) {
-    todayStandup = {
-      id: 0,
-      boardId: boardData.id,
-      userId: "",
-      formData: pendingCreateStandupFormData as Standup["formData"],
-      createdAt: "",
-      updatedAt: "",
-    };
+  if (createStandupFetcher.state !== "idle") {
+    const values = createStandupFetcher.json;
+    if (values) {
+      const { formData, formSchemaId } = values as {
+        formData: Standup["formData"];
+        formSchemaId: number;
+      };
+      todayStandup = {
+        id: 0,
+        boardId: board.id,
+        userId: "",
+        formSchemaId: formSchemaId,
+        formData: formData,
+        createdAt: "",
+        updatedAt: "",
+      };
+    }
   }
 
   useEffect(() => {
@@ -76,16 +89,18 @@ function CardContent() {
     }
   }, [updateStandupFetcher.data]);
 
-  const pendingUpdateStandupFormData = updateStandupFetcher.formData
-    ? Object.fromEntries(updateStandupFetcher.formData.entries())
-    : undefined;
-
-  if (pendingUpdateStandupFormData) {
-    if (todayStandup) {
-      todayStandup = {
-        ...todayStandup,
-        formData: pendingUpdateStandupFormData as Standup["formData"],
+  if (updateStandupFetcher.state !== "idle") {
+    const values = updateStandupFetcher.json;
+    if (values) {
+      const { formData } = values as {
+        formData: Standup["formData"];
       };
+      if (todayStandup) {
+        todayStandup = {
+          ...todayStandup,
+          formData: formData as Standup["formData"],
+        };
+      }
     }
   }
 
@@ -95,35 +110,41 @@ function CardContent() {
     <>
       {!todayStandup && (
         <DynamicForm
-          schema={schema}
+          schema={activeStandupFormSchema}
           onSubmit={async (data) => {
+            if (!boardActiveStandupFormSchema) {
+              return;
+            }
+
             createStandupFetcher.submit(
               {
-                ...data,
+                formData: data,
+                formSchemaId: boardActiveStandupFormSchema.id,
               },
               {
+                encType: "application/json",
                 method: "POST",
-                action: `/boards/${boardData.id}/standups/create`,
+                action: `/boards/${board.id}/standups/create`,
               }
             );
             setIsEditing(false);
           }}
-          onCancel={() => setIsEditing(false)}
         />
       )}
       {todayStandup &&
         (isEditing ? (
           <DynamicForm
-            schema={schema}
+            schema={activeStandupFormSchema}
             defaultValues={todayStandup.formData as DynamicFormValues}
             onSubmit={async (data) => {
               updateStandupFetcher.submit(
                 {
-                  ...data,
+                  formData: data,
                 },
                 {
+                  encType: "application/json",
                   method: "POST",
-                  action: `/boards/${boardData.id}/standups/${todayStandup?.id}/update`,
+                  action: `/boards/${board.id}/standups/${todayStandup?.id}/update`,
                 }
               );
               setIsEditing(false);
@@ -136,7 +157,7 @@ function CardContent() {
               Today's Standup
             </Text>
             <Flex direction="column" gap="5">
-              {schema.fields.map((field) => {
+              {activeStandupFormSchema.fields.map((field) => {
                 const value = (todayStandup?.formData as DynamicFormValues)[
                   field.name
                 ];

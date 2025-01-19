@@ -6,18 +6,19 @@ import type { Standup } from "types";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
+interface CreateStandupRequestBody {
+  formData: Standup["formData"]; // TODO: this should be formValues
+  formSchemaId: number;
+}
+
 function createStandup(
   boardId: string,
-  {
-    formData,
-  }: {
-    formData: Standup["formData"];
-  },
+  { formData, formSchemaId }: CreateStandupRequestBody,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/standups`, {
     method: "POST",
-    body: JSON.stringify({ formData }),
+    body: JSON.stringify({ formData, formSchemaId }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -32,13 +33,14 @@ export async function action({ request, params }: Route.ActionArgs) {
     request
   );
 
-  const boardId = params.boardId;
+  const { formData, formSchemaId } =
+    (await request.json()) as CreateStandupRequestBody;
 
-  const formData = Object.fromEntries((await request.formData()).entries());
+  const boardId = params.boardId;
 
   const response = await createStandup(
     boardId,
-    { formData },
+    { formData, formSchemaId: Number(formSchemaId) },
     {
       accessToken,
     }

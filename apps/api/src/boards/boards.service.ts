@@ -1,28 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../libs/db';
-import { boards, InsertBoard, usersToBoards, Board } from '../libs/db/schema';
+import {
+  boards,
+  InsertBoard,
+  usersToBoards,
+  Board,
+  standupFormSchemas,
+  StandupFormSchema,
+} from '../libs/db/schema';
 import { and, count, eq } from 'drizzle-orm';
 
 @Injectable()
 export class BoardsService {
-  async create({
-    name,
-    formSchemas,
-  }: {
-    name: InsertBoard['name'];
-    formSchemas: InsertBoard['formSchemas'];
-  }): Promise<Board> {
-    return await db
+  create({ name }: { name: InsertBoard['name'] }) {
+    return db
       .insert(boards)
       .values({
         name,
-        formSchemas,
+        formSchemas: {} as InsertBoard['formSchemas'],
       })
       .returning()
-      .then(([board]) => board);
+      .then((boards): Board => boards[0]);
   }
 
-  async createWithUserAssociation(
+  async setup(
     {
       name,
     }: {
@@ -30,7 +31,26 @@ export class BoardsService {
     },
     userId: string,
   ): Promise<Board> {
-    const defaultStandupFormSchema = {
+    const result = await this.create({
+      name,
+    });
+
+    await this.associateUser(result.id, userId);
+
+    await this.createDefaultFormSchema(result.id);
+
+    return result;
+  }
+
+  private async associateUser(boardId: number, userId: string): Promise<void> {
+    await db.insert(usersToBoards).values({
+      userId,
+      boardId,
+    });
+  }
+
+  private async createDefaultFormSchema(boardId: number): Promise<void> {
+    const schema = {
       title: "Today's Standup",
       fields: [
         {
@@ -59,30 +79,31 @@ export class BoardsService {
       ],
     };
 
-    const result = await this.create({
-      name,
-      formSchemas: defaultStandupFormSchema,
-    });
+    const [result] = await db
+      .insert(standupFormSchemas)
+      .values({
+        boardId,
+        schema,
+      })
+      .returning()
+      .then((standupFormSchemas): StandupFormSchema => standupFormSchemas[0]);
 
-    await this.associateUser(result.id, userId);
-
-    return result;
-  }
-
-  private async associateUser(boardId: number, userId: string): Promise<void> {
-    await db.insert(usersToBoards).values({
-      userId,
-      boardId,
-    });
+    await db
+      .update(boards)
+      .set({
+        activeStandupFormSchemaId: result.id,
+      })
+      .where(eq(boards.id, boardId));
   }
 
   // list() {
   //   return `This action returns all boards`;
   // }
 
-  async get(id: number) {
-    const [result] = await db.select().from(boards).where(eq(boards.id, id));
-    return result;
+  async get(id: number): Promise<Board> {
+    const result = await db.select().from(boards).where(eq(boards.id, id));
+
+    return result[0];
   }
 
   async verifyUserAccess(boardId: number, userId: string): Promise<boolean> {
