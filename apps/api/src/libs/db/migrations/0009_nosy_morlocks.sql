@@ -1,0 +1,2 @@
+ALTER TABLE "boards" ADD COLUMN "active_standup_form_schema_id" integer;--> statement-breakpoint
+ALTER TABLE "boards" ADD CONSTRAINT "boards_active_standup_form_schema_id_standup_form_schemas_id_fk" FOREIGN KEY ("active_standup_form_schema_id") REFERENCES "public"."standup_form_schemas"("id") ON DELETE no action ON UPDATE no action;

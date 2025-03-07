@@ -1,0 +1,208 @@
+import { Button, Card, Flex, Text } from "@radix-ui/themes";
+import { Suspense, use, useEffect, useState } from "react";
+import { useFetcher, useLoaderData, type SubmitTarget } from "react-router";
+import type { loader } from "./board-route";
+import { DateTime } from "luxon";
+import DynamicForm, {
+  FormSkeleton,
+  validateFormSchema,
+  type DynamicFormValues,
+} from "./dynamic-form";
+import { type ActionType as CreateStandupActionType } from "../create-board-standup/create-board-standup";
+import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
+import type { Standup } from "types";
+
+type Props = {};
+
+function CardContent() {
+  const { boardPromise, standupsPromise, boardActiveStandupFormSchemaPromise } =
+    useLoaderData<typeof loader>();
+
+  const board = use(boardPromise);
+  const standups: Standup[] = use(standupsPromise);
+  const boardActiveStandupFormSchema = use(boardActiveStandupFormSchemaPromise);
+
+  const activeStandupFormSchema = validateFormSchema(
+    boardActiveStandupFormSchema?.schema
+  );
+
+  if (!activeStandupFormSchema) {
+    return null;
+  }
+
+  // TODO: save board timezone in db
+  const boardTimezone = "Pacific/Honolulu";
+  const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
+
+  const createStandupFetcher = useFetcher<CreateStandupActionType>();
+  const updateStandupFetcher = useFetcher<UpdateStandupActionType>();
+
+  let todayStandup = standups.find((standup) => {
+    // Convert createdAt to the board's timezone
+    const standupDate = DateTime.fromISO(standup.createdAt, {
+      zone: "utc",
+    })
+      .setZone(boardTimezone)
+      .startOf("day"); // 2025-01-13T00:00:00.000Z
+
+    return standupDate.equals(boardToday);
+  });
+
+  useEffect(() => {
+    if (createStandupFetcher.data) {
+      const { error } = createStandupFetcher.data;
+      if (error) {
+        // TODO: properly toast that there was an error creating the standup
+        alert(error);
+        todayStandup = undefined;
+        setIsEditing(true);
+      }
+    }
+  }, [createStandupFetcher.data]);
+
+  if (createStandupFetcher.state !== "idle") {
+    const values = createStandupFetcher.json;
+    if (values) {
+      const { formData, formSchemaId } = values as {
+        formData: Standup["formData"];
+        formSchemaId: number;
+      };
+      todayStandup = {
+        id: 0,
+        boardId: board.id,
+        userId: "",
+        formSchemaId: formSchemaId,
+        formData: formData,
+        createdAt: "",
+        updatedAt: "",
+      };
+    }
+  }
+
+  useEffect(() => {
+    if (updateStandupFetcher.data) {
+      const error = updateStandupFetcher.data.error;
+      if (error) {
+        // TODO: properly toast that there was an error updating the standup
+        alert(error);
+      }
+    }
+  }, [updateStandupFetcher.data]);
+
+  if (updateStandupFetcher.state !== "idle") {
+    const values = updateStandupFetcher.json;
+    if (values) {
+      const { formData } = values as {
+        formData: Standup["formData"];
+      };
+      if (todayStandup) {
+        todayStandup = {
+          ...todayStandup,
+          formData: formData as Standup["formData"],
+        };
+      }
+    }
+  }
+
+  const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
+
+  return (
+    <>
+      {!todayStandup && (
+        <DynamicForm
+          schema={activeStandupFormSchema}
+          onSubmit={async (data) => {
+            if (!boardActiveStandupFormSchema) {
+              return;
+            }
+
+            createStandupFetcher.submit(
+              {
+                formData: data,
+                formSchemaId: boardActiveStandupFormSchema.id,
+              },
+              {
+                encType: "application/json",
+                method: "POST",
+                action: `/boards/${board.id}/standups/create`,
+              }
+            );
+            setIsEditing(false);
+          }}
+        />
+      )}
+      {todayStandup &&
+        (isEditing ? (
+          <DynamicForm
+            schema={activeStandupFormSchema}
+            defaultValues={todayStandup.formData as DynamicFormValues}
+            onSubmit={async (data) => {
+              updateStandupFetcher.submit(
+                {
+                  formData: data,
+                },
+                {
+                  encType: "application/json",
+                  method: "POST",
+                  action: `/boards/${board.id}/standups/${todayStandup?.id}/update`,
+                }
+              );
+              setIsEditing(false);
+            }}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <Flex direction="column" gap="5">
+            <Text size="4" weight="bold">
+              Today's Standup
+            </Text>
+            <Flex direction="column" gap="5">
+              {activeStandupFormSchema.fields.map((field) => {
+                const value = (todayStandup?.formData as DynamicFormValues)[
+                  field.name
+                ];
+                if (!value) {
+                  return null;
+                }
+                return (
+                  <Flex key={field.name} direction="column" gap="2">
+                    <Text size="2" weight="medium">
+                      {field.label}
+                    </Text>
+                    <Text size="2">{value}</Text>
+                  </Flex>
+                );
+              })}
+            </Flex>
+            <Flex justify="end" gap="2">
+              <Button
+                highContrast
+                size="2"
+                variant="surface"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </Button>
+            </Flex>
+          </Flex>
+        ))}
+    </>
+  );
+}
+
+function TodaysStandup({}: Props) {
+  return (
+    <Card
+      size={{
+        initial: "2",
+        sm: "4",
+      }}
+    >
+      <Suspense fallback={<FormSkeleton />}>
+        <CardContent />
+      </Suspense>
+    </Card>
+  );
+}
+
+export default TodaysStandup;
