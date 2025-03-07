@@ -79,7 +79,7 @@ export class BoardsService {
       ],
     };
 
-    const [result] = await db
+    const result = await db
       .insert(standupFormSchemas)
       .values({
         boardId,

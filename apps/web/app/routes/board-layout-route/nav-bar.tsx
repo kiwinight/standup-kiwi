@@ -5,12 +5,15 @@ import { useParams } from "react-router";
 import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Flex, DropdownMenu, Button, Skeleton, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
+import { useAppearance } from "~/context/AppearanceContext";
 
 function NavBar() {
   const { currentUserBoardsDataPromise, currentUserDataPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
 
   const { boardId } = useParams();
+
+  const { appearance, setAppearance } = useAppearance();
 
   return (
     <Flex
@@ -130,25 +133,25 @@ function NavBar() {
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
-              <DropdownMenu.SubTrigger>Theme</DropdownMenu.SubTrigger>
+              <DropdownMenu.SubTrigger>Appearance</DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
                   onClick={() => {
-                    alert("Not implemented!");
+                    setAppearance("light");
                   }}
                 >
                   Light
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   onClick={() => {
-                    alert("Not implemented!");
+                    setAppearance("dark");
                   }}
                 >
                   Dark
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   onClick={() => {
-                    alert("Not implemented!");
+                    setAppearance("inherit");
                   }}
                 >
                   System
@@ -188,10 +191,10 @@ function NavBar() {
             </DropdownMenu.Sub>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
-        <Flex gap="2">
-          <KiwinightSymbol width={24} height={24} />
+        <Flex className="" align="center" gap="1">
+          <KiwinightSymbol width={32} height={32} />
           <Text size="3" weight="bold" className="!tracking-tight">
-            Kiwi Standup
+            Standup Kiwi
           </Text>
         </Flex>
       </Flex>

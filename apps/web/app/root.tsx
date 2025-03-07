@@ -13,6 +13,7 @@ import stylesheet from "./app.css?url";
 import "@radix-ui/themes/styles.css";
 import "./radix.css";
 import { Theme } from "@radix-ui/themes";
+import { AppearanceProvider, useAppearance } from "./context/AppearanceContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -38,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Theme accentColor="gray">{children}</Theme>
+        <AppearanceProvider>{children}</AppearanceProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -47,7 +48,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const { appearance } = useAppearance();
+
+  return (
+    <Theme accentColor="gray" appearance={appearance}>
+      <Outlet />
+    </Theme>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
