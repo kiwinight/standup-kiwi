@@ -1,5 +1,5 @@
 {
-  "name": "@kiwinight/standup-kiwi-web",
+  "name": "standup-kiwi-web",
   "private": true,
   "type": "module",
   "scripts": {
