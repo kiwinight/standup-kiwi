@@ -31,6 +31,7 @@ export class UsersService {
         id: boards.id,
         name: boards.name,
         formSchemas: boards.formSchemas,
+        activeStandupFormSchemaId: boards.activeStandupFormSchemaId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
         usersCount: count(usersToBoards.userId),

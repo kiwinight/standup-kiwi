@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as jose from 'jose';
+import { Request } from 'express';
 
 export interface AuthenticatedRequest extends Request {
   userId: string;
@@ -45,8 +46,8 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token]: [string, string] =
-      request.headers['authorization']?.split(' ') ?? [];
+    const authHeader = request.headers.authorization;
+    const [type, token] = authHeader?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
 }
