@@ -20,7 +20,10 @@ export class BoardsService {
         formSchemas: {} as InsertBoard['formSchemas'],
       })
       .returning()
-      .then((boards): Board => boards[0]);
+      .then((boards): Board => {
+        const [board] = boards;
+        return board;
+      });
   }
 
   async setup(

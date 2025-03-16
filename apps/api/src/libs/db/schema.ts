@@ -8,6 +8,7 @@ import {
   serial,
   primaryKey,
   jsonb,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 
 export const boards = pgTable('boards', {
@@ -15,21 +16,11 @@ export const boards = pgTable('boards', {
   formSchemas: jsonb('form_schemas').notNull(), // TODO: remove this
   activeStandupFormSchemaId: integer(
     'active_standup_form_schema_id',
-  ).references(() => standupFormSchemas.id),
+  ).references((): AnyPgColumn => standupFormSchemas.id),
   name: text().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-export const boardsRelations = relations(boards, ({ many, one }) => ({
-  usersToBoards: many(usersToBoards),
-  standups: many(standups),
-  standupFormSchemas: many(standupFormSchemas),
-  activeStandupFormSchema: one(standupFormSchemas, {
-    fields: [boards.activeStandupFormSchemaId],
-    references: [standupFormSchemas.id],
-  }),
-}));
 
 export type Board = typeof boards.$inferSelect;
 export type InsertBoard = typeof boards.$inferInsert;
@@ -44,16 +35,6 @@ export const standupFormSchemas = pgTable('standup_form_schemas', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-export const standupFormSchemasRelations = relations(
-  standupFormSchemas,
-  ({ one }) => ({
-    board: one(boards, {
-      fields: [standupFormSchemas.boardId],
-      references: [boards.id],
-    }),
-  }),
-);
 
 export type StandupFormSchema = typeof standupFormSchemas.$inferSelect;
 export type InsertStandupFormSchema = typeof standupFormSchemas.$inferInsert;
@@ -74,13 +55,6 @@ export const usersToBoards = pgTable(
   }),
 );
 
-export const usersToBoardsRelations = relations(usersToBoards, ({ one }) => ({
-  board: one(boards, {
-    fields: [usersToBoards.boardId],
-    references: [boards.id],
-  }),
-}));
-
 export const standups = pgTable('standups', {
   id: serial('id').primaryKey(),
   boardId: integer('board_id')
@@ -99,6 +73,33 @@ export const standups = pgTable('standups', {
     .defaultNow()
     .notNull(),
 });
+
+export const boardsRelations = relations(boards, ({ many, one }) => ({
+  usersToBoards: many(usersToBoards),
+  standups: many(standups),
+  standupFormSchemas: many(standupFormSchemas),
+  activeStandupFormSchema: one(standupFormSchemas, {
+    fields: [boards.activeStandupFormSchemaId],
+    references: [standupFormSchemas.id],
+  }),
+}));
+
+export const standupFormSchemasRelations = relations(
+  standupFormSchemas,
+  ({ one }) => ({
+    board: one(boards, {
+      fields: [standupFormSchemas.boardId],
+      references: [boards.id],
+    }),
+  }),
+);
+
+export const usersToBoardsRelations = relations(usersToBoards, ({ one }) => ({
+  board: one(boards, {
+    fields: [usersToBoards.boardId],
+    references: [boards.id],
+  }),
+}));
 
 export const standupsRelations = relations(standups, ({ one }) => ({
   board: one(boards, {

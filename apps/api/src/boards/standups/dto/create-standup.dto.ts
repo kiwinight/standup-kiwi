@@ -7,5 +7,5 @@ export class CreateStandupDto {
 
   @IsNotEmpty()
   @IsNumber()
-  formSchemaId: number;
+  formSchemaId!: number;
 }
