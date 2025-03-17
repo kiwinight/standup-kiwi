@@ -5,28 +5,32 @@ import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
   FormSkeleton,
-  validateFormSchema,
+  validateDynamicFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
-import { type ActionType as CreateStandupActionType } from "../create-board-standup/create-board-standup";
+import {
+  type ActionType as CreateStandupActionType,
+  type CreateStandupRequestBody,
+} from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 import type { Standup } from "types";
 
 type Props = {};
 
 function CardContent() {
-  const { boardPromise, standupsPromise, boardActiveStandupFormSchemaPromise } =
-    useLoaderData<typeof loader>();
+  const {
+    boardPromise,
+    standupsPromise,
+    boardActiveStandupFormStructurePromise,
+  } = useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
   const standups: Standup[] = use(standupsPromise);
-  const boardActiveStandupFormSchema = use(boardActiveStandupFormSchemaPromise);
+  const structure = use(boardActiveStandupFormStructurePromise);
 
-  const activeStandupFormSchema = validateFormSchema(
-    boardActiveStandupFormSchema?.schema
-  );
+  const schema = validateDynamicFormSchema(structure?.schema);
 
-  if (!activeStandupFormSchema) {
+  if (!schema) {
     return null;
   }
 
@@ -63,15 +67,13 @@ function CardContent() {
   if (createStandupFetcher.state !== "idle") {
     const values = createStandupFetcher.json;
     if (values) {
-      const { formData, formSchemaId } = values as {
-        formData: Standup["formData"];
-        formSchemaId: number;
-      };
+      const { formData, formStructureId } =
+        values as unknown as CreateStandupRequestBody;
       todayStandup = {
         id: 0,
         boardId: board.id,
         userId: "",
-        formSchemaId: formSchemaId,
+        formStructureId: formStructureId,
         formData: formData,
         createdAt: "",
         updatedAt: "",
@@ -110,16 +112,16 @@ function CardContent() {
     <>
       {!todayStandup && (
         <DynamicForm
-          schema={activeStandupFormSchema}
+          schema={schema}
           onSubmit={async (data) => {
-            if (!boardActiveStandupFormSchema) {
+            if (!structure) {
               return;
             }
 
             createStandupFetcher.submit(
               {
                 formData: data,
-                formSchemaId: boardActiveStandupFormSchema.id,
+                formStructureId: structure.id,
               },
               {
                 encType: "application/json",
@@ -134,7 +136,7 @@ function CardContent() {
       {todayStandup &&
         (isEditing ? (
           <DynamicForm
-            schema={activeStandupFormSchema}
+            schema={schema}
             defaultValues={todayStandup.formData as DynamicFormValues}
             onSubmit={async (data) => {
               updateStandupFetcher.submit(
@@ -157,7 +159,7 @@ function CardContent() {
               Today's Standup
             </Text>
             <Flex direction="column" gap="5">
-              {activeStandupFormSchema.fields.map((field) => {
+              {schema.fields.map((field) => {
                 const value = (todayStandup?.formData as DynamicFormValues)[
                   field.name
                 ];

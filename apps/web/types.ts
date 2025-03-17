@@ -5,18 +5,18 @@
  */
 export type Board = {
   id: number;
-  activeStandupFormSchemaId: number | null;
   name: string;
+  activeStandupFormStructureId: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type StandupFormSchema = {
+export type StandupFormStructure = {
   id: number;
-  boardId: number;
-  schema: unknown;
   createdAt: Date;
   updatedAt: Date;
+  boardId: number;
+  schema: unknown;
 };
 
 interface Team {
@@ -50,7 +50,7 @@ export interface Standup {
   id: number;
   boardId: number;
   userId: string;
-  formSchemaId: number;
+  formStructureId: number;
   formData: unknown;
   createdAt: string;
   updatedAt: string;
