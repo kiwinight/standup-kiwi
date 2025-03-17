@@ -13,10 +13,9 @@ import {
 
 export const boards = pgTable('boards', {
   id: serial('id').primaryKey(),
-  formSchemas: jsonb('form_schemas').notNull(), // TODO: remove this
-  activeStandupFormSchemaId: integer(
-    'active_standup_form_schema_id',
-  ).references((): AnyPgColumn => standupFormSchemas.id),
+  activeStandupFormStructureId: integer(
+    'active_standup_form_structure_id',
+  ).references((): AnyPgColumn => standupFormStructures.id),
   name: text().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -25,8 +24,7 @@ export const boards = pgTable('boards', {
 export type Board = typeof boards.$inferSelect;
 export type InsertBoard = typeof boards.$inferInsert;
 
-// TODO: rename table name to standupFormStructures!!
-export const standupFormSchemas = pgTable('standup_form_schemas', {
+export const standupFormStructures = pgTable('standup_form_structures', {
   id: serial('id').primaryKey(),
   boardId: integer('board_id')
     .notNull()
@@ -36,8 +34,9 @@ export const standupFormSchemas = pgTable('standup_form_schemas', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export type StandupFormSchema = typeof standupFormSchemas.$inferSelect;
-export type InsertStandupFormSchema = typeof standupFormSchemas.$inferInsert;
+export type StandupFormStructure = typeof standupFormStructures.$inferSelect;
+export type InsertStandupFormStructure =
+  typeof standupFormStructures.$inferInsert;
 
 export const usersToBoards = pgTable(
   'users_to_boards',
@@ -61,9 +60,9 @@ export const standups = pgTable('standups', {
     .notNull()
     .references(() => boards.id),
   userId: uuid('user_id').notNull(), // User who submitted the standup
-  formSchemaId: integer('form_schema_id')
+  formStructureId: integer('form_structure_id')
     .notNull()
-    .references(() => standupFormSchemas.id),
+    .references(() => standupFormStructures.id),
   // TODO: I think this column name should be formValues
   formData: jsonb('form_data').notNull(), // The actual standup responses
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -77,18 +76,18 @@ export const standups = pgTable('standups', {
 export const boardsRelations = relations(boards, ({ many, one }) => ({
   usersToBoards: many(usersToBoards),
   standups: many(standups),
-  standupFormSchemas: many(standupFormSchemas),
-  activeStandupFormSchema: one(standupFormSchemas, {
-    fields: [boards.activeStandupFormSchemaId],
-    references: [standupFormSchemas.id],
+  standupFormStructures: many(standupFormStructures),
+  activeStandupFormStructure: one(standupFormStructures, {
+    fields: [boards.activeStandupFormStructureId],
+    references: [standupFormStructures.id],
   }),
 }));
 
-export const standupFormSchemasRelations = relations(
-  standupFormSchemas,
+export const standupFormStructuresRelations = relations(
+  standupFormStructures,
   ({ one }) => ({
     board: one(boards, {
-      fields: [standupFormSchemas.boardId],
+      fields: [standupFormStructures.boardId],
       references: [boards.id],
     }),
   }),
@@ -106,9 +105,9 @@ export const standupsRelations = relations(standups, ({ one }) => ({
     fields: [standups.boardId],
     references: [boards.id],
   }),
-  formSchema: one(standupFormSchemas, {
-    fields: [standups.formSchemaId],
-    references: [standupFormSchemas.id],
+  formStructure: one(standupFormStructures, {
+    fields: [standups.formStructureId],
+    references: [standupFormStructures.id],
   }),
 }));
 

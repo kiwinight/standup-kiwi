@@ -7,7 +7,7 @@ import {
   type ApiResponse,
   type Board,
   type Standup,
-  type StandupFormSchema,
+  type StandupFormStructure,
 } from "types";
 import verifyAuthentication from "~/libs/auth";
 
@@ -30,23 +30,23 @@ function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   }).then((response) => response.json() as Promise<ApiResponse<Board>>);
 }
 
-function getStandupFormSchema(
+function getStandupFormStructure(
   {
-    standupFormSchemaId,
+    standupFormStructureId,
     boardId,
-  }: { standupFormSchemaId: number; boardId: number },
+  }: { standupFormStructureId: number; boardId: number },
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
     import.meta.env.VITE_API_URL +
-      `/boards/${boardId}/standup-form-schemas/${standupFormSchemaId}`,
+      `/boards/${boardId}/standup-form-structures/${standupFormStructureId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     }
   ).then(
-    (response) => response.json() as Promise<ApiResponse<StandupFormSchema>>
+    (response) => response.json() as Promise<ApiResponse<StandupFormStructure>>
   );
 }
 
@@ -90,11 +90,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
   );
 
-  const standupFormSchemasPromise = standupsPromise.then((standups) => {
-    const ids = standups.map((standup) => standup.formSchemaId);
+  const standupFormStructuresPromise = standupsPromise.then((standups) => {
+    const ids = standups.map((standup) => standup.formStructureId);
     return fetch(
       import.meta.env.VITE_API_URL +
-        `/boards/${boardId}/standup-form-schemas?ids=${ids.join(",")}`,
+        `/boards/${boardId}/standup-form-structures?ids=${ids.join(",")}`,
       {
         method: "GET",
         headers: {
@@ -104,7 +104,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     )
       .then(
         (response) =>
-          response.json() as Promise<ApiResponse<StandupFormSchema[]>>
+          response.json() as Promise<ApiResponse<StandupFormStructure[]>>
       )
       .then((data) => {
         if (isApiErrorResponse(data)) {
@@ -118,14 +118,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       });
   });
 
-  const boardActiveStandupFormSchemaPromise = boardPromise.then(
+  const boardActiveStandupFormStructurePromise = boardPromise.then(
     async (board) => {
-      if (!board.activeStandupFormSchemaId) {
+      if (!board.activeStandupFormStructureId) {
         return null;
       }
-      return getStandupFormSchema(
+      return getStandupFormStructure(
         {
-          standupFormSchemaId: board.activeStandupFormSchemaId,
+          standupFormStructureId: board.activeStandupFormStructureId,
           boardId: board.id,
         },
         { accessToken }
@@ -145,8 +145,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return {
     boardPromise,
     standupsPromise,
-    boardActiveStandupFormSchemaPromise,
-    standupFormSchemasPromise,
+    boardActiveStandupFormStructurePromise,
+    standupFormStructuresPromise,
   };
 }
 

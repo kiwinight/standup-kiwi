@@ -35,8 +35,7 @@ export class UsersService {
       .select({
         id: boards.id,
         name: boards.name,
-        formSchemas: boards.formSchemas,
-        activeStandupFormSchemaId: boards.activeStandupFormSchemaId,
+        activeStandupFormStructureId: boards.activeStandupFormStructureId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
         usersCount: count(usersToBoards.userId),
