@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../libs/db';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   boards,
   InsertBoard,
@@ -9,11 +8,17 @@ import {
   StandupFormSchema,
 } from '../libs/db/schema';
 import { and, count, eq } from 'drizzle-orm';
+import { Database, DATABASE_TOKEN } from 'src/db/db.module';
 
 @Injectable()
 export class BoardsService {
+  constructor(
+    @Inject(DATABASE_TOKEN)
+    private readonly db: Database,
+  ) {}
+
   create({ name }: { name: InsertBoard['name'] }) {
-    return db
+    return this.db
       .insert(boards)
       .values({
         name,
@@ -46,7 +51,7 @@ export class BoardsService {
   }
 
   private async associateUser(boardId: number, userId: string): Promise<void> {
-    await db.insert(usersToBoards).values({
+    await this.db.insert(usersToBoards).values({
       userId,
       boardId,
     });
@@ -82,7 +87,7 @@ export class BoardsService {
       ],
     };
 
-    const result = await db
+    const result = await this.db
       .insert(standupFormSchemas)
       .values({
         boardId,
@@ -91,7 +96,7 @@ export class BoardsService {
       .returning()
       .then((standupFormSchemas): StandupFormSchema => standupFormSchemas[0]);
 
-    await db
+    await this.db
       .update(boards)
       .set({
         activeStandupFormSchemaId: result.id,
@@ -104,13 +109,13 @@ export class BoardsService {
   // }
 
   async get(id: number): Promise<Board> {
-    const result = await db.select().from(boards).where(eq(boards.id, id));
+    const result = await this.db.select().from(boards).where(eq(boards.id, id));
 
     return result[0];
   }
 
   async verifyUserAccess(boardId: number, userId: string): Promise<boolean> {
-    const [result] = await db
+    const [result] = await this.db
       .select({
         count: count(),
       })

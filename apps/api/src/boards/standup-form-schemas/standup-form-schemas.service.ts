@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { db } from 'src/libs/db';
+import { Inject, Injectable } from '@nestjs/common';
 import { standupFormSchemas } from 'src/libs/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
+import { DATABASE_TOKEN } from 'src/db/db.module';
+import { Database } from 'src/db/db.module';
 
 @Injectable()
 export class StandupFormSchemasService {
+  constructor(
+    @Inject(DATABASE_TOKEN)
+    private readonly db: Database,
+  ) {}
+
   // create(createStandupFormSchemaDto: CreateStandupFormSchemaDto) {
   //   return 'This action adds a new standupFormSchema';
   // }
@@ -14,7 +20,7 @@ export class StandupFormSchemasService {
   // }
 
   get(id: number) {
-    return db
+    return this.db
       .select()
       .from(standupFormSchemas)
       .where(eq(standupFormSchemas.id, id))
@@ -23,7 +29,7 @@ export class StandupFormSchemasService {
 
   list(boardId: number, ids?: number[]) {
     if (ids) {
-      return db
+      return this.db
         .select()
         .from(standupFormSchemas)
         .where(
@@ -34,7 +40,7 @@ export class StandupFormSchemasService {
         );
     }
 
-    return db
+    return this.db
       .select()
       .from(standupFormSchemas)
       .where(eq(standupFormSchemas.boardId, boardId));

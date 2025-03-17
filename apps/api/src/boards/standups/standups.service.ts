@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { db } from 'src/libs/db';
+import { Inject, Injectable } from '@nestjs/common';
 import { InsertStandup, Standup, standups } from 'src/libs/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
+import { Database, DATABASE_TOKEN } from 'src/db/db.module';
 
 @Injectable()
 export class StandupsService {
+  constructor(
+    @Inject(DATABASE_TOKEN)
+    private readonly db: Database,
+  ) {}
+
   create({
     boardId,
     userId,
@@ -16,7 +21,7 @@ export class StandupsService {
     formData: InsertStandup['formData'];
     formSchemaId: InsertStandup['formSchemaId'];
   }): Promise<Standup> {
-    return db
+    return this.db
       .insert(standups)
       .values({
         boardId,
@@ -29,7 +34,7 @@ export class StandupsService {
   }
 
   list(boardId: number) {
-    return db
+    return this.db
       .select()
       .from(standups)
       .where(eq(standups.boardId, boardId))
@@ -48,7 +53,7 @@ export class StandupsService {
       formData?: InsertStandup['formData'];
     },
   ) {
-    return db
+    return this.db
       .update(standups)
       .set({ formData, updatedAt: sql`NOW()` })
       .where(eq(standups.id, id))

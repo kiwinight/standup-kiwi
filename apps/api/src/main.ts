@@ -22,6 +22,5 @@ async function bootstrap() {
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
   console.log(`\x1b[1;32mApplication is running on port ${port}\x1b[0m`);
-  console.log('process.env.DATABASE_URL', process.env.DATABASE_URL);
 }
 bootstrap();
