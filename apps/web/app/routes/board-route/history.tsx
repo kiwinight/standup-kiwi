@@ -2,17 +2,20 @@ import { DateTime } from "luxon";
 import React, { Suspense, use } from "react";
 import { useLoaderData } from "react-router";
 import type { loader } from "./board-route";
-import { validateFormSchema, type DynamicFormValues } from "./dynamic-form";
+import {
+  validateDynamicFormSchema,
+  type DynamicFormValues,
+} from "./dynamic-form";
 import { Card, Flex, Skeleton, Text, Tooltip } from "@radix-ui/themes";
 import type { Standup } from "types";
 
 type Props = {};
 
 function Standups() {
-  const { standupsPromise, standupFormSchemasPromise } =
+  const { standupsPromise, standupFormStructuresPromise } =
     useLoaderData<typeof loader>();
   const standups = use(standupsPromise);
-  const standupFormSchemas = use(standupFormSchemasPromise);
+  const standupFormStructures = use(standupFormStructuresPromise);
 
   // TODO: get board timezone from board
   const boardTimezone = "Pacific/Honolulu";
@@ -29,13 +32,13 @@ function Standups() {
       return null;
     }
 
-    const schema = standupFormSchemas.find(
-      (schema) => schema.id === standup.formSchemaId
+    const structure = standupFormStructures.find(
+      (structure) => structure.id === standup.formStructureId
     );
 
-    const parsedSchema = validateFormSchema(schema?.schema);
+    const schema = validateDynamicFormSchema(structure?.schema);
 
-    if (!parsedSchema) {
+    if (!schema) {
       return null;
     }
 
@@ -60,7 +63,7 @@ function Standups() {
                 .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
             </Text>
           </Tooltip>
-          {parsedSchema.fields.map((field) => {
+          {schema.fields.map((field) => {
             const value = (
               standup.formData as Standup["formData"] as DynamicFormValues
             )[field.name];
