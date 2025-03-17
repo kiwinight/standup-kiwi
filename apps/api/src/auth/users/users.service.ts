@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { db } from 'src/libs/db';
+import { Inject, Injectable } from '@nestjs/common';
 import { boards, usersToBoards, Board } from 'src/libs/db/schema';
 import { count, eq } from 'drizzle-orm';
 import { User } from 'src/auth/auth-service.types';
+import { Database, DATABASE_TOKEN } from 'src/db/db.module';
 
 @Injectable()
 export class UsersService {
+  constructor(
+    @Inject(DATABASE_TOKEN)
+    private readonly db: Database,
+  ) {}
+
   async get(userId: string) {
     const response = await fetch(
       process.env.AUTH_SERVICE_API_URL + '/users/' + userId,
@@ -26,7 +31,7 @@ export class UsersService {
   async getBoardsOfUser(
     userId: string,
   ): Promise<(Board & { usersCount: number })[]> {
-    return await db
+    return await this.db
       .select({
         id: boards.id,
         name: boards.name,
