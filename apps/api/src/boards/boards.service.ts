@@ -4,8 +4,8 @@ import {
   InsertBoard,
   usersToBoards,
   Board,
-  standupFormSchemas,
-  StandupFormSchema,
+  standupFormStructures,
+  StandupFormStructure,
 } from '../libs/db/schema';
 import { and, count, eq } from 'drizzle-orm';
 import { Database, DATABASE_TOKEN } from 'src/db/db.module';
@@ -22,7 +22,6 @@ export class BoardsService {
       .insert(boards)
       .values({
         name,
-        formSchemas: {} as InsertBoard['formSchemas'],
       })
       .returning()
       .then((boards): Board => {
@@ -45,7 +44,7 @@ export class BoardsService {
 
     await this.associateUser(result.id, userId);
 
-    await this.createDefaultFormSchema(result.id);
+    await this.createDefaultFormStructure(result.id);
 
     return result;
   }
@@ -57,7 +56,7 @@ export class BoardsService {
     });
   }
 
-  private async createDefaultFormSchema(boardId: number): Promise<void> {
+  private async createDefaultFormStructure(boardId: number): Promise<void> {
     const schema = {
       title: "Today's Standup",
       fields: [
@@ -88,18 +87,21 @@ export class BoardsService {
     };
 
     const result = await this.db
-      .insert(standupFormSchemas)
+      .insert(standupFormStructures)
       .values({
         boardId,
         schema,
       })
       .returning()
-      .then((standupFormSchemas): StandupFormSchema => standupFormSchemas[0]);
+      .then(
+        (standupFormStructures): StandupFormStructure =>
+          standupFormStructures[0],
+      );
 
     await this.db
       .update(boards)
       .set({
-        activeStandupFormSchemaId: result.id,
+        activeStandupFormStructureId: result.id,
       })
       .where(eq(boards.id, boardId));
   }

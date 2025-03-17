@@ -71,6 +71,13 @@
       "when": 1737096188929,
       "tag": "0009_nosy_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1742179957273,
+      "tag": "0010_moaning_guardian",
+      "breakpoints": true
     }
   ]
 }
