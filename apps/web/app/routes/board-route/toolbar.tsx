@@ -1,13 +1,15 @@
 import { Share1Icon, GearIcon } from "@radix-ui/react-icons";
-import { Flex, Skeleton, Button, Text } from "@radix-ui/themes";
+import { Flex, Skeleton, Button, Text, Tooltip } from "@radix-ui/themes";
 import React, { Suspense } from "react";
-import { Await, useLoaderData } from "react-router";
+import { Await, Link, useLoaderData, useParams } from "react-router";
 import type { loader } from "./board-route";
 
 type Props = {};
 
 function Toolbar({}: Props) {
   const { boardPromise } = useLoaderData<typeof loader>();
+
+  const { boardId } = useParams();
 
   return (
     <Flex
@@ -38,13 +40,18 @@ function Toolbar({}: Props) {
           sm: "0",
         }}
       >
-        <Button variant="ghost" highContrast>
-          <Share1Icon />
-          Share
+        <Button asChild variant="ghost" highContrast>
+          <Link to={`/boards/${boardId}/settings/sharing`}>
+            <Share1Icon />
+            Share
+          </Link>
         </Button>
-        <Button variant="ghost" highContrast>
-          <GearIcon />
-          Settings
+
+        <Button asChild variant="ghost" highContrast>
+          <Link to={`/boards/${boardId}/settings`}>
+            <GearIcon />
+            Settings
+          </Link>
         </Button>
       </Flex>
     </Flex>
