@@ -9,6 +9,11 @@ export default [
     route("/boards/:boardId", "routes/board-route/board-route.tsx"),
 
     route(
+      "/boards/:boardId/settings",
+      "routes/board-settings-route/board-settings-route.tsx"
+    ),
+
+    route(
       "/boards/:boardId/standups/create",
       "routes/create-board-standup/create-board-standup.tsx"
     ),
