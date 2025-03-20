@@ -8,9 +8,18 @@ export default [
     ),
     route("/boards/:boardId", "routes/board-route/board-route.tsx"),
 
-    route(
-      "/boards/:boardId/settings",
-      "routes/board-settings-route/board-settings-route.tsx"
+    layout(
+      "routes/board-settings-layout-route/board-settings-layout-route.tsx",
+      [
+        route(
+          "/boards/:boardId/settings",
+          "routes/board-settings-route/board-settings-route.tsx"
+        ),
+        route(
+          "/boards/:boardId/settings/sharing",
+          "routes/board-settings-sharing-route/board-settings-sharing-route.tsx"
+        ),
+      ]
     ),
 
     route(

@@ -1,20 +1,9 @@
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Flex,
-  Select,
-  TabNav,
-  Text,
-  TextField,
-} from "@radix-ui/themes";
-import { Link, useParams } from "react-router";
-import Toolbar from "../board-route/toolbar";
+import { Button, Card, Flex, Select, Text, TextField } from "@radix-ui/themes";
+import { useParams } from "react-router";
 import type { Route } from "./+types/board-settings-route";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import React from "react";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { alertFeatureNotImplemented } from "../../libs/alert";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   return null;
@@ -120,144 +109,103 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
   }, []);
 
   return (
-    <Container my="7" maxWidth="672px" px="4">
-      <Flex direction="column" gap="7">
-        <Flex direction="column" gap="4">
-          <Flex>
-            <Button asChild variant="ghost" highContrast>
-              <Link to={`/boards/${boardId}`}>
-                <ArrowLeftIcon />
-                Back to board
-              </Link>
+    <>
+      <Card
+        size={{
+          initial: "2",
+          sm: "4",
+        }}
+      >
+        <form
+          method="post"
+          onSubmit={(event) => {
+            event.preventDefault();
+            alertFeatureNotImplemented();
+          }}
+        >
+          <Flex direction="column">
+            <Text size="4" weight="bold">
+              Board name
+            </Text>
+            <Flex direction="column" mt="5" gap="5">
+              <Flex key="name" direction="column" gap="2">
+                <TextField.Root
+                  name="name"
+                  placeholder="e.g. Daily Standup"
+                  size="2"
+                />
+                <Text color="gray" size="2">
+                  Give your standup board a clear and recognizable name.
+                </Text>
+              </Flex>
+            </Flex>
+          </Flex>
+          <Flex justify="end" mt="5" gap="2">
+            <Button highContrast size="2" type="submit" loading={false}>
+              Save
             </Button>
           </Flex>
-          <Flex>
-            <Text size="6" weight="bold">
-              Board Settings
+        </form>
+      </Card>
+
+      <Card
+        size={{
+          initial: "2",
+          sm: "4",
+        }}
+      >
+        <form
+          method="post"
+          onSubmit={(event) => {
+            event.preventDefault();
+            alertFeatureNotImplemented();
+          }}
+        >
+          <Flex direction="column">
+            <Text size="4" weight="bold">
+              Timezone
             </Text>
+            <Flex direction="column" mt="5" gap="5">
+              <Flex key="name" direction="column" gap="2">
+                <Text size="2" weight="medium">
+                  Standup timezone
+                </Text>
+
+                <Select.Root defaultValue="UTC">
+                  <Select.Trigger />
+                  <Select.Content>
+                    {Object.entries(timezones).map(
+                      ([offsetGroup, timezoneList]) => (
+                        <React.Fragment key={offsetGroup}>
+                          <Select.Group>
+                            <Select.Label>{offsetGroup}</Select.Label>
+                            {timezoneList.map((tz) => (
+                              <Select.Item key={tz.value} value={tz.value}>
+                                (UTC{tz.offset}) {tz.label}
+                              </Select.Item>
+                            ))}
+                          </Select.Group>
+                          <Select.Separator />
+                        </React.Fragment>
+                      )
+                    )}
+                  </Select.Content>
+                </Select.Root>
+                <Text color="gray" size="2">
+                  This timezone determines the date assigned to all standups on
+                  this board. Standups are recorded based on the selected
+                  timezone.
+                </Text>
+              </Flex>
+            </Flex>
           </Flex>
-          <Box>
-            <TabNav.Root>
-              <TabNav.Link href={`/boards/${boardId}/settings`} active>
-                General
-              </TabNav.Link>
-              <TabNav.Link href={`/boards/${boardId}/settings/sharing`}>
-                Sharing
-              </TabNav.Link>
-            </TabNav.Root>
-          </Box>
-        </Flex>
-
-        <Card
-          size={{
-            initial: "2",
-            sm: "4",
-          }}
-        >
-          <form
-            method="post"
-            onSubmit={(event) => {
-              console.log("Not implemented!");
-            }}
-          >
-            <Flex direction="column">
-              <Text size="4" weight="bold">
-                Board name
-              </Text>
-              <Flex direction="column" mt="5" gap="5">
-                <Flex key="name" direction="column" gap="2">
-                  {/* <Text size="2" weight="medium">
-                    Board name
-                  </Text> */}
-                  <TextField.Root
-                    name="name"
-                    placeholder="e.g. Daily Standup"
-                    size="2"
-                  />
-                  <Text color="gray" size="2">
-                    Give your standup board a clear and recognizable name.
-                  </Text>
-                </Flex>
-              </Flex>
-            </Flex>
-            <Flex justify="end" mt="5" gap="2">
-              <Button
-                highContrast
-                size="2"
-                type="submit"
-                disabled
-                loading={false}
-              >
-                Save
-              </Button>
-            </Flex>
-          </form>
-        </Card>
-
-        <Card
-          size={{
-            initial: "2",
-            sm: "4",
-          }}
-        >
-          <form
-            method="post"
-            onSubmit={(event) => {
-              console.log("Not implemented!");
-            }}
-          >
-            <Flex direction="column">
-              <Text size="4" weight="bold">
-                Timezone
-              </Text>
-              <Flex direction="column" mt="5" gap="5">
-                <Flex key="name" direction="column" gap="2">
-                  <Text size="2" weight="medium">
-                    Standup timezone
-                  </Text>
-
-                  <Select.Root defaultValue="UTC">
-                    <Select.Trigger />
-                    <Select.Content>
-                      {Object.entries(timezones).map(
-                        ([offsetGroup, timezoneList]) => (
-                          <React.Fragment key={offsetGroup}>
-                            <Select.Group>
-                              <Select.Label>{offsetGroup}</Select.Label>
-                              {timezoneList.map((tz) => (
-                                <Select.Item key={tz.value} value={tz.value}>
-                                  (UTC{tz.offset}) {tz.label}
-                                </Select.Item>
-                              ))}
-                            </Select.Group>
-                            <Select.Separator />
-                          </React.Fragment>
-                        )
-                      )}
-                    </Select.Content>
-                  </Select.Root>
-                  <Text color="gray" size="2">
-                    This timezone determines the date assigned to all standups
-                    on this board. Standups are recorded based on the selected
-                    timezone.
-                  </Text>
-                </Flex>
-              </Flex>
-            </Flex>
-            <Flex justify="end" mt="5" gap="2">
-              <Button
-                highContrast
-                size="2"
-                type="submit"
-                disabled
-                loading={false}
-              >
-                Save
-              </Button>
-            </Flex>
-          </form>
-        </Card>
-      </Flex>
-    </Container>
+          <Flex justify="end" mt="5" gap="2">
+            <Button highContrast size="2" type="submit" loading={false}>
+              Save
+            </Button>
+          </Flex>
+        </form>
+      </Card>
+    </>
   );
 }
