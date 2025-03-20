@@ -66,14 +66,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export function shouldRevalidate(arg: ShouldRevalidateFunctionArgs) {
   if (
-    arg.currentParams.boardId &&
-    arg.nextParams.boardId &&
+    Boolean(arg.currentParams.boardId) &&
+    Boolean(arg.nextParams.boardId) &&
     arg.currentParams.boardId !== arg.nextParams.boardId
   ) {
-    return false;
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 function BoardLayoutRoute({}: Route.ComponentProps) {

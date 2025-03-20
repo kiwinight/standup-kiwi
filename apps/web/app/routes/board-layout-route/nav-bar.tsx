@@ -6,6 +6,7 @@ import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Flex, DropdownMenu, Button, Skeleton, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { useAppearance } from "~/context/AppearanceContext";
+import { alertFeatureNotImplemented } from "~/libs/alert";
 
 function NavBar() {
   const { currentUserBoardsDataPromise, currentUserDataPromise } =
@@ -36,11 +37,11 @@ function NavBar() {
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
-            <Link to="/boards/create">
-              <DropdownMenu.Item>
+            <DropdownMenu.Item asChild>
+              <Link to="/boards/create">
                 <PlusIcon /> Create a new board
-              </DropdownMenu.Item>
-            </Link>
+              </Link>
+            </DropdownMenu.Item>
 
             <Suspense
               fallback={
@@ -174,7 +175,7 @@ function NavBar() {
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
                   onClick={() => {
-                    alert("Not implemented!");
+                    alertFeatureNotImplemented();
                   }}
                 >
                   Settings
@@ -182,7 +183,7 @@ function NavBar() {
                 <DropdownMenu.Item
                   color="red"
                   onClick={() => {
-                    alert("Not implemented!");
+                    alertFeatureNotImplemented();
                   }}
                 >
                   Logout
