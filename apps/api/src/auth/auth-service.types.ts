@@ -17,11 +17,11 @@ export interface User {
   primary_email: string;
   display_name: string | null;
   selected_team: Team | null;
-  selected_team_id: string;
+  selected_team_id: string | null;
   profile_image_url: string;
-  client_metadata: Record<string, any>;
-  client_read_only_metadata: Record<string, any>;
-  server_metadata: Record<string, any>;
+  client_metadata: Record<string, any> | null;
+  client_read_only_metadata: Record<string, any> | null;
+  server_metadata: Record<string, any> | null;
   has_password: boolean;
 }
 

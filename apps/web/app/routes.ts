@@ -1,6 +1,12 @@
-import { type RouteConfig, layout, route } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  route,
+} from "@react-router/dev/routes";
 
 export default [
+  index("routes/index-route/index-route.tsx"),
   layout("routes/board-layout-route/board-layout-route.tsx", [
     route(
       "/boards/create",
