@@ -14,11 +14,15 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { Board } from 'src/libs/db/schema';
 import { AuthenticatedRequest, AuthGuard } from 'src/auth/guards/auth.guard';
 import { BoardAccessGuard } from './guards/board-access.guard';
+import { UsersService } from 'src/auth/users/users.service';
 
 @Controller('boards')
 @UseGuards(AuthGuard)
 export class BoardsController {
-  constructor(private readonly boardsService: BoardsService) {}
+  constructor(
+    private readonly boardsService: BoardsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // POST /boards
   @Post()
@@ -49,8 +53,19 @@ export class BoardsController {
   // GET /boards/:boardId
   @UseGuards(BoardAccessGuard)
   @Get(':boardId')
-  async get(@Param('boardId', ParseIntPipe) boardId: number): Promise<Board> {
+  async get(
+    @Req() request: AuthenticatedRequest,
+    @Param('boardId', ParseIntPipe) boardId: number,
+  ): Promise<Board> {
+    const userId = request.userId;
     try {
+      // NOTE: This is to update the last accessed board in user metadata
+      this.usersService.update(userId, {
+        client_read_only_metadata: {
+          lastAccessedBoardId: boardId,
+        },
+      });
+
       return await this.boardsService.get(boardId);
     } catch (error) {
       console.error(error);

@@ -24,8 +24,33 @@ export class UsersService {
         },
       },
     );
-    const data: User = await response.json(); // TODO: handle error case
-    return data;
+    const user: User = await response.json(); // TODO: handle error case
+
+    // NOTE: This is to avoid the server_metadata property from being included in the response
+    user.server_metadata = null;
+
+    return user;
+  }
+
+  async update(userId: string, user: Partial<User>) {
+    const response = await fetch(
+      process.env.AUTH_SERVICE_API_URL + '/users/' + userId,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Stack-Access-Type': 'server',
+          'X-Stack-Project-Id': process.env.AUTH_SERVICE_PROJECT_ID!,
+          'X-Stack-Secret-Server-Key':
+            process.env.AUTH_SERVICE_SECRET_SERVER_KEY!,
+        },
+        body: JSON.stringify(user),
+      },
+    );
+
+    const updatedUser: User = await response.json(); // TODO: handle error case
+
+    return updatedUser;
   }
 
   async getBoardsOfUser(
