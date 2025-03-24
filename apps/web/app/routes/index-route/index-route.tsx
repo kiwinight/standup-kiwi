@@ -37,7 +37,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     currentUser.client_read_only_metadata?.lastAccessedBoardId;
 
   if (lastAccessedBoardId) {
-    return redirect(`/boards/${lastAccessedBoardId}`);
+    const boardPath = `/boards/${lastAccessedBoardId}`;
+    return redirect(boardPath);
   }
 
   return redirect("/boards/create");
