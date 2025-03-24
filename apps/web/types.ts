@@ -41,7 +41,9 @@ export interface User {
   selected_team_id: string | null;
   profile_image_url: string;
   client_metadata: Record<string, any> | null;
-  client_read_only_metadata: Record<string, any> | null;
+  client_read_only_metadata:
+    | (Record<string, any> & { lastAccessedBoardId?: number })
+    | null;
   server_metadata: null; // NOTE: This value is should be always null from the client side
   has_password: boolean;
 }
