@@ -1,13 +1,12 @@
-name: CI
+name: Validation
 
 on:
-  push:
-    branches: ["*"]
   pull_request:
     branches: ["*"]
 
 jobs:
-  ci:
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
 
     steps:
@@ -43,21 +42,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Typecheck Web
+      - name: TypeCheck Web
         run: pnpm --filter standup-kiwi-web typecheck
 
-      - name: Build Web
-        run: pnpm --filter standup-kiwi-web build
-
-      # API checks
-      - name: Setup Node.js for API
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: "apps/api/.nvmrc"
-          cache: "pnpm"
-
-      - name: Typecheck API
+      - name: TypeCheck API
         run: pnpm --filter standup-kiwi-api typecheck
 
+  build:
+    name: Build
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Web
+        run: pnpm --filter standup-kiwi-web build
       - name: Build API
         run: pnpm --filter standup-kiwi-api build
