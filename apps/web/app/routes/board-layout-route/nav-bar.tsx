@@ -137,6 +137,9 @@ function NavBar() {
               <DropdownMenu.SubTrigger>Appearance</DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
+                  className={
+                    appearance === "light" ? "bg-[var(--accent-a3)]" : ""
+                  }
                   onClick={() => {
                     setAppearance("light");
                   }}
@@ -144,6 +147,9 @@ function NavBar() {
                   Light
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
+                  className={
+                    appearance === "dark" ? "bg-[var(--accent-a3)]" : ""
+                  }
                   onClick={() => {
                     setAppearance("dark");
                   }}
@@ -151,6 +157,9 @@ function NavBar() {
                   Dark
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
+                  className={
+                    appearance === "inherit" ? "bg-[var(--accent-a3)]" : ""
+                  }
                   onClick={() => {
                     setAppearance("inherit");
                   }}
