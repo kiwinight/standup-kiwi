@@ -16,6 +16,13 @@ function NavBar() {
 
   const { appearance, setAppearance } = useAppearance();
 
+  const symbolColor =
+    appearance === "light"
+      ? "#000"
+      : appearance === "dark"
+        ? "#ffffff"
+        : "#000";
+
   return (
     <Flex
       className="h-[56px] px-4 z-10 bg-[var(--color-background)]"
@@ -202,7 +209,7 @@ function NavBar() {
           </DropdownMenu.Content>
         </DropdownMenu.Root>
         <Flex className="" align="center" gap="1">
-          <KiwinightSymbol width={32} height={32} />
+          <KiwinightSymbol width={32} height={32} color={symbolColor} />
           <Text size="3" weight="bold" className="!tracking-tight">
             Standup Kiwi
           </Text>
