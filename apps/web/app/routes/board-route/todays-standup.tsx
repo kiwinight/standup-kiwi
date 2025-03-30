@@ -1,6 +1,6 @@
-import { Button, Card, Flex, Text } from "@radix-ui/themes";
+import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
 import { Suspense, use, useEffect, useState } from "react";
-import { useFetcher, useLoaderData, type SubmitTarget } from "react-router";
+import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
@@ -13,7 +13,10 @@ import {
   type CreateStandupRequestBody,
 } from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
+
 import type { Standup } from "types";
+
+import { parseMarkdownToHtml } from "~/libs/markdown";
 
 type Props = {};
 
@@ -166,12 +169,21 @@ function CardContent() {
                 if (!value) {
                   return null;
                 }
+
+                const html = parseMarkdownToHtml(value);
+
                 return (
                   <Flex key={field.name} direction="column" gap="2">
-                    <Text size="2" weight="medium">
+                    <Text
+                      size="2"
+                      className="font-[var(--font-weight-semibold)]"
+                    >
                       {field.label}
                     </Text>
-                    <Text size="2">{value}</Text>
+                    <Box
+                      className="prose prose-sm prose-custom"
+                      dangerouslySetInnerHTML={{ __html: html }}
+                    />
                   </Flex>
                 );
               })}
@@ -195,6 +207,7 @@ function CardContent() {
 function TodaysStandup({}: Props) {
   return (
     <Card
+      tabIndex={0}
       size={{
         initial: "2",
         sm: "4",

@@ -78,26 +78,23 @@ function DynamicForm({
   const { title, description, fields } = schema;
 
   const dynamicFormSchema = z.object(
-    fields.reduce(
-      (acc, field) => {
-        if (field.type === "textarea") {
-          let fieldValidation = z.string();
+    fields.reduce((acc, field) => {
+      if (field.type === "textarea") {
+        let fieldValidation = z.string();
 
-          if (field.validations) {
-            fieldValidation = fieldValidation
-              .min(field.validations.minLength || 0)
-              .max(field.validations.maxLength || Infinity);
-          }
-
-          acc[field.name] = field.required
-            ? fieldValidation.nonempty()
-            : fieldValidation.optional();
+        if (field.validations) {
+          fieldValidation = fieldValidation
+            .min(field.validations.minLength || 0)
+            .max(field.validations.maxLength || Infinity);
         }
 
-        return acc;
-      },
-      {} as { [key: string]: z.ZodType }
-    )
+        acc[field.name] = field.required
+          ? fieldValidation.nonempty()
+          : fieldValidation.optional();
+      }
+
+      return acc;
+    }, {} as { [key: string]: z.ZodType })
   );
 
   const {
@@ -136,7 +133,10 @@ function DynamicForm({
               <Flex key={field.name} direction="column" gap="2">
                 <label>
                   <Flex align="center" gap="2">
-                    <Text size="2" weight="medium">
+                    <Text
+                      size="2"
+                      className="font-[var(--font-weight-semibold)]"
+                    >
                       {field.label}
                     </Text>
                     {field.required && (
