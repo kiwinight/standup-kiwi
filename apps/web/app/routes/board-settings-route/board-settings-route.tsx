@@ -1,16 +1,105 @@
 import { Button, Card, Flex, Select, Text, TextField } from "@radix-ui/themes";
-import { useParams } from "react-router";
+import {
+  data,
+  useLoaderData,
+  type ActionFunctionArgs,
+  redirect,
+  Form,
+} from "react-router";
 import type { Route } from "./+types/board-settings-route";
-import { useMemo } from "react";
+import { use, useMemo } from "react";
 import React from "react";
 import { alertFeatureNotImplemented } from "../../libs/alert";
+import verifyAuthentication from "~/libs/auth";
+import { isApiErrorResponse, type ApiResponse, type Board } from "types";
+import { RouteErrorResponse } from "~/root";
+import { commitSession } from "~/libs/auth-session.server";
+
+function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
+  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((response) => response.json() as Promise<ApiResponse<Board>>);
+}
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  return null;
+  const { accessToken } = await verifyAuthentication(request);
+
+  const boardId = params.boardId;
+
+  const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
+    if (isApiErrorResponse(data)) {
+      throw new RouteErrorResponse(
+        data.statusCode,
+        data.message,
+        Error(data.error)
+      );
+    }
+    return data;
+  });
+
+  return data({ boardPromise });
+}
+
+function getFormName(formData: FormData): string | undefined {
+  return formData.get("name")?.toString().trim();
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { accessToken, refreshed, session } =
+    await verifyAuthentication(request);
+
+  const boardId = params.boardId;
+
+  let formData = await request.formData();
+
+  const name = getFormName(formData);
+
+  const board = await fetch(
+    import.meta.env.VITE_API_URL + `/boards/${boardId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  ).then(async (response) => {
+    const data: ApiResponse<Board> = await response.json();
+
+    return data;
+  });
+
+  if (isApiErrorResponse(board)) {
+    return data(
+      {
+        errors: {
+          name: "Failed to update board",
+        },
+      },
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
+
+  return redirect("/boards/" + board.id + "/settings", {
+    headers: {
+      ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
+    },
+  });
 }
 
 export default function BoardSettingsRoute({}: Route.ComponentProps) {
-  const { boardId } = useParams();
+  const { boardPromise } = useLoaderData<typeof loader>();
+
+  const board = use(boardPromise);
+
+  const [boardName, setBoardName] = React.useState(board.name ?? "");
 
   // Get all available timezones using the Intl API
   const timezones = useMemo(() => {
@@ -116,13 +205,7 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
           sm: "4",
         }}
       >
-        <form
-          method="post"
-          onSubmit={(event) => {
-            event.preventDefault();
-            alertFeatureNotImplemented();
-          }}
-        >
+        <Form method="post">
           <Flex direction="column">
             <Text size="4" weight="bold">
               Board name
@@ -133,6 +216,8 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
                   name="name"
                   placeholder="e.g. Daily Standup"
                   size="2"
+                  defaultValue={board.name}
+                  onChange={(e) => setBoardName(e.target.value)}
                 />
                 <Text color="gray" size="2">
                   Give your standup board a clear and recognizable name.
@@ -141,11 +226,16 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
             </Flex>
           </Flex>
           <Flex justify="end" mt="5" gap="2">
-            <Button highContrast size="2" type="submit" loading={false}>
+            <Button
+              highContrast
+              size="2"
+              type="submit"
+              disabled={board.name === boardName}
+            >
               Save
             </Button>
           </Flex>
-        </form>
+        </Form>
       </Card>
 
       <Card

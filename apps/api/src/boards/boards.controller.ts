@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   InternalServerErrorException,
+  Patch,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -15,6 +16,7 @@ import { Board } from 'src/libs/db/schema';
 import { AuthenticatedRequest, AuthGuard } from 'src/auth/guards/auth.guard';
 import { BoardAccessGuard } from './guards/board-access.guard';
 import { UsersService } from 'src/auth/users/users.service';
+import { UpdateBoardDto } from 'src/boards/dto/update-board.dto';
 
 @Controller('boards')
 @UseGuards(AuthGuard)
@@ -73,10 +75,19 @@ export class BoardsController {
     }
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-  //   return this.boardsService.update(+id, updateBoardDto);
-  // }
+  @UseGuards(BoardAccessGuard)
+  @Patch(':boardId')
+  update(
+    @Param('boardId', ParseIntPipe) boardId: number,
+    @Body() updateBoardDto: UpdateBoardDto,
+  ): Promise<Board> {
+    try {
+      return this.boardsService.update(boardId, updateBoardDto);
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
 
   // @Delete(':id')
   // delete(@Param('id') id: string) {
