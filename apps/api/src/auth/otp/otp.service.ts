@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { OtpSignInResponse } from '../auth-service.types';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OtpService {
+  constructor(private readonly usersService: UsersService) {}
+
   async sendCode(email: string): Promise<{ nonce: string }> {
     const response = await fetch(
       process.env.AUTH_SERVICE_API_URL + '/auth/otp/send-sign-in-code',
@@ -22,8 +25,25 @@ export class OtpService {
         }),
       },
     );
-    const data: { nonce: string } = await response.json();
+    const data:
+      | { nonce: string }
+      | {
+          error: string;
+          details: { message?: string };
+          code: string;
+        } = await response.json();
+
+    if ('error' in data) {
+      throw new Error(data.error);
+    }
+
     return data;
+  }
+
+  async checkIfUserExists(email: string): Promise<boolean> {
+    const users = await this.usersService.list({ query: email });
+
+    return users.some((user) => user.primary_email === email);
   }
 
   async signIn(code: string): Promise<OtpSignInResponse> {
@@ -43,7 +63,18 @@ export class OtpService {
         }),
       },
     );
-    const data: OtpSignInResponse = await response.json();
+    const data:
+      | OtpSignInResponse
+      | {
+          error: string;
+          details: { message?: string };
+          code: string;
+        } = await response.json();
+
+    if ('error' in data) {
+      throw new Error(data.error);
+    }
+
     return data;
   }
 }

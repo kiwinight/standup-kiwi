@@ -12,9 +12,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { ActionType as SignInWithAccessCodeActionType } from "../sign-in-with-access-code-route/sign-in-with-access-code-route";
-import type { Route } from "./+types/sign-in-route";
+import type { Route } from "./+types/sign-up-route";
 
-function SignInRoute({}: Route.ComponentProps) {
+function SignUpRoute({}: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const fetcher = useFetcher<SignInWithAccessCodeActionType>();
@@ -35,11 +35,11 @@ function SignInRoute({}: Route.ComponentProps) {
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">
-            Sign in
+            Complete your sign up
           </Text>
           <Text size="2" color="gray">
             We’ve sent a 6-digit access code to your email. Enter it below to
-            sign in and access Standup Kiwi.
+            complete your sign up and access Standup Kiwi.
           </Text>
         </Flex>
         <Card
@@ -103,7 +103,7 @@ function SignInRoute({}: Route.ComponentProps) {
                   type="submit"
                   loading={fetcher.state === "submitting"}
                 >
-                  Sign in
+                  Sign up
                 </Button>
               </Flex>
             </Flex>
@@ -114,4 +114,4 @@ function SignInRoute({}: Route.ComponentProps) {
   );
 }
 
-export default SignInRoute;
+export default SignUpRoute;

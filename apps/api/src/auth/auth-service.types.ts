@@ -27,6 +27,10 @@ export interface User {
   has_password: boolean;
 }
 
+export interface ListUser extends User {
+  is_anonymous: boolean;
+}
+
 export interface OtpSignInResponse {
   refresh_token: string;
   access_token: string;
