@@ -3,30 +3,28 @@ import {
   Card,
   Container,
   Flex,
-  Heading,
   Text,
   TextField,
 } from "@radix-ui/themes";
-import { useFetcher, useSearchParams } from "react-router";
+import { useFetcher } from "react-router";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type { ActionType as SignInWithAccessCodeActionType } from "../sign-in-with-access-code-route/sign-in-with-access-code-route";
-import type { Route } from "./+types/sign-in-route";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { ActionType as SendAccessCodeActionType } from "../send-access-code-route/send-access-code-route";
 
-function SignInRoute({}: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+type Props = {};
 
-  const fetcher = useFetcher<SignInWithAccessCodeActionType>();
+function AccessRoute({}: Props) {
+  const fetcher = useFetcher<SendAccessCodeActionType>();
 
   const formSchema = z.object({
-    otp: z.string().min(6),
+    email: z.string().email(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      otp: "",
+      email: "",
     },
   });
 
@@ -35,13 +33,15 @@ function SignInRoute({}: Route.ComponentProps) {
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">
-            Sign in
+            Welcome! Let’s get you access
           </Text>
           <Text size="2" color="gray">
-            We’ve sent a 6-digit access code to your email. Enter it below to
-            sign in and access Standup Kiwi.
+            We’ll send a one-time access code to your email. Use it to sign in —
+            or sign up if you're new — so we can recognize you and help you
+            access your personalized experience.
           </Text>
         </Flex>
+
         <Card
           size={{
             initial: "2",
@@ -49,20 +49,23 @@ function SignInRoute({}: Route.ComponentProps) {
           }}
         >
           <form
+            method="post"
             onSubmit={form.handleSubmit((data) => {
               fetcher.submit(
-                { otp: data.otp, nonce: searchParams.get("nonce") },
+                {
+                  email: data.email,
+                },
                 {
                   encType: "application/json",
                   method: "post",
-                  action: "/access-code/sign-in",
+                  action: "/access-code/send",
                 }
               );
             })}
           >
             <Flex direction="column">
               <Text size="4" weight="bold">
-                Your access code
+                Your email
               </Text>
 
               <Flex direction="column" mt="5" gap="5">
@@ -73,7 +76,7 @@ function SignInRoute({}: Route.ComponentProps) {
                         size="2"
                         className="font-[var(--font-weight-semibold)]"
                       >
-                        Access code
+                        Email
                       </Text>
                       <Text size="1" color="gray">
                         Required
@@ -82,20 +85,21 @@ function SignInRoute({}: Route.ComponentProps) {
                   </label>
                   <TextField.Root
                     type="text"
-                    placeholder="A1B2C3"
+                    placeholder="you@example.com"
                     variant="soft"
-                    {...form.register("otp")}
+                    {...form.register("email")}
                   />
                   <Text size="2" color="gray">
-                    Enter the 6-digit access code we sent to your email.
+                    Enter your email to get access code.
                   </Text>
-                  {form.formState.errors.otp && (
+                  {form.formState.errors.email && (
                     <Text size="2" color="red">
-                      {form.formState.errors.otp.message}
+                      {form.formState.errors.email.message}
                     </Text>
                   )}
                 </Flex>
               </Flex>
+
               <Flex justify="end" mt="5" gap="2">
                 <Button
                   highContrast
@@ -103,7 +107,7 @@ function SignInRoute({}: Route.ComponentProps) {
                   type="submit"
                   loading={fetcher.state === "submitting"}
                 >
-                  Sign in
+                  Send code
                 </Button>
               </Flex>
             </Flex>
@@ -114,4 +118,4 @@ function SignInRoute({}: Route.ComponentProps) {
   );
 }
 
-export default SignInRoute;
+export default AccessRoute;

@@ -32,7 +32,7 @@ async function verifyTokenAndRefresh(session: Session) {
 
   if (!accessToken) {
     console.error("verifyAuthentication: No access token found");
-    throw redirect("/sign-in");
+    throw redirect("/access");
   }
 
   const verificationResponse = await verifyAccessToken(accessToken);
@@ -47,7 +47,7 @@ async function verifyTokenAndRefresh(session: Session) {
   const refreshToken = session.get("refresh_token");
 
   if (!refreshToken) {
-    throw redirect("/sign-in");
+    throw redirect("/access");
   }
 
   const response = await refreshAccessToken(refreshToken);
@@ -60,7 +60,7 @@ async function verifyTokenAndRefresh(session: Session) {
   }
 
   console.error("verifyAuthentication: Failed to refresh access token");
-  throw redirect("/sign-in");
+  throw redirect("/access");
 }
 
 async function retriggerLoader(url: string, session: Session) {
