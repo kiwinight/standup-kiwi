@@ -27,19 +27,33 @@ export default [
         ),
       ]
     ),
-
-    route(
-      "/boards/:boardId/standups/create",
-      "routes/create-board-standup/create-board-standup.tsx"
-    ),
-    route(
-      "/boards/:boardId/standups/:standupId/update",
-      "routes/update-board-standup/update-board-standup.tsx"
-    ),
   ]),
-  route("/sign-in", "routes/sign-in-route/sign-in-route.tsx"),
+  layout("routes/access-layout-route/access-layout-route.tsx", [
+    route("/access", "routes/access-route/access-route.tsx"),
+    route("/access/sign-in", "routes/sign-in-route/sign-in-route.tsx"),
+    route("/access/sign-up", "routes/sign-up-route/sign-up-route.tsx"),
+  ]),
+
+  // action only routes
   route(
-    "/sign-in/one-time-password",
-    "routes/sign-in-one-time-password-route/sign-in-one-time-password-route.tsx"
+    "/boards/:boardId/standups/create",
+    "routes/create-board-standup/create-board-standup.tsx"
   ),
+  route(
+    "/boards/:boardId/standups/:standupId/update",
+    "routes/update-board-standup/update-board-standup.tsx"
+  ),
+  route(
+    "/access-code/send",
+    "routes/send-access-code-route/send-access-code-route.tsx"
+  ),
+  route(
+    "/access-code/sign-in",
+    "routes/sign-in-with-access-code-route/sign-in-with-access-code-route.tsx"
+  ),
+  // TODO: Add delete session route - logout
+  // route(
+  //   "/session/delete",
+  //   "routes/delete-session-route/delete-session-route.tsx"
+  // ),
 ] satisfies RouteConfig;

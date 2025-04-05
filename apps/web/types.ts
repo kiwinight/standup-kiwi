@@ -44,8 +44,12 @@ export interface User {
   client_read_only_metadata:
     | (Record<string, any> & { lastAccessedBoardId?: number })
     | null;
-  server_metadata: null; // NOTE: This value is should be always null from the client side
+  server_metadata: null; // NOTE: This value should be always null from the client side
   has_password: boolean;
+}
+
+export interface ListUser extends User {
+  is_anonymous: boolean;
 }
 
 export interface Standup {

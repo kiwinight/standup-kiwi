@@ -1,4 +1,11 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  UseGuards,
+  Query,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedRequest, AuthGuard } from '../guards/auth.guard';
 import { Board } from '../../libs/db/schema';
@@ -20,5 +27,30 @@ export class UsersController {
     const userId = request.userId;
     // TODO: handle error case
     return this.usersService.getBoardsOfUser(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('')
+  listUsers(
+    @Query('teamId') teamId?: string,
+    @Query('limit') limit?: number,
+    @Query('cursor') cursor?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('desc') desc?: boolean,
+    @Query('query') query?: string,
+  ) {
+    try {
+      return this.usersService.list({
+        teamId,
+        limit,
+        cursor,
+        orderBy,
+        desc,
+        query,
+      });
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
   }
 }
