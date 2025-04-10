@@ -1,8 +1,7 @@
 import { Button, Card, Flex, Select, Text, TextField } from "@radix-ui/themes";
 import { data, useLoaderData, useFetcher } from "react-router";
 import type { Route } from "./+types/board-settings-route";
-import { use, useMemo } from "react";
-import React from "react";
+import React, { use, useEffect, useMemo } from "react";
 import { alertFeatureNotImplemented } from "../../libs/alert";
 import verifyAuthentication from "~/libs/auth";
 import { isApiErrorResponse, type ApiResponse, type Board } from "types";
@@ -39,10 +38,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export default function BoardSettingsRoute({}: Route.ComponentProps) {
   const updateBoardNameFetcher = useFetcher<UpdateBoardNameActionType>();
-
-  const isBoardNameUpdating =
-    updateBoardNameFetcher.state === "submitting" ||
-    updateBoardNameFetcher.state === "loading";
 
   const { boardPromise } = useLoaderData<typeof loader>();
 
@@ -144,7 +139,7 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
     return sortedGroups;
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (updateBoardNameFetcher.data) {
       const error = updateBoardNameFetcher.data.error;
       if (error) {
@@ -154,24 +149,39 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
     }
   }, [updateBoardNameFetcher.data]);
 
+  // NOTE: For optimistic updates
+  const boardName = updateBoardNameFetcher.json
+    ? (updateBoardNameFetcher.json as { name: string }).name
+    : board.name;
+
   const {
     control,
     formState: { errors },
     handleSubmit,
     watch,
+    setValue,
   } = useForm<{ name: string }>({
     defaultValues: {
-      name: board.name,
+      name: boardName,
     },
   });
 
-  const onSubmit = (formData: { name: string }) => {
-    updateBoardNameFetcher.submit(formData, {
-      encType: "application/json",
-      method: "POST",
-      action: `/boards/${board.id}/update`,
-    });
-  };
+  useEffect(() => {
+    setValue("name", boardName);
+  }, [boardName, setValue]);
+
+  const handleBoardNameFormSubmit = handleSubmit((data) => {
+    updateBoardNameFetcher.submit(
+      {
+        name: data.name,
+      },
+      {
+        encType: "application/json",
+        method: "POST",
+        action: `/boards/${board.id}/update`,
+      }
+    );
+  });
 
   return (
     <>
@@ -181,12 +191,7 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
           sm: "4",
         }}
       >
-        <form
-          method="post"
-          onSubmit={handleSubmit((data) => {
-            onSubmit(data);
-          })}
-        >
+        <form method="post" onSubmit={handleBoardNameFormSubmit}>
           <Flex direction="column">
             <Text size="4" weight="bold">
               Board name
@@ -217,7 +222,7 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
               highContrast
               size="2"
               type="submit"
-              disabled={board.name === watch("name") || isBoardNameUpdating}
+              disabled={boardName === watch("name")}
             >
               Save
             </Button>

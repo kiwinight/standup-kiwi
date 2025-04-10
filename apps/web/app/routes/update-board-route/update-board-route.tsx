@@ -5,17 +5,15 @@ import verifyAuthentication from "~/libs/auth";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
-interface UpdateBoardNameRequestBody {
-  formData: { name: string };
+interface UpdateBoardRequestBody {
+  name: Board["name"];
 }
 
-function updateBoardName(
+function updateBoard(
   boardId: string,
-  { formData }: UpdateBoardNameRequestBody,
+  { name }: UpdateBoardRequestBody,
   { accessToken }: { accessToken: string }
 ) {
-  const { name } = formData;
-
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
     method: "PATCH",
     body: JSON.stringify({ name }),
@@ -38,23 +36,19 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const boardId = params.boardId;
 
-  const formData = await request.json();
+  const { name } = (await request.json()) as UpdateBoardRequestBody;
 
-  const response = await updateBoardName(
-    boardId,
-    { formData },
-    { accessToken }
-  );
+  const response = await updateBoard(boardId, { name }, { accessToken });
 
   return data(
     {
       ...(isApiErrorResponse(response)
         ? {
             error: response.message,
-            standup: null,
+            board: null,
           }
         : {
-            standup: response,
+            board: response,
             error: null,
           }),
     },
