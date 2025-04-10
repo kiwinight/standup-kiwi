@@ -1,11 +1,5 @@
 import { Button, Card, Flex, Select, Text, TextField } from "@radix-ui/themes";
-import {
-  data,
-  useLoaderData,
-  type ActionFunctionArgs,
-  redirect,
-  Form,
-} from "react-router";
+import { data, useLoaderData, useFetcher } from "react-router";
 import type { Route } from "./+types/board-settings-route";
 import { use, useMemo } from "react";
 import React from "react";
@@ -13,7 +7,8 @@ import { alertFeatureNotImplemented } from "../../libs/alert";
 import verifyAuthentication from "~/libs/auth";
 import { isApiErrorResponse, type ApiResponse, type Board } from "types";
 import { RouteErrorResponse } from "~/root";
-import { commitSession } from "~/libs/auth-session.server";
+import { type ActionType as UpdateBoardNameActionType } from "../update-board-route/update-board-route";
+import { Controller, useForm } from "react-hook-form";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -42,64 +37,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return data({ boardPromise });
 }
 
-function getFormName(formData: FormData): string | undefined {
-  return formData.get("name")?.toString().trim();
-}
-
-export async function action({ request, params }: ActionFunctionArgs) {
-  const { accessToken, refreshed, session } =
-    await verifyAuthentication(request);
-
-  const boardId = params.boardId;
-
-  let formData = await request.formData();
-
-  const name = getFormName(formData);
-
-  const board = await fetch(
-    import.meta.env.VITE_API_URL + `/boards/${boardId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ name }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then(async (response) => {
-    const data: ApiResponse<Board> = await response.json();
-
-    return data;
-  });
-
-  if (isApiErrorResponse(board)) {
-    return data(
-      {
-        errors: {
-          name: "Failed to update board",
-        },
-      },
-      {
-        headers: {
-          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
-        },
-      }
-    );
-  }
-
-  return redirect("/boards/" + board.id + "/settings", {
-    headers: {
-      ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
-    },
-  });
-}
-
 export default function BoardSettingsRoute({}: Route.ComponentProps) {
+  const updateBoardNameFetcher = useFetcher<UpdateBoardNameActionType>();
+
+  const isBoardNameUpdating =
+    updateBoardNameFetcher.state === "submitting" ||
+    updateBoardNameFetcher.state === "loading";
+
   const { boardPromise } = useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
-
-  const [boardName, setBoardName] = React.useState(board.name ?? "");
 
   // Get all available timezones using the Intl API
   const timezones = useMemo(() => {
@@ -197,6 +144,35 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
     return sortedGroups;
   }, []);
 
+  React.useEffect(() => {
+    if (updateBoardNameFetcher.data) {
+      const error = updateBoardNameFetcher.data.error;
+      if (error) {
+        // TODO: properly toast that there was an error updating the standup
+        alert(error);
+      }
+    }
+  }, [updateBoardNameFetcher.data]);
+
+  const {
+    control,
+    formState: { errors },
+    handleSubmit,
+    watch,
+  } = useForm<{ name: string }>({
+    defaultValues: {
+      name: board.name,
+    },
+  });
+
+  const onSubmit = (formData: { name: string }) => {
+    updateBoardNameFetcher.submit(formData, {
+      encType: "application/json",
+      method: "POST",
+      action: `/boards/${board.id}/update`,
+    });
+  };
+
   return (
     <>
       <Card
@@ -205,19 +181,30 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
           sm: "4",
         }}
       >
-        <Form method="post">
+        <form
+          method="post"
+          onSubmit={handleSubmit((data) => {
+            onSubmit(data);
+          })}
+        >
           <Flex direction="column">
             <Text size="4" weight="bold">
               Board name
             </Text>
             <Flex direction="column" mt="5" gap="5">
               <Flex key="name" direction="column" gap="2">
-                <TextField.Root
+                <Controller
                   name="name"
-                  placeholder="e.g. Daily Standup"
-                  size="2"
-                  defaultValue={board.name}
-                  onChange={(e) => setBoardName(e.target.value)}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <TextField.Root
+                      value={value}
+                      onChange={onChange}
+                      name="name"
+                      placeholder="e.g. Daily Standup"
+                      size="2"
+                    />
+                  )}
                 />
                 <Text color="gray" size="2">
                   Give your standup board a clear and recognizable name.
@@ -230,12 +217,12 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
               highContrast
               size="2"
               type="submit"
-              disabled={board.name === boardName}
+              disabled={board.name === watch("name") || isBoardNameUpdating}
             >
               Save
             </Button>
           </Flex>
-        </Form>
+        </form>
       </Card>
 
       <Card
