@@ -51,6 +51,10 @@ export default [
     "/access-code/sign-in",
     "routes/sign-in-with-access-code-route/sign-in-with-access-code-route.tsx"
   ),
+  route(
+    "/boards/:boardId/update",
+    "routes/update-board-route/update-board-route.tsx"
+  ),
   // TODO: Add delete session route - logout
   // route(
   //   "/session/delete",
