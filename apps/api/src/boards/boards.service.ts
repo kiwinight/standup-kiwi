@@ -7,8 +7,9 @@ import {
   standupFormStructures,
   StandupFormStructure,
 } from '../libs/db/schema';
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, sql } from 'drizzle-orm';
 import { Database, DATABASE_TOKEN } from 'src/db/db.module';
+import { UpdateBoardDto } from 'src/boards/dto/update-board.dto';
 
 @Injectable()
 export class BoardsService {
@@ -132,9 +133,15 @@ export class BoardsService {
     return result.count > 0;
   }
 
-  // update(id: number, updateBoardDto: UpdateBoardDto) {
-  //   return `This action updates a #${id} board`;
-  // }
+  async update(id: number, updateBoardDto: UpdateBoardDto): Promise<Board> {
+    const result = await this.db
+      .update(boards)
+      .set({ name: updateBoardDto.name, updatedAt: sql`NOW()` })
+      .where(eq(boards.id, id))
+      .returning();
+
+    return result[0];
+  }
 
   // remove(id: number) {
   //   return `This action removes a #${id} board`;
