@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -22,11 +22,30 @@ COPY . .
 WORKDIR /app/apps/api
 RUN pnpm run build
 
-# Check the build output
-RUN ls -la /app/apps/api/dist
+# Production stage
+FROM node:20-alpine
 
-# Expose the port the app runs on
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy necessary files from build stage
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/apps/api/package.json ./apps/api/
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# Install production dependencies only
+RUN pnpm install --prod
+
+# Set working directory for the application
+WORKDIR /app/apps/api
+
+# App Runner uses PORT environment variable by default
+ENV PORT=4000
+
+# Expose the port
 EXPOSE 4000
 
 # Command to run the application
-CMD ["pnpm", "run", "start"]
+CMD ["pnpm", "run", "start:prod"]
