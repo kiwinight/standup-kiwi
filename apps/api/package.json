@@ -1,7 +1,5 @@
 {
   "name": "standup-kiwi-api",
-  "description": "",
-  "author": "",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development nest start --watch",
