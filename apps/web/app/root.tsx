@@ -21,11 +21,13 @@ if (
   process.versions &&
   process.versions.node
 ) {
-  const { webcrypto } = await import("crypto");
-
-  if (!globalThis.crypto) {
-    globalThis.crypto = webcrypto as unknown as Crypto;
-  }
+  (function () {
+    import("crypto").then(({ webcrypto }) => {
+      if (!globalThis.crypto) {
+        globalThis.crypto = webcrypto as unknown as Crypto;
+      }
+    });
+  })();
 }
 
 export const links: Route.LinksFunction = () => [
