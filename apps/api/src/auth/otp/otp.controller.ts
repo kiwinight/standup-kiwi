@@ -18,7 +18,7 @@ export class OtpController {
       return await this.otpService.sendCode(body.email);
     } catch (error) {
       console.error(error);
-      throw new InternalServerErrorException('Failed to send code');
+      throw new InternalServerErrorException();
     }
   }
 
