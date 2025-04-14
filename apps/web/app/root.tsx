@@ -15,6 +15,19 @@ import "./radix.css";
 import { Theme } from "@radix-ui/themes";
 import { AppearanceProvider, useAppearance } from "./context/AppearanceContext";
 
+// NOTE: This setup is for Node.js 18 environment
+if (
+  typeof process !== "undefined" &&
+  process.versions &&
+  process.versions.node
+) {
+  const { webcrypto } = await import("crypto");
+
+  if (!globalThis.crypto) {
+    globalThis.crypto = webcrypto as unknown as Crypto;
+  }
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
