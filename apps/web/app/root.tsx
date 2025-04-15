@@ -115,6 +115,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        try {
+          const appearance = localStorage.getItem("appearance");
+          if (appearance === "dark") {
+            document.documentElement.classList.add("dark");
+          } else if (appearance === "light") {
+            document.documentElement.classList.add("light");
+          } else if (appearance === "inherit") {
+            document.documentElement.classList.add("inherit");
+          }
+        } catch (e) {}
+      `,
+          }}
+        />
       </head>
       <body>
         <AppearanceProvider>{children}</AppearanceProvider>
