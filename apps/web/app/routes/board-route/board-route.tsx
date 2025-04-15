@@ -15,13 +15,6 @@ import Toolbar from "./toolbar";
 import TodaysStandup from "./todays-standup";
 import History from "./history";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
-
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
     headers: {

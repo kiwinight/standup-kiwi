@@ -30,6 +30,10 @@ if (
   })();
 }
 
+export function meta(args: Route.MetaArgs) {
+  return [{ title: "Standup Kiwi" }];
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {

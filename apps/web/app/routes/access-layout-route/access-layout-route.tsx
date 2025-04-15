@@ -3,6 +3,10 @@ import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import type { Route } from "./+types/access-layout-route";
 
+export function meta(args: Route.MetaArgs) {
+  return [{ title: "Access • Standup Kiwi" }];
+}
+
 function AccessLayoutRoute({}: Route.ComponentProps) {
   return (
     <div>
