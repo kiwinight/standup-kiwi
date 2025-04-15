@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { ActionType as SignInWithAccessCodeActionType } from "../sign-in-with-access-code-route/sign-in-with-access-code-route";
 import type { Route } from "./+types/sign-in-route";
+import { useEffect } from "react";
 
 function SignInRoute({}: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,6 +30,12 @@ function SignInRoute({}: Route.ComponentProps) {
       otp: "",
     },
   });
+
+  useEffect(() => {
+    if (fetcher.data?.error) {
+      form.setError("otp", { message: fetcher.data.error });
+    }
+  }, [fetcher.data]);
 
   return (
     <Container my="7" maxWidth="672px" px="4">
