@@ -30,8 +30,47 @@ if (
   })();
 }
 
-export function meta(args: Route.MetaArgs) {
-  return [{ title: "Standup Kiwi" }];
+export function meta(args?: Route.MetaArgs) {
+  const description =
+    "Standup Kiwi is a check-in space for teams and solo creators. It is designed to keep your updates calm, clear, and effortless.";
+
+  return [
+    {
+      title: "Standup Kiwi",
+    },
+    {
+      name: "description",
+      content: description,
+    },
+    {
+      property: "og:title",
+      content: "Standup Kiwi",
+    },
+    {
+      property: "og:description",
+      content: description,
+    },
+    {
+      property: "og:image",
+      content: "/og-image.png",
+    },
+    {
+      property: "og:url",
+      content: "https://app.standupkiwi.com",
+    },
+    {
+      property: "og:type",
+      content: "website",
+    },
+    {
+      property: "og:site_name",
+      content: "Standup Kiwi",
+    },
+    {
+      property: "og:locale",
+      content: "en_US",
+    },
+  ];
 }
 
 export const links: Route.LinksFunction = () => [
@@ -46,6 +85,23 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    href: "/favicon-32x32.png",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "16x16",
+    href: "/favicon-16x16.png",
+  },
+  {
+    rel: "apple-touch-icon",
+    sizes: "180x180",
+    href: "/apple-touch-icon.png",
+  },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -53,7 +109,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
         <Meta />
         <Links />
       </head>
