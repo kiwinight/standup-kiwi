@@ -16,16 +16,6 @@ import NavBar from "./nav-bar";
 import { RouteErrorResponse } from "~/root";
 import verifyAuthentication from "~/libs/auth";
 import { useEffect } from "react";
-// import { meta as rootMeta } from "~/root";
-
-// export function meta(args: Route.MetaArgs) {
-//   return [
-//     ...rootMeta(),
-//     {
-//       title: "Standup Kiwi",
-//     },
-//   ];
-// }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken } = await verifyAuthentication(request);
