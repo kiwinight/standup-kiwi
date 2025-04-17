@@ -1,4 +1,9 @@
-import { data, Outlet, type ShouldRevalidateFunctionArgs } from "react-router";
+import {
+  data,
+  Outlet,
+  useLoaderData,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 import { Box } from "@radix-ui/themes";
 import {
   isApiErrorResponse,
@@ -10,6 +15,7 @@ import type { Route } from "./+types/board-layout-route";
 import NavBar from "./nav-bar";
 import { RouteErrorResponse } from "~/root";
 import verifyAuthentication from "~/libs/auth";
+import { useEffect } from "react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken } = await verifyAuthentication(request);
@@ -76,7 +82,26 @@ export function shouldRevalidate(arg: ShouldRevalidateFunctionArgs) {
   return false;
 }
 
-function BoardLayoutRoute({}: Route.ComponentProps) {
+function BoardLayoutRoute(props: Route.ComponentProps) {
+  const { params } = props;
+
+  const boardId = params.boardId ? parseInt(params.boardId) : undefined;
+
+  const { currentUserBoardsDataPromise } = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    if (!boardId) {
+      return;
+    }
+
+    currentUserBoardsDataPromise.then((boards) => {
+      const board = boards.find((board) => board.id === boardId);
+      if (board) {
+        document.title = `${board.name} • Standup Kiwi`;
+      }
+    });
+  }, [currentUserBoardsDataPromise, boardId]);
+
   return (
     <div>
       <NavBar />

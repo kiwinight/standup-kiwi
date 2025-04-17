@@ -2,6 +2,16 @@ import { Link, Outlet } from "react-router";
 import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import type { Route } from "./+types/access-layout-route";
+import { meta as rootMeta } from "~/root";
+
+export function meta(args: Route.MetaArgs) {
+  return [
+    ...rootMeta(),
+    {
+      title: "Access • Standup Kiwi",
+    },
+  ];
+}
 
 function AccessLayoutRoute({}: Route.ComponentProps) {
   return (
