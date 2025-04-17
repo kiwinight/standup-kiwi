@@ -154,6 +154,10 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
     ? (updateBoardNameFetcher.json as { name: string }).name
     : board.name;
 
+  useEffect(() => {
+    document.title = `${boardName} • Standup Kiwi`;
+  }, [boardName]);
+
   const {
     control,
     formState: { errors },
@@ -191,6 +195,7 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
           sm: "4",
         }}
       >
+        {/* TODO: Apply skeleton UI for board name card content */}
         <form method="post" onSubmit={handleBoardNameFormSubmit}>
           <Flex direction="column">
             <Text size="4" weight="bold">
