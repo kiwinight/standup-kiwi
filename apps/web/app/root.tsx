@@ -32,7 +32,7 @@ if (
 
 export function meta(args?: Route.MetaArgs) {
   const description =
-    "Standup Kiwi is a check-in space for teams and solo creators. It is designed to keep your updates calm, clear, and effortless.";
+    "Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless.";
 
   return [
     {
