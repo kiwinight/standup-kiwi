@@ -1,11 +1,11 @@
-import { Suspense } from "react";
+import { Suspense, useContext } from "react";
 import type { Route } from "./+types/board-layout-route";
 import { Await, Link, useLoaderData } from "react-router";
 import { useParams } from "react-router";
 import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Flex, DropdownMenu, Button, Skeleton, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
-import { useAppearance } from "~/context/AppearanceContext";
+import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 
 function NavBar() {
@@ -14,14 +14,7 @@ function NavBar() {
 
   const { boardId } = useParams();
 
-  const { appearance, setAppearance } = useAppearance();
-
-  const symbolColor =
-    appearance === "light"
-      ? "#000"
-      : appearance === "dark"
-        ? "#ffffff"
-        : "#000";
+  const { appearance, setAppearance } = useUserAppearanceSetting();
 
   return (
     <Flex
@@ -209,7 +202,7 @@ function NavBar() {
           </DropdownMenu.Content>
         </DropdownMenu.Root>
         <Flex className="" align="center" gap="1">
-          <KiwinightSymbol width={32} height={32} color={symbolColor} />
+          <KiwinightSymbol width={32} height={32} color="var(--gray-12)" />
           <Text size="3" weight="bold" className="!tracking-tight">
             Standup Kiwi
           </Text>

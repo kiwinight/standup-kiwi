@@ -13,7 +13,12 @@ import stylesheet from "./app.css?url";
 import "@radix-ui/themes/styles.css";
 import "./radix.css";
 import { Theme } from "@radix-ui/themes";
-import { AppearanceProvider, useAppearance } from "./context/AppearanceContext";
+import { UserAppearanceSettingProvider } from "./context/UserAppearanceSettingContext";
+import {
+  ColorSchemeProvider,
+  useColorScheme,
+  colorSchemeFlickerPrevention,
+} from "./context/ColorSchemeContext";
 
 // NOTE: This setup is for Node.js 18 environment
 if (
@@ -115,9 +120,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{ __html: colorSchemeFlickerPrevention }}
+        />
       </head>
       <body>
-        <AppearanceProvider>{children}</AppearanceProvider>
+        <UserAppearanceSettingProvider>
+          <ColorSchemeProvider>{children}</ColorSchemeProvider>
+        </UserAppearanceSettingProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -126,10 +136,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { appearance } = useAppearance();
+  const { colorScheme } = useColorScheme();
 
   return (
-    <Theme accentColor="gray" appearance={appearance}>
+    <Theme
+      accentColor="gray"
+      {...(colorScheme !== null ? { appearance: colorScheme } : {})}
+    >
       <Outlet />
     </Theme>
   );
