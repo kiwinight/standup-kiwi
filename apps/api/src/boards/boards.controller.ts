@@ -38,6 +38,7 @@ export class BoardsController {
       return await this.boardsService.setup(
         {
           name: createBoardDto.name,
+          timezone: createBoardDto.timezone,
         },
         userId,
       );

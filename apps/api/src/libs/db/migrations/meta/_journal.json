@@ -78,6 +78,13 @@
       "when": 1742179957273,
       "tag": "0010_moaning_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1745202365812,
+      "tag": "0011_gifted_namorita",
+      "breakpoints": true
     }
   ]
 }
