@@ -116,6 +116,7 @@ export class UsersService {
       .select({
         id: boards.id,
         name: boards.name,
+        timezone: boards.timezone,
         activeStandupFormStructureId: boards.activeStandupFormStructureId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,

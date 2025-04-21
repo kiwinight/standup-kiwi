@@ -17,6 +17,7 @@ export const boards = pgTable('boards', {
     'active_standup_form_structure_id',
   ).references((): AnyPgColumn => standupFormStructures.id),
   name: text().notNull(),
+  timezone: text().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

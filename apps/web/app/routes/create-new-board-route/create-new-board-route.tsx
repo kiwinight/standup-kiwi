@@ -58,9 +58,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const name = getFormName(formData);
 
+  const timezone = formData.get("timezone")?.toString().trim();
+
   const board = await fetch(import.meta.env.VITE_API_URL + "/boards", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, timezone }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -131,6 +133,11 @@ function CreateNewBoardRoute({}: Props) {
                 {fetcher.data.errors.name}
               </Text>
             )}
+            <input
+              className="hidden"
+              name="timezone"
+              value={Intl.DateTimeFormat().resolvedOptions().timeZone}
+            />
           </Flex>
 
           <Flex justify="end" mt="5" gap="2">

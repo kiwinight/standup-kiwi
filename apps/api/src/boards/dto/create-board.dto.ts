@@ -4,4 +4,8 @@ export class CreateBoardDto {
   @IsNotEmpty()
   @IsString()
   name!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  timezone!: string;
 }

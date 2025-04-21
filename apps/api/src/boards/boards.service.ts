@@ -18,11 +18,18 @@ export class BoardsService {
     private readonly db: Database,
   ) {}
 
-  create({ name }: { name: InsertBoard['name'] }) {
+  create({
+    name,
+    timezone,
+  }: {
+    name: InsertBoard['name'];
+    timezone: InsertBoard['timezone'];
+  }) {
     return this.db
       .insert(boards)
       .values({
         name,
+        timezone,
       })
       .returning()
       .then((boards): Board => {
@@ -34,13 +41,16 @@ export class BoardsService {
   async setup(
     {
       name,
+      timezone,
     }: {
       name: InsertBoard['name'];
+      timezone: InsertBoard['timezone'];
     },
     userId: string,
   ): Promise<Board> {
     const result = await this.create({
       name,
+      timezone,
     });
 
     await this.associateUser(result.id, userId);
