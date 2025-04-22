@@ -3,7 +3,15 @@ import type { Route } from "./+types/board-layout-route";
 import { Await, Link, useLoaderData } from "react-router";
 import { useParams } from "react-router";
 import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
-import { Flex, DropdownMenu, Button, Skeleton, Text } from "@radix-ui/themes";
+import {
+  Flex,
+  DropdownMenu,
+  Button,
+  Skeleton,
+  Text,
+  Badge,
+  Tooltip,
+} from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
@@ -24,13 +32,14 @@ function NavBar() {
       position="sticky"
       top="0"
     >
-      <Flex gap="4" align="center">
+      <Flex gap="3" align="center">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
             <Button
               variant="surface"
               size="2"
-              radius="medium"
+              // radius="medium"
+              radius="large"
               className="!pl-[8px] !pr-[8px]"
             >
               <ListBulletIcon fontSize={24} width={16} height={16} />
@@ -201,12 +210,23 @@ function NavBar() {
             </DropdownMenu.Sub>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
-        <Flex className="" align="center" gap="1">
-          <KiwinightSymbol width={32} height={32} color="var(--gray-12)" />
-          <Text size="3" weight="bold" className="!tracking-tight">
-            Standup Kiwi
-          </Text>
-        </Flex>
+        <Button variant="ghost" size="1" asChild>
+          <Link to="/">
+            <Flex align="center" gap="1">
+              <KiwinightSymbol width={28} height={28} color="var(--gray-12)" />
+              <Text
+                size="3"
+                weight="bold"
+                className="!tracking-tight"
+                color="gray"
+                highContrast
+              >
+                Standup Kiwi
+              </Text>
+            </Flex>
+          </Link>
+        </Button>
+        <Badge highContrast>Beta</Badge>
       </Flex>
     </Flex>
   );
