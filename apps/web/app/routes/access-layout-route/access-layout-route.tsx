@@ -26,7 +26,7 @@ function AccessLayoutRoute({}: Route.ComponentProps) {
         <Button variant="ghost" size="1" asChild>
           <Link to="/">
             <Flex align="center" gap="1">
-              <KiwinightSymbol width={32} height={32} color={"#000"} />
+              <KiwinightSymbol width={28} height={28} color="var(--gray-12)" />
               <Text
                 size="3"
                 weight="bold"
