@@ -13,7 +13,7 @@ import verifyAuthentication from "~/libs/auth";
 
 import Toolbar from "./toolbar";
 import TodaysStandup from "./todays-standup";
-import History from "./history";
+import PastStandups from "./past-standups";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -149,7 +149,7 @@ export default function BoardRoute({}: Route.ComponentProps) {
       <Flex direction="column" gap="7">
         <Toolbar />
         <TodaysStandup />
-        <History />
+        <PastStandups />
       </Flex>
     </Container>
   );
