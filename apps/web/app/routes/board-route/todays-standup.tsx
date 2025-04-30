@@ -1,11 +1,12 @@
 import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
-import { Suspense, use, useEffect, useState } from "react";
+import { Suspense, use, useEffect, useRef, useState } from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
   FormSkeleton,
   validateDynamicFormSchema,
+  type DynamicFormHandle,
   type DynamicFormValues,
 } from "./dynamic-form";
 import {
@@ -111,10 +112,27 @@ function CardContent() {
 
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
 
+  const formRef = useRef<DynamicFormHandle>(null);
+
   return (
-    <>
+    <Card
+      tabIndex={0}
+      size={{
+        initial: "2",
+        sm: "4",
+      }}
+      onKeyDown={(e) => {
+        if (e.key.toLowerCase() === "e") {
+          setIsEditing(true);
+        }
+        if (e.metaKey && e.key === "Enter") {
+          formRef.current?.triggerSubmit();
+        }
+      }}
+    >
       {!todayStandup && (
         <DynamicForm
+          ref={formRef}
           schema={schema}
           onSubmit={async (data) => {
             if (!structure) {
@@ -200,23 +218,15 @@ function CardContent() {
             </Flex>
           </Flex>
         ))}
-    </>
+    </Card>
   );
 }
 
 function TodaysStandup({}: Props) {
   return (
-    <Card
-      tabIndex={0}
-      size={{
-        initial: "2",
-        sm: "4",
-      }}
-    >
-      <Suspense fallback={<FormSkeleton />}>
-        <CardContent />
-      </Suspense>
-    </Card>
+    <Suspense fallback={<FormSkeleton />}>
+      <CardContent />
+    </Suspense>
   );
 }
 
