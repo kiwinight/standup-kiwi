@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -10,9 +11,27 @@ import {
   Text,
   Theme,
 } from "@radix-ui/themes";
+import { BoxModelIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useState } from "react";
 
 function PreviewA() {
+  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString(
+    "en-US",
+    {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }
+  );
+  const dayBeforeYesterday = new Date(
+    Date.now() - 86400000 * 2
+  ).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
   return (
     <div
       className="rt-Container rt-r-size-4 rt-r-px-4 rt-r-my-7"
@@ -145,7 +164,7 @@ function PreviewA() {
                   data-state="closed"
                   className="rt-Text rt-r-size-4 rt-r-weight-bold"
                 >
-                  Thu, May 1, 2025
+                  {yesterday}
                 </span>
                 <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
                   <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
@@ -203,7 +222,7 @@ function PreviewA() {
                   data-state="closed"
                   className="rt-Text rt-r-size-4 rt-r-weight-bold"
                 >
-                  Wed, Apr 30, 2025
+                  {dayBeforeYesterday}
                 </span>
                 <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
                   <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
@@ -450,13 +469,9 @@ function PreviewB() {
   );
 }
 
-function GridBackground({
-  gridSize = 32,
-  opacity = 0.05,
-}: {
-  gridSize?: number;
-  opacity?: number;
-}) {
+function GridBackground() {
+  const GRID_SIZE = 32;
+  const OPACITY = 0.05;
   return (
     <Box
       position="absolute"
@@ -465,12 +480,10 @@ function GridBackground({
       right="0"
       bottom="0"
       style={{
-        backgroundImage: `linear-gradient(to right, rgba(0,0,0,${opacity}) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,${opacity}) 1px, transparent 1px)`,
-        // maskImage:
-        //   "radial-gradient(circle at center, black 0%, transparent 100%)",
+        backgroundImage: `linear-gradient(to right, rgba(0,0,0,${OPACITY}) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,${OPACITY}) 1px, transparent 1px)`,
         pointerEvents: "none",
-        backgroundSize: `${gridSize}px ${gridSize}px`,
-        backgroundPosition: `${gridSize - 1}px ${gridSize - 1}px`,
+        backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
+        backgroundPosition: `${GRID_SIZE - 1}px ${GRID_SIZE - 9}px`,
       }}
     />
   );
@@ -486,35 +499,38 @@ function NavBar() {
       align="center"
       top="0"
     >
-      <Button variant="ghost" size="1">
-        <Flex align="center" gap="1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={28}
-            height={28}
-            viewBox="0 0 90 90"
-            fill="none"
-          >
-            <path
-              fill="var(--gray-12)"
-              d="M83.7 9.7s-16 5.4-21.5 7L79.7.9s.1-1-1-.6-18.8 14.3-18.8 14.3-9.2-1.4-12.5 2c0 0-.2.3-.2.5s.7.2.7.2-2.7 1.2-3.8 3.9c-.7 1.5-1 2.1-1 2.1s-.4.4-.1.6c.3.1.7-.2.7-.2s-.7 1.2-2 2.3c0 0-.5.2-.4.5.1.2.4 0 .4 0S38.5 36 25.6 38.1c-11.5 2-17.2 12.5-18.2 14.3-.1.2-.2.4-.4.6-.3.5-.8 1.3-.3 1.1L7 54s-4.8 11.3 3.7 17.8c0 0 .7.7.8 1.1 0 0 .4-.1.5-.5 0 0 1.2 1.5 1.4 2.2 0 0 .2.5.5.3.3-.1.7-.9.7-.9s.5.7.3 1.1c-.2.5 1.8.3 1.8.3s.7 1 1.7.9c0 0 .4.5-.1 1 0 0 1.3.5 3.2-.4 0 0 .7-.1 1.2-.1l.9.1c-.2.9.3 2.5.5 3.1 1.1 2.1 4.1 7.4 4.1 7.4s.3.7-.2 1c-.7.6-1.3.3-1.3.3s-1.2-.4-1.7.1c-.5.6-.3 1-.3 1H45s0-1.9-1.9-1.9c-1.4 0-1.9.7-4.5.6-3-.1-7.4-.8-9.8-7.4C27.3 78.4 30 77 30 77s.5-.7 1.2-.3c0 0 .2.6.7.6.9.1 2.9-1.5 2.9-1.5s1-.2 1.4-.6c0 0-.1.5.3.7.7.4 2-.4 2-.4s5.2-3.4 7.2-6.9c0 0 .5 0 .8-.6.3-.6 1.8-3.4 4.3-10.1 0 0 .2.7.4.5.2-.2.3-1 .3-1s.7-4.4 1-6c.4-2 3-18.2 10.1-29.3 0 0 1.6-2.8 5.7-4.8 0 0 12.5-5.9 15.1-6.4 0 0 1-.4.9-1.1-.1-.1-.1-.3-.6-.1ZM57 20c-.6.6-1.2.7-1.6.5-.4-.4-.2-1.1.3-1.7.5-.6 1.2-.7 1.6-.5.5.4.3 1.2-.3 1.7Z"
-            ></path>
-            <path
-              fill="var(--gray-12)"
-              d="M41.1 75.2s1.4 1.9 1.6 2.3c.1.4 1.2 1.3 2.1.9C45.7 78 47 77 48 76c.8-.8 7.2-5.6 7.1-5.6 0 0 1.2-.9 3.4-.7 0 0 2 .3 3.3.7 1.3.5 1.6-.3 1.6-.3s.3-.7-.9-1.2c-1.2-.6-3.6-1.1-5.9-1.2 0 0 3.7-.8 7.7.1 1.7.5 2.3.2 2.3-.5s-.7-1-2.5-1.2c-1.6-.2-6.2-.5-8.5.2-.7.2-1.6.7-2.1 1.2-.6.5-1.3 1.1-2.1 2-2 2.1-3.4 3.1-4.6 3.5-1.1.5-1.7 0-1.7 0l-.7-.7-3.3 2.9Z"
-            ></path>
-          </svg>
-          <Text
-            size="3"
-            weight="bold"
-            className="!tracking-tight"
-            color="gray"
-            highContrast
-          >
-            Standup Kiwi
-          </Text>
-        </Flex>
-      </Button>
+      <Flex gap="3" align="center">
+        <Button variant="ghost" size="1">
+          <Flex align="center" gap="1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={28}
+              height={28}
+              viewBox="0 0 90 90"
+              fill="none"
+            >
+              <path
+                fill="var(--gray-12)"
+                d="M83.7 9.7s-16 5.4-21.5 7L79.7.9s.1-1-1-.6-18.8 14.3-18.8 14.3-9.2-1.4-12.5 2c0 0-.2.3-.2.5s.7.2.7.2-2.7 1.2-3.8 3.9c-.7 1.5-1 2.1-1 2.1s-.4.4-.1.6c.3.1.7-.2.7-.2s-.7 1.2-2 2.3c0 0-.5.2-.4.5.1.2.4 0 .4 0S38.5 36 25.6 38.1c-11.5 2-17.2 12.5-18.2 14.3-.1.2-.2.4-.4.6-.3.5-.8 1.3-.3 1.1L7 54s-4.8 11.3 3.7 17.8c0 0 .7.7.8 1.1 0 0 .4-.1.5-.5 0 0 1.2 1.5 1.4 2.2 0 0 .2.5.5.3.3-.1.7-.9.7-.9s.5.7.3 1.1c-.2.5 1.8.3 1.8.3s.7 1 1.7.9c0 0 .4.5-.1 1 0 0 1.3.5 3.2-.4 0 0 .7-.1 1.2-.1l.9.1c-.2.9.3 2.5.5 3.1 1.1 2.1 4.1 7.4 4.1 7.4s.3.7-.2 1c-.7.6-1.3.3-1.3.3s-1.2-.4-1.7.1c-.5.6-.3 1-.3 1H45s0-1.9-1.9-1.9c-1.4 0-1.9.7-4.5.6-3-.1-7.4-.8-9.8-7.4C27.3 78.4 30 77 30 77s.5-.7 1.2-.3c0 0 .2.6.7.6.9.1 2.9-1.5 2.9-1.5s1-.2 1.4-.6c0 0-.1.5.3.7.7.4 2-.4 2-.4s5.2-3.4 7.2-6.9c0 0 .5 0 .8-.6.3-.6 1.8-3.4 4.3-10.1 0 0 .2.7.4.5.2-.2.3-1 .3-1s.7-4.4 1-6c.4-2 3-18.2 10.1-29.3 0 0 1.6-2.8 5.7-4.8 0 0 12.5-5.9 15.1-6.4 0 0 1-.4.9-1.1-.1-.1-.1-.3-.6-.1ZM57 20c-.6.6-1.2.7-1.6.5-.4-.4-.2-1.1.3-1.7.5-.6 1.2-.7 1.6-.5.5.4.3 1.2-.3 1.7Z"
+              ></path>
+              <path
+                fill="var(--gray-12)"
+                d="M41.1 75.2s1.4 1.9 1.6 2.3c.1.4 1.2 1.3 2.1.9C45.7 78 47 77 48 76c.8-.8 7.2-5.6 7.1-5.6 0 0 1.2-.9 3.4-.7 0 0 2 .3 3.3.7 1.3.5 1.6-.3 1.6-.3s.3-.7-.9-1.2c-1.2-.6-3.6-1.1-5.9-1.2 0 0 3.7-.8 7.7.1 1.7.5 2.3.2 2.3-.5s-.7-1-2.5-1.2c-1.6-.2-6.2-.5-8.5.2-.7.2-1.6.7-2.1 1.2-.6.5-1.3 1.1-2.1 2-2 2.1-3.4 3.1-4.6 3.5-1.1.5-1.7 0-1.7 0l-.7-.7-3.3 2.9Z"
+              ></path>
+            </svg>
+            <Text
+              size="3"
+              weight="bold"
+              className="!tracking-tight"
+              color="gray"
+              highContrast
+            >
+              Standup Kiwi
+            </Text>
+          </Flex>
+        </Button>
+        <Badge highContrast>Beta</Badge>
+      </Flex>
     </Flex>
   );
 }
@@ -526,77 +542,184 @@ function IndexContent({}: Props) {
   return (
     <Theme className="relative" accentColor="gray">
       <NavBar />
-      <Section
-        size={{
-          initial: "2",
+      <Box
+        pt={{
+          initial: "0",
+          sm: "6",
         }}
-        className="relative"
+        pb={{
+          sm: "6",
+        }}
+        className="bg-linear-to-b from-white via-[var(--gray-1)] to-white"
+        style={{}}
       >
         <GridBackground />
 
-        <Container size="4" px="4">
-          <Flex direction="column" gap="4">
-            <Heading
-              as="h1"
-              size={{
-                initial: "8",
-              }}
-            >
-              The standup board for teams and solo experts
-            </Heading>
-            <Text
-              size={{
+        <Section
+          size={{
+            initial: "3",
+            sm: "4",
+          }}
+          className="relative"
+        >
+          <Container
+            size={{
+              initial: "4",
+              sm: "3",
+            }}
+            px={{
+              initial: "4",
+            }}
+          >
+            <Flex
+              direction="column"
+              gap={{
                 initial: "4",
+                sm: "5",
+              }}
+              align={{
+                initial: "center",
+                sm: "center",
               }}
             >
-              Standup Kiwi is an open-source tool for async check-ins, daily
-              reflections, and progress sharing – calm, clear, and effortless.
-            </Text>
+              <Heading
+                as="h1"
+                size={{
+                  initial: "8",
+                  sm: "9",
+                }}
+                align={{
+                  initial: "center",
+                  sm: "center",
+                }}
+              >
+                The standup board <br className="hidden sm:block" />
+                for teams and solo experts
+              </Heading>
 
-            <Button
-              size={{
-                initial: "3",
+              <Text
+                size={{
+                  initial: "3",
+                  sm: "4",
+                }}
+                align={{
+                  initial: "center",
+                  sm: "center",
+                }}
+              >
+                Standup Kiwi is an open-source tool for async check-ins, daily
+                reflections, and progress sharing – calm, clear, and effortless.
+              </Text>
+
+              <Button
+                // className="self-start!"
+                className="w-full! sm:w-auto!"
+                size={{
+                  initial: "3",
+                  sm: "4",
+                }}
+                highContrast
+              >
+                Start Now
+              </Button>
+
+              <Text size="2" color="gray">
+                Currently in beta. We welcome your feedback!
+              </Text>
+            </Flex>
+          </Container>
+        </Section>
+
+        <Section
+          size={{
+            initial: "3",
+            sm: "4",
+          }}
+          pt="0"
+          className="relative"
+        >
+          <Container
+            size={{
+              initial: "4",
+              sm: "4",
+            }}
+            px={{
+              initial: "4",
+            }}
+          >
+            <Flex
+              direction="column"
+              gap={{
+                initial: "4",
+                sm: "5",
               }}
-              highContrast
+              align={{
+                initial: "center",
+                sm: "center",
+              }}
             >
-              Start Now
-            </Button>
+              <SegmentedControl.Root
+                className="w-full sm:max-w-[296px]"
+                defaultValue={selectedPreview}
+                onValueChange={setSelectedPreview}
+                size={{
+                  initial: "2",
+                  sm: "3",
+                }}
+                radius="full"
+              >
+                <SegmentedControl.Item value="a">
+                  <Flex align="center" gap="2">
+                    <BoxModelIcon className="w-[15px] sm:w-[18px] h-[15px] sm:h-[18px]" />
+                    Board
+                  </Flex>
+                </SegmentedControl.Item>
+                <SegmentedControl.Item value="b">
+                  <Flex align="center" gap="2">
+                    <Pencil2Icon className="w-[15px] sm:w-[18px] h-[15px] sm:h-[18px]" />
+                    Editor
+                  </Flex>
+                </SegmentedControl.Item>
+              </SegmentedControl.Root>
 
-            <Text size="2" color="gray">
-              Currently in beta. We welcome your feedback!
-            </Text>
-          </Flex>
-          <Flex direction="column" gap="4" mt="7">
-            <Text size="3" className="font-[var(--font-weight-semibold)]">
-              Tool Preview
-            </Text>
-            <SegmentedControl.Root
-              defaultValue={selectedPreview}
-              onValueChange={setSelectedPreview}
-              size="2"
-            >
-              <SegmentedControl.Item value="a">Board</SegmentedControl.Item>
-              <SegmentedControl.Item value="b">Editor</SegmentedControl.Item>
-            </SegmentedControl.Root>
+              <Text
+                size={{
+                  initial: "2",
+                  sm: "3",
+                }}
+                align="center"
+              >
+                {selectedPreview === "a" && (
+                  <>
+                    Catch up on today's and past standups with calm, clear cards
+                    on a board. <br className="hidden sm:block" /> Organize them
+                    by team, project, or personal boards.
+                  </>
+                )}
+                {selectedPreview === "b" && (
+                  <>
+                    Write and edit your standups in a clean, markdown-supported
+                    format. <br className="hidden sm:block" /> Use lists, bold,
+                    and italics to keep your updates clear and easy to scan.
+                  </>
+                )}
+              </Text>
 
-            <Text size="2" color="gray">
-              {selectedPreview === "a" &&
-                "The primary space for your standups. Today’s entry is at the top, with past ones below — all neatly organized as cards for quick review."}
-              {selectedPreview === "b" &&
-                "Update your standup in a clean, markdown-supported format. Use lists, bold, or italics to keep your updates clear and easy to scan."}
-            </Text>
-
-            <Card
-              variant="classic"
-              className="pointer-events-none select-none"
-              inert
-            >
-              {selectedPreview === "a" && <PreviewA />}
-              {selectedPreview === "b" && <PreviewB />}
-            </Card>
-          </Flex>
-        </Container>
-      </Section>
+              <Card
+                className="pointer-events-none select-none w-full"
+                inert
+                size={{
+                  initial: "1",
+                  sm: "5",
+                }}
+              >
+                {selectedPreview === "a" && <PreviewA />}
+                {selectedPreview === "b" && <PreviewB />}
+              </Card>
+            </Flex>
+          </Container>
+        </Section>
+      </Box>
     </Theme>
   );
 }
