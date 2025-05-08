@@ -1,10 +1,19 @@
 import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
-import { Suspense, use, useEffect, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useState,
+  use,
+  useRef,
+  useImperativeHandle,
+  type Ref,
+} from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
   FormSkeleton,
+  type DynamicFormRef,
   validateDynamicFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
@@ -20,7 +29,13 @@ import { parseMarkdownToHtml } from "~/libs/markdown";
 
 type Props = {};
 
-function CardContent() {
+interface CardContentRef {
+  edit: () => void;
+  cancel: () => void;
+  save: () => void;
+}
+
+function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
   const {
     boardPromise,
     standupsPromise,
@@ -32,6 +47,24 @@ function CardContent() {
   const structure = use(boardActiveStandupFormStructurePromise);
 
   const schema = validateDynamicFormSchema(structure?.schema);
+
+  const dynamicFormRef = useRef<DynamicFormRef>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      edit: () => {
+        handleEditButtonClick();
+      },
+      cancel: () => {
+        handleDynamicFormCancel();
+      },
+      save: () => {
+        dynamicFormRef.current?.submit();
+      },
+    }),
+    []
+  );
 
   if (!schema) {
     return null;
@@ -111,10 +144,19 @@ function CardContent() {
 
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
 
+  function handleDynamicFormCancel() {
+    setIsEditing(false);
+  }
+
+  function handleEditButtonClick() {
+    setIsEditing(true);
+  }
+
   return (
     <>
       {!todayStandup && (
         <DynamicForm
+          ref={dynamicFormRef}
           schema={schema}
           onSubmit={async (data) => {
             if (!structure) {
@@ -139,6 +181,7 @@ function CardContent() {
       {todayStandup &&
         (isEditing ? (
           <DynamicForm
+            ref={dynamicFormRef}
             schema={schema}
             defaultValues={todayStandup.formData as DynamicFormValues}
             onSubmit={async (data) => {
@@ -154,7 +197,7 @@ function CardContent() {
               );
               setIsEditing(false);
             }}
-            onCancel={() => setIsEditing(false)}
+            onCancel={handleDynamicFormCancel}
           />
         ) : (
           <Flex direction="column" gap="5">
@@ -193,7 +236,7 @@ function CardContent() {
                 highContrast
                 size="2"
                 variant="surface"
-                onClick={() => setIsEditing(true)}
+                onClick={handleEditButtonClick}
               >
                 Edit
               </Button>
@@ -205,6 +248,8 @@ function CardContent() {
 }
 
 function TodaysStandup({}: Props) {
+  const cardContentRef = useRef<CardContentRef>(null);
+
   return (
     <Card
       tabIndex={0}
@@ -212,9 +257,22 @@ function TodaysStandup({}: Props) {
         initial: "2",
         sm: "4",
       }}
+      onKeyDown={(event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+          cardContentRef.current?.save();
+        }
+
+        if (event.key === "e") {
+          cardContentRef.current?.edit();
+        }
+
+        if (event.key === "Escape") {
+          cardContentRef.current?.cancel();
+        }
+      }}
     >
       <Suspense fallback={<FormSkeleton />}>
-        <CardContent />
+        <CardContent ref={cardContentRef} />
       </Suspense>
     </Card>
   );
