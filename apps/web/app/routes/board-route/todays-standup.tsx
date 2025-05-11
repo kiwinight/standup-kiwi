@@ -37,8 +37,7 @@ function CardContent() {
     return null;
   }
 
-  // TODO: save board timezone in db
-  const boardTimezone = "Pacific/Honolulu";
+  const boardTimezone = board.timezone;
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
 
   const createStandupFetcher = useFetcher<CreateStandupActionType>();

@@ -6,7 +6,7 @@ import { alertFeatureNotImplemented } from "../../libs/alert";
 import verifyAuthentication from "~/libs/auth";
 import { isApiErrorResponse, type ApiResponse, type Board } from "types";
 import { RouteErrorResponse } from "~/root";
-import { type ActionType as UpdateBoardNameActionType } from "../update-board-route/update-board-route";
+import { type ActionType as UpdateBoardActionType } from "../update-board-route/update-board-route";
 import { Controller, useForm } from "react-hook-form";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
@@ -37,7 +37,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export default function BoardSettingsRoute({}: Route.ComponentProps) {
-  const updateBoardNameFetcher = useFetcher<UpdateBoardNameActionType>();
+  const updateBoardFetcher = useFetcher<UpdateBoardActionType>();
 
   const { boardPromise } = useLoaderData<typeof loader>();
 
@@ -140,19 +140,23 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
   }, []);
 
   useEffect(() => {
-    if (updateBoardNameFetcher.data) {
-      const error = updateBoardNameFetcher.data.error;
+    if (updateBoardFetcher.data) {
+      const error = updateBoardFetcher.data.error;
       if (error) {
         // TODO: properly toast that there was an error updating the standup
         alert(error);
       }
     }
-  }, [updateBoardNameFetcher.data]);
+  }, [updateBoardFetcher.data]);
 
   // NOTE: For optimistic updates
-  const boardName = updateBoardNameFetcher.json
-    ? (updateBoardNameFetcher.json as { name: string }).name
+  const boardName = updateBoardFetcher.json
+    ? (updateBoardFetcher.json as { name: string }).name
     : board.name;
+
+  const timezone = updateBoardFetcher.json
+    ? (updateBoardFetcher.json as { timezone: string }).timezone
+    : board.timezone;
 
   useEffect(() => {
     document.title = `${boardName} • Standup Kiwi`;
@@ -164,20 +168,23 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
     handleSubmit,
     watch,
     setValue,
-  } = useForm<{ name: string }>({
+  } = useForm<{ name: string; timezone: string }>({
     defaultValues: {
       name: boardName,
+      timezone,
     },
   });
 
   useEffect(() => {
     setValue("name", boardName);
-  }, [boardName, setValue]);
+    setValue("timezone", timezone);
+  }, [boardName, setValue, timezone]);
 
-  const handleBoardNameFormSubmit = handleSubmit((data) => {
-    updateBoardNameFetcher.submit(
+  const handleBoardFormSubmit = handleSubmit((data) => {
+    updateBoardFetcher.submit(
       {
-        name: data.name,
+        ...(data.name && { name: data.name }),
+        ...(data.timezone && { timezone: data.timezone }),
       },
       {
         encType: "application/json",
@@ -188,15 +195,15 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
   });
 
   return (
-    <>
-      <Card
-        size={{
-          initial: "2",
-          sm: "4",
-        }}
-      >
-        {/* TODO: Apply skeleton UI for board name card content */}
-        <form method="post" onSubmit={handleBoardNameFormSubmit}>
+    <form method="post" onSubmit={handleBoardFormSubmit}>
+      <Flex direction="column" gap="7">
+        <Card
+          size={{
+            initial: "2",
+            sm: "4",
+          }}
+        >
+          {/* TODO: Apply skeleton UI for board name card content */}
           <Flex direction="column">
             <Text size="4" weight="bold">
               Board name
@@ -232,20 +239,12 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
               Save
             </Button>
           </Flex>
-        </form>
-      </Card>
+        </Card>
 
-      <Card
-        size={{
-          initial: "2",
-          sm: "4",
-        }}
-      >
-        <form
-          method="post"
-          onSubmit={(event) => {
-            event.preventDefault();
-            alertFeatureNotImplemented();
+        <Card
+          size={{
+            initial: "2",
+            sm: "4",
           }}
         >
           <Flex direction="column">
@@ -258,26 +257,36 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
                   Standup timezone
                 </Text>
 
-                <Select.Root defaultValue="UTC">
-                  <Select.Trigger />
-                  <Select.Content>
-                    {Object.entries(timezones).map(
-                      ([offsetGroup, timezoneList]) => (
-                        <React.Fragment key={offsetGroup}>
-                          <Select.Group>
-                            <Select.Label>{offsetGroup}</Select.Label>
-                            {timezoneList.map((tz) => (
-                              <Select.Item key={tz.value} value={tz.value}>
-                                (UTC{tz.offset}) {tz.label}
-                              </Select.Item>
-                            ))}
-                          </Select.Group>
-                          <Select.Separator />
-                        </React.Fragment>
-                      )
-                    )}
-                  </Select.Content>
-                </Select.Root>
+                <Controller
+                  name="timezone"
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <Select.Root
+                      defaultValue="UTC"
+                      value={value}
+                      onValueChange={onChange}
+                    >
+                      <Select.Trigger />
+                      <Select.Content>
+                        {Object.entries(timezones).map(
+                          ([offsetGroup, timezoneList]) => (
+                            <React.Fragment key={offsetGroup}>
+                              <Select.Group>
+                                <Select.Label>{offsetGroup}</Select.Label>
+                                {timezoneList.map((tz) => (
+                                  <Select.Item key={tz.value} value={tz.value}>
+                                    (UTC{tz.offset}) {tz.label}
+                                  </Select.Item>
+                                ))}
+                              </Select.Group>
+                              <Select.Separator />
+                            </React.Fragment>
+                          )
+                        )}
+                      </Select.Content>
+                    </Select.Root>
+                  )}
+                />
                 <Text color="gray" size="2">
                   This timezone determines the date assigned to all standups on
                   this board. Standups are recorded based on the selected
@@ -287,12 +296,18 @@ export default function BoardSettingsRoute({}: Route.ComponentProps) {
             </Flex>
           </Flex>
           <Flex justify="end" mt="5" gap="2">
-            <Button highContrast size="2" type="submit" loading={false}>
+            <Button
+              highContrast
+              size="2"
+              type="submit"
+              loading={false}
+              disabled={timezone === watch("timezone")}
+            >
               Save
             </Button>
           </Flex>
-        </form>
-      </Card>
-    </>
+        </Card>
+      </Flex>
+    </form>
   );
 }

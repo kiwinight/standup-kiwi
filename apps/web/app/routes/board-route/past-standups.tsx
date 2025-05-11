@@ -13,13 +13,15 @@ import { parseMarkdownToHtml } from "~/libs/markdown";
 type Props = {};
 
 function Standups() {
-  const { standupsPromise, standupFormStructuresPromise } =
+  const { boardPromise, standupsPromise, standupFormStructuresPromise } =
     useLoaderData<typeof loader>();
+
+  const board = use(boardPromise);
   const standups = use(standupsPromise);
   const standupFormStructures = use(standupFormStructuresPromise);
 
-  // TODO: get board timezone from board
-  const boardTimezone = "Pacific/Honolulu";
+  const boardTimezone = board.timezone;
+
   const today = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
 
   const pastStandups = standups.filter(
@@ -81,12 +83,12 @@ function Standups() {
         <Flex direction="column" gap="5" align="start">
           <Tooltip
             content={DateTime.fromISO(standup.createdAt)
-              .setZone("Pacific/Honolulu")
+              .setZone(boardTimezone)
               .toLocaleString(DateTime.DATETIME_FULL)}
           >
             <Text size="4" weight="bold">
               {DateTime.fromISO(standup.createdAt)
-                .setZone("Pacific/Honolulu")
+                .setZone(boardTimezone)
                 .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
             </Text>
           </Tooltip>
