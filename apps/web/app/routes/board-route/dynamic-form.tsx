@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Flex, Box, TextArea, Button, Text, Skeleton } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import { useImperativeHandle, type Ref } from "react";
 
 export function validateDynamicFormSchema(schema: unknown) {
   try {
@@ -62,13 +63,19 @@ export type DynamicFormValues = {
   [key: string]: any; // Allows dynamic field names
 };
 
+export type DynamicFormRef = {
+  submit: () => void;
+};
+
 function DynamicForm({
+  ref,
   schema,
   defaultValues,
   onSubmit,
   onCancel,
   loading,
 }: {
+  ref: Ref<DynamicFormRef>;
   schema: z.infer<typeof dynamicFormSchema>;
   defaultValues?: DynamicFormValues;
   onSubmit: (data: DynamicFormValues) => void;
@@ -78,23 +85,26 @@ function DynamicForm({
   const { title, description, fields } = schema;
 
   const dynamicFormSchema = z.object(
-    fields.reduce((acc, field) => {
-      if (field.type === "textarea") {
-        let fieldValidation = z.string();
+    fields.reduce(
+      (acc, field) => {
+        if (field.type === "textarea") {
+          let fieldValidation = z.string();
 
-        if (field.validations) {
-          fieldValidation = fieldValidation
-            .min(field.validations.minLength || 0)
-            .max(field.validations.maxLength || Infinity);
+          if (field.validations) {
+            fieldValidation = fieldValidation
+              .min(field.validations.minLength || 0)
+              .max(field.validations.maxLength || Infinity);
+          }
+
+          acc[field.name] = field.required
+            ? fieldValidation.nonempty()
+            : fieldValidation.optional();
         }
 
-        acc[field.name] = field.required
-          ? fieldValidation.nonempty()
-          : fieldValidation.optional();
-      }
-
-      return acc;
-    }, {} as { [key: string]: z.ZodType })
+        return acc;
+      },
+      {} as { [key: string]: z.ZodType }
+    )
   );
 
   const {
@@ -111,13 +121,22 @@ function DynamicForm({
       }, {} as DynamicFormValues),
   });
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: () => {
+        handleFormSubmit();
+      },
+    }),
+    []
+  );
+
+  const handleFormSubmit = handleSubmit((data) => {
+    onSubmit(data);
+  });
+
   return (
-    <form
-      method="post"
-      onSubmit={handleSubmit((data) => {
-        onSubmit(data);
-      })}
-    >
+    <form method="post" onSubmit={handleFormSubmit}>
       <Flex direction="column">
         <Text size="4" weight="bold">
           {title}
