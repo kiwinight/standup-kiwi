@@ -262,7 +262,7 @@ function TodaysStandup({}: Props) {
           cardContentRef.current?.save();
         }
 
-        if (event.key === "e") {
+        if (event.key.toLowerCase() === "e") {
           cardContentRef.current?.edit();
         }
 
