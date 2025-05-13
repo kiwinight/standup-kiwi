@@ -6,6 +6,7 @@
 export type Board = {
   id: number;
   name: string;
+  timezone: string;
   activeStandupFormStructureId: number | null;
   createdAt: Date;
   updatedAt: Date;
