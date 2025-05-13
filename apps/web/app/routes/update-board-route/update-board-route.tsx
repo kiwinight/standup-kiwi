@@ -7,16 +7,17 @@ import { commitSession } from "~/libs/auth-session.server";
 
 interface UpdateBoardRequestBody {
   name: Board["name"];
+  timezone: Board["timezone"];
 }
 
 function updateBoard(
   boardId: string,
-  { name }: UpdateBoardRequestBody,
+  { name, timezone }: UpdateBoardRequestBody,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
     method: "PATCH",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, timezone }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -36,9 +37,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const boardId = params.boardId;
 
-  const { name } = (await request.json()) as UpdateBoardRequestBody;
+  const { name, timezone } = (await request.json()) as UpdateBoardRequestBody;
 
-  const response = await updateBoard(boardId, { name }, { accessToken });
+  const response = await updateBoard(
+    boardId,
+    { name, timezone },
+    { accessToken }
+  );
 
   return data(
     {

@@ -146,7 +146,11 @@ export class BoardsService {
   async update(id: number, updateBoardDto: UpdateBoardDto): Promise<Board> {
     const result = await this.db
       .update(boards)
-      .set({ name: updateBoardDto.name, updatedAt: sql`NOW()` })
+      .set({
+        name: updateBoardDto.name,
+        timezone: updateBoardDto.timezone,
+        updatedAt: sql`NOW()`,
+      })
       .where(eq(boards.id, id))
       .returning();
 
