@@ -57,6 +57,10 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   const schema = validateDynamicFormSchema(structure.schema);
 
+  if (!schema) {
+    return null;
+  }
+
   const dynamicFormRef = useRef<DynamicFormRef>(null);
 
   useImperativeHandle(
@@ -74,10 +78,6 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
     }),
     []
   );
-
-  if (!schema) {
-    return null;
-  }
 
   const boardTimezone = board.timezone;
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
@@ -118,10 +118,9 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
         // TODO: properly toast that there was an error creating the standup
         alert(error);
         setIsEditing(true);
-        todayStandup = undefined;
       }
     }
-  }, [createStandupFetcher.data, todayStandup]);
+  }, [createStandupFetcher.data]);
 
   if (updateStandupFetcher.json) {
     const { formData } =
@@ -158,23 +157,20 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   return (
     <>
-      {(!todayStandup || (todayStandup && isEditing)) && (
+      {isEditing && (
         <DynamicForm
           ref={dynamicFormRef}
           schema={schema}
           defaultValues={
-            Boolean(
-              todayStandup && isEditing && createStandupFetcher.state === "idle"
-            )
-              ? (todayStandup?.formData as DynamicFormValues)
+            todayStandup
+              ? (todayStandup.formData as DynamicFormValues)
               : undefined
           }
+          showCancelButton={Boolean(
+            todayStandup && createStandupFetcher.state === "idle"
+          )}
           onSubmit={async (data) => {
             if (!todayStandup) {
-              if (!structure) {
-                return;
-              }
-
               createStandupFetcher.submit(
                 {
                   formData: data,
@@ -209,51 +205,47 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
         />
       )}
 
-      {todayStandup &&
-        (isEditing ? null : (
+      {!isEditing && (
+        <Flex direction="column" gap="5">
+          <Text size="4" weight="bold">
+            Today's Standup
+          </Text>
           <Flex direction="column" gap="5">
-            <Text size="4" weight="bold">
-              Today's Standup
-            </Text>
-            <Flex direction="column" gap="5">
-              {schema.fields.map((field) => {
-                const value = (todayStandup?.formData as DynamicFormValues)[
-                  field.name
-                ];
-                if (!value) {
-                  return null;
-                }
+            {schema.fields.map((field) => {
+              const value = (todayStandup?.formData as DynamicFormValues)[
+                field.name
+              ];
+              if (!value) {
+                return null;
+              }
 
-                const html = parseMarkdownToHtml(value);
+              const html = parseMarkdownToHtml(value);
 
-                return (
-                  <Flex key={field.name} direction="column" gap="2">
-                    <Text
-                      size="2"
-                      className="font-[var(--font-weight-semibold)]"
-                    >
-                      {field.label}
-                    </Text>
-                    <Box
-                      className="prose prose-sm prose-custom"
-                      dangerouslySetInnerHTML={{ __html: html }}
-                    />
-                  </Flex>
-                );
-              })}
-            </Flex>
-            <Flex justify="end" gap="2">
-              <Button
-                highContrast
-                size="2"
-                variant="surface"
-                onClick={handleEditButtonClick}
-              >
-                Edit
-              </Button>
-            </Flex>
+              return (
+                <Flex key={field.name} direction="column" gap="2">
+                  <Text size="2" className="font-[var(--font-weight-semibold)]">
+                    {field.label}
+                  </Text>
+                  <Box
+                    className="prose prose-sm prose-custom"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                </Flex>
+              );
+            })}
           </Flex>
-        ))}
+          <Flex justify="end" gap="2">
+            <Button
+              highContrast
+              size="2"
+              variant="surface"
+              onClick={handleEditButtonClick}
+            >
+              Edit
+            </Button>
+          </Flex>
+        </Flex>
+      )}
     </>
   );
 }
