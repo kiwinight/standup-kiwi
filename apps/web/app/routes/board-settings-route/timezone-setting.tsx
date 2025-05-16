@@ -110,6 +110,10 @@ function TimezoneSetting({}: Props) {
 
   const board = use(boardPromise);
 
+  if (!board) {
+    return null;
+  }
+
   const boardTimezone = updateBoardTimezoneFetcher.json
     ? (updateBoardTimezoneFetcher.json as { timezone: string }).timezone
     : board.timezone;

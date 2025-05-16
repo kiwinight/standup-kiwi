@@ -7,7 +7,7 @@ import {
   type DynamicFormValues,
 } from "./dynamic-form";
 import { Box, Card, Flex, Skeleton, Text, Tooltip } from "@radix-ui/themes";
-import type { Standup } from "types";
+import { type Standup } from "types";
 import { parseMarkdownToHtml } from "~/libs/markdown";
 
 type Props = {};
@@ -17,8 +17,17 @@ function Standups() {
     useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
+
+  if (!board) {
+    return <SuspenseFallback />;
+  }
+
   const standups = use(standupsPromise);
   const standupFormStructures = use(standupFormStructuresPromise);
+
+  if (!standups || !standupFormStructures) {
+    return <SuspenseFallback />;
+  }
 
   const boardTimezone = board.timezone;
 

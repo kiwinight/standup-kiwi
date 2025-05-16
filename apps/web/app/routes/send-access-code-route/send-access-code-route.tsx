@@ -1,5 +1,5 @@
 import type { Route } from "./+types/send-access-code-route";
-import { isApiErrorResponse, type ApiResponse, type ListUser } from "types";
+import { isErrorData, type ApiData, type ListUser } from "types";
 import { data } from "react-router";
 import { redirect } from "react-router";
 
@@ -14,9 +14,7 @@ function sendAccessCode(email: string) {
     headers: {
       "Content-Type": "application/json",
     },
-  }).then(
-    (response) => response.json() as Promise<ApiResponse<{ nonce: string }>>
-  );
+  }).then((response) => response.json() as Promise<ApiData<{ nonce: string }>>);
 }
 
 function checkIfUserExists(email: string) {
@@ -29,13 +27,13 @@ function checkIfUserExists(email: string) {
         "Content-Type": "application/json",
       },
     }
-  ).then((response) => response.json() as Promise<ApiResponse<boolean>>);
+  ).then((response) => response.json() as Promise<ApiData<boolean>>);
 }
 
 async function determineRedirectUrl(email: string) {
   const userExistsResponse = await checkIfUserExists(email);
 
-  if (isApiErrorResponse(userExistsResponse)) {
+  if (isErrorData(userExistsResponse)) {
     return "/access/sign-in";
   }
 
@@ -47,15 +45,15 @@ export type ActionType = typeof action;
 export async function action({ request }: Route.ActionArgs) {
   const { email } = (await request.json()) as SendAccessCodeRequestBody;
 
-  const sendAccessCodeResponse = await sendAccessCode(email);
+  const responseData = await sendAccessCode(email);
 
-  if (isApiErrorResponse(sendAccessCodeResponse)) {
+  if (isErrorData(responseData)) {
     return data({
-      error: sendAccessCodeResponse.message,
+      error: responseData.message,
     });
   }
 
-  const { nonce } = sendAccessCodeResponse;
+  const { nonce } = responseData;
 
   const redirectUrl = await determineRedirectUrl(email);
 

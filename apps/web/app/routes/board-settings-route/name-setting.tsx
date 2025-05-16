@@ -15,6 +15,10 @@ function NameSetting({}: Props) {
 
   const board = use(boardPromise);
 
+  if (!board) {
+    return null;
+  }
+
   const boardName = updateBoardNameFetcher.json
     ? (updateBoardNameFetcher.json as { name: string }).name
     : board.name;

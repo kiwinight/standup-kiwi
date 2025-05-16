@@ -1,4 +1,4 @@
-import { isApiErrorResponse, type ApiResponse } from "types";
+import { isErrorData, type ApiData } from "types";
 import type { Route } from "./+types/sign-in-with-access-code-route";
 import { data, redirect } from "react-router";
 import { commitSession, getSession } from "~/libs/auth-session.server";
@@ -18,7 +18,7 @@ function signInWithAccessCode(otp: string, nonce: string) {
   }).then(
     (response) =>
       response.json() as Promise<
-        ApiResponse<{
+        ApiData<{
           access_token: string;
           refresh_token: string;
           is_new_user: boolean;
@@ -34,18 +34,18 @@ export async function action({ request }: Route.ActionArgs) {
   const { otp, nonce } =
     (await request.json()) as SignInWithAccessCodeRequestBody;
 
-  const response = await signInWithAccessCode(otp, nonce);
+  const responseData = await signInWithAccessCode(otp, nonce);
 
-  if (isApiErrorResponse(response)) {
+  if (isErrorData(responseData)) {
     return data({
-      error: response.message,
+      error: responseData.message,
     });
   }
 
   const session = await getSession(request.headers.get("Cookie"));
 
-  session.set("access_token", response.access_token);
-  session.set("refresh_token", response.refresh_token);
+  session.set("access_token", responseData.access_token);
+  session.set("refresh_token", responseData.refresh_token);
 
   return redirect("/", {
     headers: { "Set-Cookie": await commitSession(session) },
