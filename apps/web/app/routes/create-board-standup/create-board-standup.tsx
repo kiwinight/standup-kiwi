@@ -1,7 +1,7 @@
 import verifyAuthentication from "~/libs/auth";
 import type { Route } from "./+types/create-board-standup";
-import { isApiErrorResponse } from "types";
-import type { ApiResponse } from "types";
+import { isErrorData } from "types";
+import type { ApiData } from "types";
 import type { Standup } from "types";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
@@ -23,7 +23,7 @@ function createStandup(
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-  }).then((response) => response.json() as Promise<ApiResponse<Standup>>);
+  }).then((response) => response.json() as Promise<ApiData<Standup>>);
 }
 
 export type ActionType = typeof action;
@@ -37,7 +37,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const boardId = params.boardId;
 
-  const response = await createStandup(
+  const standupData = await createStandup(
     boardId,
     { formData, formStructureId: Number(formStructureId) },
     {
@@ -47,13 +47,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   return data(
     {
-      ...(isApiErrorResponse(response)
+      ...(isErrorData(standupData)
         ? {
-            error: response.message,
+            error: standupData.message,
             standup: null,
           }
         : {
-            standup: response,
+            standup: standupData,
             error: null,
           }),
     },

@@ -1,7 +1,7 @@
 import { getSession } from "./auth-session.server";
 
 import { redirect, type Session } from "react-router";
-import { isApiErrorResponse, type ApiResponse } from "types";
+import { isErrorData, type ApiData } from "types";
 import { commitSession } from "./auth-session.server";
 
 function verifyAccessToken(accessToken: string) {
@@ -11,7 +11,7 @@ function verifyAccessToken(accessToken: string) {
       Authorization: `Bearer ${accessToken}`,
     },
   }).then(
-    (response) => response.json() as Promise<ApiResponse<{ valid: boolean }>>
+    (response) => response.json() as Promise<ApiData<{ valid: boolean }>>
   );
 }
 
@@ -22,8 +22,7 @@ function refreshAccessToken(refreshToken: string) {
       method: "POST",
     }
   ).then(
-    (response) =>
-      response.json() as Promise<ApiResponse<{ access_token: string }>>
+    (response) => response.json() as Promise<ApiData<{ access_token: string }>>
   );
 }
 
@@ -37,7 +36,7 @@ async function verifyTokenAndRefresh(session: Session) {
 
   const verificationResponse = await verifyAccessToken(accessToken);
 
-  if (!isApiErrorResponse(verificationResponse)) {
+  if (!isErrorData(verificationResponse)) {
     return {
       accessToken,
       refreshed: false,
@@ -52,7 +51,7 @@ async function verifyTokenAndRefresh(session: Session) {
 
   const response = await refreshAccessToken(refreshToken);
 
-  if (!isApiErrorResponse(response)) {
+  if (!isErrorData(response)) {
     return {
       accessToken: response.access_token,
       refreshed: true,
