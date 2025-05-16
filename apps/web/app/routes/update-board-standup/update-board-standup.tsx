@@ -1,4 +1,4 @@
-import { isApiErrorResponse, type ApiResponse } from "types";
+import { isErrorData, type ApiData } from "types";
 import type { Standup } from "types";
 import type { Route } from "./+types/update-board-standup";
 import verifyAuthentication from "~/libs/auth";
@@ -25,22 +25,21 @@ function updateStandup(
         Authorization: `Bearer ${accessToken}`,
       },
     }
-  ).then((response) => response.json() as Promise<ApiResponse<Standup>>);
+  ).then((response) => response.json() as Promise<ApiData<Standup>>);
 }
 
 export type ActionType = typeof action;
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const { accessToken, refreshed, session } = await verifyAuthentication(
-    request
-  );
+  const { accessToken, refreshed, session } =
+    await verifyAuthentication(request);
 
   const boardId = params.boardId;
   const standupId = params.standupId;
 
   const { formData } = (await request.json()) as UpdateStandupRequestBody;
 
-  const response = await updateStandup(
+  const responseData = await updateStandup(
     boardId,
     standupId,
     { formData },
@@ -49,13 +48,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   return data(
     {
-      ...(isApiErrorResponse(response)
+      ...(isErrorData(responseData)
         ? {
-            error: response.message,
+            error: responseData.message,
             standup: null,
           }
         : {
-            standup: response,
+            standup: responseData,
             error: null,
           }),
     },

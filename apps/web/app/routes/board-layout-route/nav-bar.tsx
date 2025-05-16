@@ -17,7 +17,7 @@ import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext
 import { alertFeatureNotImplemented } from "~/libs/alert";
 
 function NavBar() {
-  const { currentUserBoardsDataPromise, currentUserDataPromise } =
+  const { currentUser, currentUserBoards } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
 
   const { boardId } = useParams();
@@ -65,8 +65,22 @@ function NavBar() {
                 </>
               }
             >
-              <Await resolve={currentUserBoardsDataPromise}>
+              <Await resolve={currentUserBoards}>
                 {(data) => {
+                  if (!data) {
+                    return (
+                      <>
+                        <DropdownMenu.Separator />
+                        <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                        <DropdownMenu.Item>
+                          <Text>
+                            <Skeleton>Example</Skeleton>
+                          </Text>
+                        </DropdownMenu.Item>
+                      </>
+                    );
+                  }
+
                   const sharedBoards = data.filter(
                     (board) => board.usersCount > 1
                   );
@@ -182,8 +196,12 @@ function NavBar() {
                 <PersonIcon />
                 <Text size="2">
                   <Suspense fallback={<Skeleton>Loading</Skeleton>}>
-                    <Await resolve={currentUserDataPromise}>
+                    <Await resolve={currentUser}>
                       {(data) => {
+                        if (!data) {
+                          return <Skeleton>Loading</Skeleton>;
+                        }
+
                         return <>{data.primary_email}</>;
                       }}
                     </Await>

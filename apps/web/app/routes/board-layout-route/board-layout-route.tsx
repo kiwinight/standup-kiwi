@@ -5,68 +5,52 @@ import {
   type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import { Box } from "@radix-ui/themes";
-import {
-  isApiErrorResponse,
-  type ApiResponse,
-  type Board,
-  type User,
-} from "types";
+import { isErrorData, type ApiData, type Board, type User } from "types";
 import type { Route } from "./+types/board-layout-route";
 import NavBar from "./nav-bar";
-import { RouteErrorResponse } from "~/root";
 import verifyAuthentication from "~/libs/auth";
 import { useEffect } from "react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken } = await verifyAuthentication(request);
 
-  const currentUserDataPromise = fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then(async (response) => {
-    const data = (await response.json()) as ApiResponse<User>;
+  const currentUser = fetch(import.meta.env.VITE_API_URL + "/auth/users/me", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+    .then((response) => response.json() as Promise<ApiData<User>>)
+    .then((data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
 
-    if (isApiErrorResponse(data)) {
-      throw new RouteErrorResponse(
-        data.statusCode,
-        data.message,
-        Error(data.error)
-      );
-    }
+      return data;
+    });
 
-    return data;
-  });
-
-  const currentUserBoardsDataPromise = fetch(
+  const currentUserBoards = fetch(
     import.meta.env.VITE_API_URL + "/auth/users/me/boards",
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     }
-  ).then(async (response) => {
-    const data = (await response.json()) as ApiResponse<
-      (Board & { usersCount: number })[]
-    >;
+  )
+    .then(
+      (response) =>
+        response.json() as Promise<ApiData<(Board & { usersCount: number })[]>>
+    )
+    .then((data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
 
-    if (isApiErrorResponse(data)) {
-      throw new RouteErrorResponse(
-        data.statusCode,
-        data.message,
-        Error(data.error)
-      );
-    }
-
-    return data;
-  });
+      return data;
+    });
 
   return data({
-    currentUserBoardsDataPromise,
-    currentUserDataPromise,
+    currentUserBoards,
+    currentUser,
   });
 }
 
@@ -87,20 +71,25 @@ function BoardLayoutRoute(props: Route.ComponentProps) {
 
   const boardId = params.boardId ? parseInt(params.boardId) : undefined;
 
-  const { currentUserBoardsDataPromise } = useLoaderData<typeof loader>();
+  const { currentUserBoards } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     if (!boardId) {
       return;
     }
 
-    currentUserBoardsDataPromise.then((boards) => {
+    currentUserBoards.then((boards) => {
+      if (!boards) {
+        return;
+      }
+
       const board = boards.find((board) => board.id === boardId);
+
       if (board) {
         document.title = `${board.name} • Standup Kiwi`;
       }
     });
-  }, [currentUserBoardsDataPromise, boardId]);
+  }, [currentUserBoards, boardId]);
 
   return (
     <div>

@@ -43,10 +43,19 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
   } = useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
-  const standups: Standup[] = use(standupsPromise);
+
+  if (!board) {
+    return <FormSkeleton />;
+  }
+
+  const standups: Standup[] | null = use(standupsPromise);
   const structure = use(boardActiveStandupFormStructurePromise);
 
-  const schema = validateDynamicFormSchema(structure?.schema);
+  if (!standups || !structure) {
+    return <FormSkeleton />;
+  }
+
+  const schema = validateDynamicFormSchema(structure.schema);
 
   const dynamicFormRef = useRef<DynamicFormRef>(null);
 

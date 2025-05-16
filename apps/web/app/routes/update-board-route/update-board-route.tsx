@@ -1,4 +1,4 @@
-import { isApiErrorResponse, type ApiResponse } from "types";
+import { isErrorData, type ApiData } from "types";
 import type { Board } from "types";
 import type { Route } from "./+types/update-board-route";
 import verifyAuthentication from "~/libs/auth";
@@ -23,7 +23,7 @@ function updateBoard(
       Authorization: `Bearer ${accessToken}`,
     },
   }).then(async (response) => {
-    const data: ApiResponse<Board> = await response.json();
+    const data: ApiData<Board> = await response.json();
 
     return data;
   });
@@ -39,7 +39,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const { name, timezone } = (await request.json()) as UpdateBoardRequestBody;
 
-  const response = await updateBoard(
+  const responseData = await updateBoard(
     boardId,
     { name, timezone },
     { accessToken }
@@ -47,13 +47,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   return data(
     {
-      ...(isApiErrorResponse(response)
+      ...(isErrorData(responseData)
         ? {
-            error: response.message,
+            error: responseData.message,
             board: null,
           }
         : {
-            board: response,
+            board: responseData,
             error: null,
           }),
     },

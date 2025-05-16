@@ -1,5 +1,4 @@
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
@@ -149,66 +148,30 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack: string | undefined;
+  let title = "Oops!";
+  let description = "An unexpected error occurred.";
 
-  if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
+  if (isApiError(error)) {
+    title = error.statusCode.toString();
+    description = error.message;
   }
 
   return (
     <main className="pt-16 p-4 container mx-auto">
-      404
-      {/* <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )} */}
+      <h1>{title}</h1>
+      <p>{description}</p>
     </main>
   );
 }
 
-/**
- * RouteErrorResponse implementation based on React Router's original implementation
- * @see https://github.com/remix-run/react-router/blob/main/packages/react-router/lib/router/utils.ts
- */
-export class RouteErrorResponse implements ErrorResponse {
-  status: number;
-  statusText: string;
-  data: any;
-  private error?: Error;
-  private internal: boolean;
-
-  constructor(
-    status: number,
-    statusText: string | undefined,
-    data: any,
-    internal = false
-  ) {
-    this.status = status;
-    this.statusText = statusText || "";
-    this.internal = internal;
-    if (data instanceof Error) {
-      this.data = data.toString();
-      this.error = data;
-    } else {
-      this.data = data;
-    }
+export class ApiError extends Error {
+  statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
   }
 }
 
-export class NotFoundRouteErrorResponse extends RouteErrorResponse {
-  constructor() {
-    super(404, "Not found", Error("Not found"));
-  }
+function isApiError(error: any): error is ApiError {
+  return "statusCode" in error;
 }

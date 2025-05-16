@@ -1,8 +1,7 @@
 import { data } from "react-router";
 import type { Route } from "./+types/board-settings-route";
 import verifyAuthentication from "~/libs/auth";
-import { isApiErrorResponse, type ApiResponse, type Board } from "types";
-import { RouteErrorResponse } from "~/root";
+import { isErrorData, type ApiData, type Board } from "types";
 import NameSetting from "./name-setting";
 import TimezoneSetting from "./timezone-setting";
 
@@ -11,7 +10,7 @@ function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-  }).then((response) => response.json() as Promise<ApiResponse<Board>>);
+  }).then((response) => response.json() as Promise<ApiData<Board>>);
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -20,13 +19,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const boardId = params.boardId;
 
   const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
-    if (isApiErrorResponse(data)) {
-      throw new RouteErrorResponse(
-        data.statusCode,
-        data.message,
-        Error(data.error)
-      );
+    if (isErrorData(data)) {
+      return null;
     }
+
     return data;
   });
 

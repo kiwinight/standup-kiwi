@@ -67,21 +67,19 @@ export interface Standup {
  * API
  */
 
-interface ApiErrorResponse {
+interface ErrorData {
   message: string;
   statusCode: number;
   error?: string;
 }
 
-export function isApiErrorResponse(
-  response: unknown
-): response is ApiErrorResponse {
+export function isErrorData(data: unknown): data is ErrorData {
   return (
-    typeof response === "object" &&
-    response !== null &&
-    "message" in response &&
-    "statusCode" in response
+    typeof data === "object" &&
+    data !== null &&
+    "message" in data &&
+    "statusCode" in data
   );
 }
 
-export type ApiResponse<T> = T | ApiErrorResponse;
+export type ApiData<T> = T | ErrorData;

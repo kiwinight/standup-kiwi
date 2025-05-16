@@ -1,12 +1,6 @@
 import verifyAuthentication from "~/libs/auth";
 import type { Route } from "./+types/index-route";
-import {
-  isApiErrorResponse,
-  type ApiResponse,
-  type Board,
-  type User,
-} from "types";
-import { RouteErrorResponse } from "~/root";
+import { isErrorData, type ApiData, type Board, type User } from "types";
 import { redirect } from "react-router";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -20,18 +14,18 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     }
   ).then(async (response) => {
-    const data = (await response.json()) as ApiResponse<User>;
+    const userData = (await response.json()) as ApiData<User>;
 
-    if (isApiErrorResponse(data)) {
-      throw new RouteErrorResponse(
-        data.statusCode,
-        data.message,
-        Error(data.error)
-      );
+    if (isErrorData(userData)) {
+      return null;
     }
 
-    return data;
+    return userData;
   });
+
+  if (!currentUser) {
+    return redirect("/access");
+  }
 
   const lastAccessedBoardId =
     currentUser.client_read_only_metadata?.lastAccessedBoardId;

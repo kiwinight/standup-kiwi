@@ -16,7 +16,7 @@ import {
 import verifyAuthentication from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
 import type { Route } from "./+types/create-new-board-route";
-import { isApiErrorResponse, type ApiResponse, type Board } from "types";
+import { isErrorData, type ApiData, type Board } from "types";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await verifyAuthentication(request);
@@ -60,7 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const timezone = formData.get("timezone")?.toString().trim();
 
-  const board = await fetch(import.meta.env.VITE_API_URL + "/boards", {
+  const boardData = await fetch(import.meta.env.VITE_API_URL + "/boards", {
     method: "POST",
     body: JSON.stringify({ name, timezone }),
     headers: {
@@ -68,11 +68,11 @@ export async function action({ request }: ActionFunctionArgs) {
       Authorization: `Bearer ${accessToken}`,
     },
   }).then(async (response) => {
-    const data: ApiResponse<Board> = await response.json();
+    const data: ApiData<Board> = await response.json();
     return data;
   });
 
-  if (isApiErrorResponse(board)) {
+  if (isErrorData(boardData)) {
     return data(
       {
         errors: {
@@ -87,7 +87,7 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  return redirect("/boards/" + board.id, {
+  return redirect("/boards/" + boardData.id, {
     headers: {
       ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
     },
