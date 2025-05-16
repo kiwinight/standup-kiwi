@@ -96,31 +96,41 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
     return standupDate.equals(boardToday);
   });
 
+  if (createStandupFetcher.json) {
+    const { formData, formStructureId } =
+      (createStandupFetcher.json as unknown as CreateStandupRequestBody) || {};
+
+    todayStandup = {
+      id: 0,
+      boardId: board.id,
+      userId: "",
+      formStructureId: formStructureId,
+      formData: formData,
+      createdAt: "",
+      updatedAt: "",
+    };
+  }
+
   useEffect(() => {
     if (createStandupFetcher.data) {
       const { error } = createStandupFetcher.data;
       if (error) {
         // TODO: properly toast that there was an error creating the standup
         alert(error);
-        todayStandup = undefined;
         setIsEditing(true);
+        todayStandup = undefined;
       }
     }
-  }, [createStandupFetcher.data]);
+  }, [createStandupFetcher.data, todayStandup]);
 
-  if (createStandupFetcher.state !== "idle") {
-    const values = createStandupFetcher.json;
-    if (values) {
-      const { formData, formStructureId } =
-        values as unknown as CreateStandupRequestBody;
+  if (updateStandupFetcher.json) {
+    const { formData } =
+      (updateStandupFetcher.json as { formData: Standup["formData"] }) || {};
+
+    if (todayStandup) {
       todayStandup = {
-        id: 0,
-        boardId: board.id,
-        userId: "",
-        formStructureId: formStructureId,
-        formData: formData,
-        createdAt: "",
-        updatedAt: "",
+        ...todayStandup,
+        formData: formData as Standup["formData"],
       };
     }
   }
@@ -131,24 +141,10 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
       if (error) {
         // TODO: properly toast that there was an error updating the standup
         alert(error);
+        setIsEditing(true);
       }
     }
   }, [updateStandupFetcher.data]);
-
-  if (updateStandupFetcher.state !== "idle") {
-    const values = updateStandupFetcher.json;
-    if (values) {
-      const { formData } = values as {
-        formData: Standup["formData"];
-      };
-      if (todayStandup) {
-        todayStandup = {
-          ...todayStandup,
-          formData: formData as Standup["formData"],
-        };
-      }
-    }
-  }
 
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
 
@@ -162,37 +158,38 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   return (
     <>
-      {!todayStandup && (
+      {(!todayStandup || (todayStandup && isEditing)) && (
         <DynamicForm
           ref={dynamicFormRef}
           schema={schema}
+          defaultValues={
+            Boolean(
+              todayStandup && isEditing && createStandupFetcher.state === "idle"
+            )
+              ? (todayStandup?.formData as DynamicFormValues)
+              : undefined
+          }
           onSubmit={async (data) => {
-            if (!structure) {
-              return;
+            if (!todayStandup) {
+              if (!structure) {
+                return;
+              }
+
+              createStandupFetcher.submit(
+                {
+                  formData: data,
+                  formStructureId: structure.id,
+                },
+                {
+                  encType: "application/json",
+                  method: "POST",
+                  action: `/boards/${board.id}/standups/create`,
+                }
+              );
+              setIsEditing(false);
             }
 
-            createStandupFetcher.submit(
-              {
-                formData: data,
-                formStructureId: structure.id,
-              },
-              {
-                encType: "application/json",
-                method: "POST",
-                action: `/boards/${board.id}/standups/create`,
-              }
-            );
-            setIsEditing(false);
-          }}
-        />
-      )}
-      {todayStandup &&
-        (isEditing ? (
-          <DynamicForm
-            ref={dynamicFormRef}
-            schema={schema}
-            defaultValues={todayStandup.formData as DynamicFormValues}
-            onSubmit={async (data) => {
+            if (todayStandup && isEditing) {
               updateStandupFetcher.submit(
                 {
                   formData: data,
@@ -204,10 +201,16 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
                 }
               );
               setIsEditing(false);
-            }}
-            onCancel={handleDynamicFormCancel}
-          />
-        ) : (
+            }
+          }}
+          onCancel={
+            todayStandup && isEditing ? handleDynamicFormCancel : undefined
+          }
+        />
+      )}
+
+      {todayStandup &&
+        (isEditing ? null : (
           <Flex direction="column" gap="5">
             <Text size="4" weight="bold">
               Today's Standup
