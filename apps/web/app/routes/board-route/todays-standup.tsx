@@ -57,6 +57,10 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   const schema = validateDynamicFormSchema(structure.schema);
 
+  if (!schema) {
+    return null;
+  }
+
   const dynamicFormRef = useRef<DynamicFormRef>(null);
 
   useImperativeHandle(
@@ -75,10 +79,6 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
     []
   );
 
-  if (!schema) {
-    return null;
-  }
-
   const boardTimezone = board.timezone;
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
 
@@ -96,31 +96,40 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
     return standupDate.equals(boardToday);
   });
 
+  if (createStandupFetcher.json) {
+    const { formData, formStructureId } =
+      (createStandupFetcher.json as unknown as CreateStandupRequestBody) || {};
+
+    todayStandup = {
+      id: 0,
+      boardId: board.id,
+      userId: "",
+      formStructureId: formStructureId,
+      formData: formData,
+      createdAt: "",
+      updatedAt: "",
+    };
+  }
+
   useEffect(() => {
     if (createStandupFetcher.data) {
       const { error } = createStandupFetcher.data;
       if (error) {
         // TODO: properly toast that there was an error creating the standup
         alert(error);
-        todayStandup = undefined;
         setIsEditing(true);
       }
     }
   }, [createStandupFetcher.data]);
 
-  if (createStandupFetcher.state !== "idle") {
-    const values = createStandupFetcher.json;
-    if (values) {
-      const { formData, formStructureId } =
-        values as unknown as CreateStandupRequestBody;
+  if (updateStandupFetcher.json) {
+    const { formData } =
+      (updateStandupFetcher.json as { formData: Standup["formData"] }) || {};
+
+    if (todayStandup) {
       todayStandup = {
-        id: 0,
-        boardId: board.id,
-        userId: "",
-        formStructureId: formStructureId,
-        formData: formData,
-        createdAt: "",
-        updatedAt: "",
+        ...todayStandup,
+        formData: formData as Standup["formData"],
       };
     }
   }
@@ -131,24 +140,10 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
       if (error) {
         // TODO: properly toast that there was an error updating the standup
         alert(error);
+        setIsEditing(true);
       }
     }
   }, [updateStandupFetcher.data]);
-
-  if (updateStandupFetcher.state !== "idle") {
-    const values = updateStandupFetcher.json;
-    if (values) {
-      const { formData } = values as {
-        formData: Standup["formData"];
-      };
-      if (todayStandup) {
-        todayStandup = {
-          ...todayStandup,
-          formData: formData as Standup["formData"],
-        };
-      }
-    }
-  }
 
   const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
 
@@ -162,37 +157,35 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   return (
     <>
-      {!todayStandup && (
+      {isEditing && (
         <DynamicForm
           ref={dynamicFormRef}
           schema={schema}
+          defaultValues={
+            todayStandup
+              ? (todayStandup.formData as DynamicFormValues)
+              : undefined
+          }
+          showCancelButton={Boolean(
+            todayStandup && createStandupFetcher.state === "idle"
+          )}
           onSubmit={async (data) => {
-            if (!structure) {
-              return;
+            if (!todayStandup) {
+              createStandupFetcher.submit(
+                {
+                  formData: data,
+                  formStructureId: structure.id,
+                },
+                {
+                  encType: "application/json",
+                  method: "POST",
+                  action: `/boards/${board.id}/standups/create`,
+                }
+              );
+              setIsEditing(false);
             }
 
-            createStandupFetcher.submit(
-              {
-                formData: data,
-                formStructureId: structure.id,
-              },
-              {
-                encType: "application/json",
-                method: "POST",
-                action: `/boards/${board.id}/standups/create`,
-              }
-            );
-            setIsEditing(false);
-          }}
-        />
-      )}
-      {todayStandup &&
-        (isEditing ? (
-          <DynamicForm
-            ref={dynamicFormRef}
-            schema={schema}
-            defaultValues={todayStandup.formData as DynamicFormValues}
-            onSubmit={async (data) => {
+            if (todayStandup && isEditing) {
               updateStandupFetcher.submit(
                 {
                   formData: data,
@@ -204,53 +197,55 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
                 }
               );
               setIsEditing(false);
-            }}
-            onCancel={handleDynamicFormCancel}
-          />
-        ) : (
+            }
+          }}
+          onCancel={
+            todayStandup && isEditing ? handleDynamicFormCancel : undefined
+          }
+        />
+      )}
+
+      {!isEditing && (
+        <Flex direction="column" gap="5">
+          <Text size="4" weight="bold">
+            Today's Standup
+          </Text>
           <Flex direction="column" gap="5">
-            <Text size="4" weight="bold">
-              Today's Standup
-            </Text>
-            <Flex direction="column" gap="5">
-              {schema.fields.map((field) => {
-                const value = (todayStandup?.formData as DynamicFormValues)[
-                  field.name
-                ];
-                if (!value) {
-                  return null;
-                }
+            {schema.fields.map((field) => {
+              const value = (todayStandup?.formData as DynamicFormValues)[
+                field.name
+              ];
+              if (!value) {
+                return null;
+              }
 
-                const html = parseMarkdownToHtml(value);
+              const html = parseMarkdownToHtml(value);
 
-                return (
-                  <Flex key={field.name} direction="column" gap="2">
-                    <Text
-                      size="2"
-                      className="font-[var(--font-weight-semibold)]"
-                    >
-                      {field.label}
-                    </Text>
-                    <Box
-                      className="prose prose-sm prose-custom"
-                      dangerouslySetInnerHTML={{ __html: html }}
-                    />
-                  </Flex>
-                );
-              })}
-            </Flex>
-            <Flex justify="end" gap="2">
-              <Button
-                highContrast
-                size="2"
-                variant="surface"
-                onClick={handleEditButtonClick}
-              >
-                Edit
-              </Button>
-            </Flex>
+              return (
+                <Flex key={field.name} direction="column" gap="2">
+                  <Text size="2" className="font-[var(--font-weight-semibold)]">
+                    {field.label}
+                  </Text>
+                  <Box
+                    className="prose prose-sm prose-custom"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                </Flex>
+              );
+            })}
           </Flex>
-        ))}
+          <Flex justify="end" gap="2">
+            <Button
+              highContrast
+              size="2"
+              variant="surface"
+              onClick={handleEditButtonClick}
+            >
+              Edit
+            </Button>
+          </Flex>
+        </Flex>
+      )}
     </>
   );
 }

@@ -74,6 +74,7 @@ function DynamicForm({
   onSubmit,
   onCancel,
   loading,
+  showCancelButton = true,
 }: {
   ref: Ref<DynamicFormRef>;
   schema: z.infer<typeof dynamicFormSchema>;
@@ -81,6 +82,7 @@ function DynamicForm({
   onSubmit: (data: DynamicFormValues) => void;
   onCancel?: () => void;
   loading?: boolean;
+  showCancelButton?: boolean;
 }) {
   const { title, description, fields } = schema;
 
@@ -198,7 +200,7 @@ function DynamicForm({
           })}
         </Flex>
         <Flex justify="end" mt="5" gap="2">
-          {defaultValues && (
+          {showCancelButton && (
             <Button
               highContrast
               type="button"
