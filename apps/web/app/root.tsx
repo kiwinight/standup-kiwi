@@ -1,4 +1,5 @@
 import {
+  Link,
   Links,
   Meta,
   Outlet,
@@ -11,7 +12,7 @@ import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import "@radix-ui/themes/styles.css";
 import "./radix.css";
-import { Theme } from "@radix-ui/themes";
+import { Button, Flex, Heading, Text, Theme } from "@radix-ui/themes";
 import { UserAppearanceSettingProvider } from "./context/UserAppearanceSettingContext";
 import {
   ColorSchemeProvider,
@@ -133,6 +134,8 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const { colorScheme } = useColorScheme();
+
   let title = "Oops!";
   let description = "An unexpected error occurred.";
 
@@ -142,10 +145,26 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{title}</h1>
-      <p>{description}</p>
-    </main>
+    <Theme
+      accentColor="gray"
+      {...(colorScheme !== null ? { appearance: colorScheme } : {})}
+    >
+      <Flex
+        justify="center"
+        align="center"
+        minHeight="100dvh"
+        direction="column"
+        gap="2"
+      >
+        <Heading as="h1" size="8">
+          {title}
+        </Heading>
+        <Text>{description}</Text>
+        <Button variant="outline" asChild>
+          <Link to="/">Go to Main</Link>
+        </Button>
+      </Flex>
+    </Theme>
   );
 }
 
