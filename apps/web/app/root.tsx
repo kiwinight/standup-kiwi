@@ -19,21 +19,6 @@ import {
   colorSchemeFlickerPrevention,
 } from "./context/ColorSchemeContext";
 
-// NOTE: This setup is for Node.js 18 environment
-if (
-  typeof process !== "undefined" &&
-  process.versions &&
-  process.versions.node
-) {
-  (function () {
-    import("crypto").then(({ webcrypto }) => {
-      if (!globalThis.crypto) {
-        globalThis.crypto = webcrypto as unknown as Crypto;
-      }
-    });
-  })();
-}
-
 export function meta(args?: Route.MetaArgs) {
   const description =
     "Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless.";
