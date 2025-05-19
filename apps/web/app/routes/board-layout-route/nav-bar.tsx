@@ -102,7 +102,7 @@ function NavBar() {
                               <Link key={board.id} to={`/boards/${board.id}`}>
                                 <DropdownMenu.Item
                                   className={
-                                    isActive ? "[&]:bg-[var(--accent-a3)]" : ""
+                                    isActive ? "bg-[var(--accent-a3)]" : ""
                                   }
                                 >
                                   <Text
