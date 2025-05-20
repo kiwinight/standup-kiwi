@@ -55,11 +55,15 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export function shouldRevalidate(arg: ShouldRevalidateFunctionArgs) {
-  if (
+  const hasBoardCreated =
+    arg.formAction === "/boards/create" && arg.formMethod === "POST";
+
+  const hasBoardIdChanged =
     Boolean(arg.currentParams.boardId) &&
     Boolean(arg.nextParams.boardId) &&
-    arg.currentParams.boardId !== arg.nextParams.boardId
-  ) {
+    arg.currentParams.boardId !== arg.nextParams.boardId;
+
+  if (hasBoardIdChanged || hasBoardCreated) {
     return true;
   }
 
