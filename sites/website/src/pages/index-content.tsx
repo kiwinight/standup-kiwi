@@ -613,6 +613,7 @@ function IndexContent({}: Props) {
 
               <Button
                 // className="self-start!"
+                asChild
                 className="w-full! sm:w-auto!"
                 size={{
                   initial: "3",
@@ -620,7 +621,7 @@ function IndexContent({}: Props) {
                 }}
                 highContrast
               >
-                Start Now
+                <a href={import.meta.env.PUBLIC_APP_URL}>Start Now</a>
               </Button>
 
               <Text size="2" color="gray">
