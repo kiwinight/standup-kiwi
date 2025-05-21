@@ -26,7 +26,7 @@ function NavBar() {
 
   return (
     <Flex
-      className="h-[56px] px-4 z-10 bg-[var(--color-background)]"
+      className="h-[56px] px-4 z-10 bg-(--color-background)"
       justify="start"
       align="center"
       position="sticky"
@@ -40,7 +40,7 @@ function NavBar() {
               size="2"
               // radius="medium"
               radius="large"
-              className="!pl-[8px] !pr-[8px]"
+              className="pl-[8px]! pr-[8px]!"
             >
               <ListBulletIcon fontSize={24} width={16} height={16} />
             </Button>
@@ -102,7 +102,7 @@ function NavBar() {
                               <Link key={board.id} to={`/boards/${board.id}`}>
                                 <DropdownMenu.Item
                                   className={
-                                    isActive ? "bg-[var(--accent-a3)]" : ""
+                                    isActive ? "bg-(--accent-a3)" : ""
                                   }
                                 >
                                   <Text
@@ -133,7 +133,7 @@ function NavBar() {
                                   >
                                     <DropdownMenu.Item
                                       className={
-                                        isActive ? "!bg-[var(--accent-a3)]" : ""
+                                        isActive ? "bg-(--accent-a3)!" : ""
                                       }
                                     >
                                       <Text
@@ -161,7 +161,7 @@ function NavBar() {
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
                   className={
-                    appearance === "light" ? "bg-[var(--accent-a3)]" : ""
+                    appearance === "light" ? "bg-(--accent-a3)" : ""
                   }
                   onClick={() => {
                     setAppearance("light");
@@ -171,7 +171,7 @@ function NavBar() {
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={
-                    appearance === "dark" ? "bg-[var(--accent-a3)]" : ""
+                    appearance === "dark" ? "bg-(--accent-a3)" : ""
                   }
                   onClick={() => {
                     setAppearance("dark");
@@ -181,7 +181,7 @@ function NavBar() {
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={
-                    appearance === "inherit" ? "bg-[var(--accent-a3)]" : ""
+                    appearance === "inherit" ? "bg-(--accent-a3)" : ""
                   }
                   onClick={() => {
                     setAppearance("inherit");
@@ -235,7 +235,7 @@ function NavBar() {
               <Text
                 size="3"
                 weight="bold"
-                className="!tracking-tight"
+                className="tracking-tight!"
                 color="gray"
                 highContrast
               >

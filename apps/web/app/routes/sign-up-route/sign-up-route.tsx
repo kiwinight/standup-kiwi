@@ -71,7 +71,7 @@ function SignUpRoute({}: Route.ComponentProps) {
                     <Flex align="center" gap="2">
                       <Text
                         size="2"
-                        className="font-[var(--font-weight-semibold)]"
+                        className="font-semibold"
                       >
                         Access code
                       </Text>
