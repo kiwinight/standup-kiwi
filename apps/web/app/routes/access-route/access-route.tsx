@@ -81,7 +81,7 @@ function AccessRoute({}: Props) {
                     <Flex align="center" gap="2">
                       <Text
                         size="2"
-                        className="font-[var(--font-weight-semibold)]"
+                        className="font-semibold"
                       >
                         Email
                       </Text>

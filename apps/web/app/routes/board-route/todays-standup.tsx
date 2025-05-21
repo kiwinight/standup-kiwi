@@ -223,7 +223,7 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
               return (
                 <Flex key={field.name} direction="column" gap="2">
-                  <Text size="2" className="font-[var(--font-weight-semibold)]">
+                  <Text size="2" className="font-semibold">
                     {field.label}
                   </Text>
                   <Box
