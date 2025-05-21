@@ -156,7 +156,7 @@ function DynamicForm({
                   <Flex align="center" gap="2">
                     <Text
                       size="2"
-                      className="font-[var(--font-weight-semibold)]"
+                      className="font-semibold"
                     >
                       {field.label}
                     </Text>
@@ -177,7 +177,7 @@ function DynamicForm({
                         onChange={onChange}
                         variant="soft"
                         placeholder={field.placeholder}
-                        className="w-full !min-h-[80px]"
+                        className="w-full min-h-[80px]!"
                         resize="vertical"
                       />
                     )}

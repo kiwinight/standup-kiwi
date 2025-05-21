@@ -17,7 +17,7 @@ function AccessLayoutRoute({}: Route.ComponentProps) {
   return (
     <div>
       <Flex
-        className="h-[56px] px-4 z-10 bg-[var(--color-background)]"
+        className="h-[56px] px-4 z-10 bg-(--color-background)"
         justify="start"
         align="center"
         position="sticky"
@@ -30,7 +30,7 @@ function AccessLayoutRoute({}: Route.ComponentProps) {
               <Text
                 size="3"
                 weight="bold"
-                className="!tracking-tight"
+                className="tracking-tight!"
                 color="gray"
                 highContrast
               >
