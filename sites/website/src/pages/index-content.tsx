@@ -607,8 +607,9 @@ function IndexContent({}: Props) {
                   sm: "center",
                 }}
               >
-                Standup Kiwi is an open-source tool for async check-ins, daily
-                reflections, and progress sharing – calm, clear, and effortless.
+                Standup Kiwi is an open-source tool for sharing and recording
+                daily standups — async or live — in a calm, clear, and
+                effortless way.
               </Text>
 
               <Button
