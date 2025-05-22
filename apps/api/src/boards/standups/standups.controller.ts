@@ -63,9 +63,19 @@ export class StandupsController {
     @Body() updateStandupDto: UpdateStandupDto,
   ) {
     try {
-      return await this.standupsService.update(standupId, {
-        formData: updateStandupDto.formData,
-      });
+      const updatedStandup = await this.standupsService.update(
+        standupId,
+        boardId,
+        {
+          formData: updateStandupDto.formData,
+        },
+      );
+
+      if (!updatedStandup) {
+        throw new Error();
+      }
+
+      return updatedStandup;
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();

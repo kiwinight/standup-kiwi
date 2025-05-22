@@ -96,6 +96,13 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
     return standupDate.equals(boardToday);
   });
 
+  if (createStandupFetcher.data) {
+    const standup = createStandupFetcher.data?.standup;
+    if (standup) {
+      todayStandup = standup;
+    }
+  }
+
   if (createStandupFetcher.json) {
     const { formData, formStructureId } =
       (createStandupFetcher.json as unknown as CreateStandupRequestBody) || {};
@@ -121,6 +128,13 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
       }
     }
   }, [createStandupFetcher.data]);
+
+  if (updateStandupFetcher.data) {
+    const standup = updateStandupFetcher.data?.standup;
+    if (standup) {
+      todayStandup = standup;
+    }
+  }
 
   if (updateStandupFetcher.json) {
     const { formData } =
