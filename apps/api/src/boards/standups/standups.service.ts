@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InsertStandup, Standup, standups } from 'src/libs/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { Database, DATABASE_TOKEN } from 'src/db/db.module';
 
 @Injectable()
@@ -45,20 +45,22 @@ export class StandupsService {
   //   return `This action returns a #${id} standup`;
   // }
 
-  update(
+  async update(
     id: number,
+    boardId: number,
     {
       formData,
     }: {
       formData?: InsertStandup['formData'];
     },
-  ) {
-    return this.db
+  ): Promise<Standup | undefined> {
+    const updatedStandups = await this.db
       .update(standups)
       .set({ formData, updatedAt: sql`NOW()` })
-      .where(eq(standups.id, id))
-      .returning()
-      .then(([standup]) => standup);
+      .where(and(eq(standups.id, id), eq(standups.boardId, boardId)))
+      .returning();
+
+    return updatedStandups.find((standup) => standup.id === id);
   }
 
   // delete(id: number) {
