@@ -8,7 +8,7 @@ import {
   useImperativeHandle,
   type Ref,
 } from "react";
-import { useFetcher, useLoaderData } from "react-router";
+import { Await, useFetcher, useLoaderData } from "react-router";
 import type { loader } from "./board-route";
 import { DateTime } from "luxon";
 import DynamicForm, {
@@ -23,38 +23,27 @@ import {
 } from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 
-import type { Standup } from "types";
+import type { Board, Standup, StandupFormStructure } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 
-type Props = {};
-
-interface CardContentRef {
+interface ContentRef {
   edit: () => void;
   cancel: () => void;
   save: () => void;
 }
 
-function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
-  const {
-    boardPromise,
-    standupsPromise,
-    boardActiveStandupFormStructurePromise,
-  } = useLoaderData<typeof loader>();
-
-  const board = use(boardPromise);
-
-  if (!board) {
-    return <FormSkeleton />;
-  }
-
-  const standups: Standup[] | null = use(standupsPromise);
-  const structure = use(boardActiveStandupFormStructurePromise);
-
-  if (!standups || !structure) {
-    return <FormSkeleton />;
-  }
-
+function Content({
+  ref,
+  board,
+  standups,
+  structure,
+}: {
+  ref: Ref<ContentRef>;
+  board: Board;
+  standups: Standup[];
+  structure: StandupFormStructure;
+}) {
   const schema = validateDynamicFormSchema(structure.schema);
 
   if (!schema) {
@@ -82,10 +71,14 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
   const boardTimezone = board.timezone;
   const boardToday = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
 
-  const createStandupFetcher = useFetcher<CreateStandupActionType>();
-  const updateStandupFetcher = useFetcher<UpdateStandupActionType>();
+  const createStandupFetcher = useFetcher<CreateStandupActionType>({
+    key: "create-standup",
+  });
+  const updateStandupFetcher = useFetcher<UpdateStandupActionType>({
+    key: "update-standup",
+  });
 
-  let todayStandup = standups.find((standup) => {
+  let todayStandup: Standup | undefined = standups.find((standup) => {
     // Convert createdAt to the board's timezone
     const standupDate = DateTime.fromISO(standup.createdAt, {
       zone: "utc",
@@ -138,7 +131,9 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
 
   if (updateStandupFetcher.json) {
     const { formData } =
-      (updateStandupFetcher.json as { formData: Standup["formData"] }) || {};
+      (updateStandupFetcher.json as {
+        formData: Standup["formData"];
+      }) || {};
 
     if (todayStandup) {
       todayStandup = {
@@ -264,8 +259,28 @@ function CardContent({ ref }: { ref: Ref<CardContentRef> }) {
   );
 }
 
-function TodaysStandup({}: Props) {
-  const cardContentRef = useRef<CardContentRef>(null);
+function TodaysStandup() {
+  const contentRef = useRef<ContentRef>(null);
+
+  const {
+    boardPromise,
+    standupsPromise,
+    boardActiveStandupFormStructurePromise,
+  } = useLoaderData<typeof loader>();
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      contentRef.current?.save();
+    }
+
+    if (event.key.toLowerCase() === "e") {
+      contentRef.current?.edit();
+    }
+
+    if (event.key === "Escape") {
+      contentRef.current?.cancel();
+    }
+  }
 
   return (
     <Card
@@ -274,22 +289,39 @@ function TodaysStandup({}: Props) {
         initial: "2",
         sm: "4",
       }}
-      onKeyDown={(event) => {
-        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-          cardContentRef.current?.save();
-        }
-
-        if (event.key.toLowerCase() === "e") {
-          cardContentRef.current?.edit();
-        }
-
-        if (event.key === "Escape") {
-          cardContentRef.current?.cancel();
-        }
-      }}
+      onKeyDown={handleKeyDown}
     >
       <Suspense fallback={<FormSkeleton />}>
-        <CardContent ref={cardContentRef} />
+        <Await
+          resolve={boardPromise}
+          children={(board) => {
+            return (
+              <Await resolve={standupsPromise}>
+                {(standups) => {
+                  return (
+                    <Await
+                      resolve={boardActiveStandupFormStructurePromise}
+                      children={(structure) => {
+                        if (!board || !standups || !structure) {
+                          return <FormSkeleton />;
+                        }
+
+                        return (
+                          <Content
+                            ref={contentRef}
+                            board={board}
+                            standups={standups}
+                            structure={structure}
+                          />
+                        );
+                      }}
+                    />
+                  );
+                }}
+              </Await>
+            );
+          }}
+        />
       </Suspense>
     </Card>
   );
