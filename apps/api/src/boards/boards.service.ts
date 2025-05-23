@@ -143,8 +143,11 @@ export class BoardsService {
     return result.count > 0;
   }
 
-  async update(id: number, updateBoardDto: UpdateBoardDto): Promise<Board> {
-    const result = await this.db
+  async update(
+    id: number,
+    updateBoardDto: UpdateBoardDto,
+  ): Promise<Board | undefined> {
+    const updatedBoards = await this.db
       .update(boards)
       .set({
         name: updateBoardDto.name,
@@ -154,7 +157,7 @@ export class BoardsService {
       .where(eq(boards.id, id))
       .returning();
 
-    return result[0];
+    return updatedBoards.find((board) => board.id === id);
   }
 
   // remove(id: number) {

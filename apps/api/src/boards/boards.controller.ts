@@ -78,12 +78,21 @@ export class BoardsController {
 
   @UseGuards(BoardAccessGuard)
   @Patch(':boardId')
-  update(
+  async update(
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() updateBoardDto: UpdateBoardDto,
   ): Promise<Board> {
     try {
-      return this.boardsService.update(boardId, updateBoardDto);
+      const updatedBoard = await this.boardsService.update(
+        boardId,
+        updateBoardDto,
+      );
+
+      if (!updatedBoard) {
+        throw new Error();
+      }
+
+      return updatedBoard;
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();
