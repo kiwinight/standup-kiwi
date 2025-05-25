@@ -7,6 +7,11 @@ import {
 
 export default [
   index("routes/index-route/index-route.tsx"),
+
+  layout("routes/team-board-layout-route/team-board-layout-route.tsx", [
+    route("/boards/9999", "routes/team-board-route/team-board-route.tsx"),
+  ]),
+
   layout("routes/board-layout-route/board-layout-route.tsx", [
     route(
       "/boards/create",

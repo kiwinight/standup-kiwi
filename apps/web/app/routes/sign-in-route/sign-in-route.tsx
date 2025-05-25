@@ -76,11 +76,8 @@ function SignInRoute({}: Route.ComponentProps) {
                 <Flex direction="column" gap="2">
                   <label>
                     <Flex align="center" gap="2">
-                      <Text
-                        size="2"
-                        className="font-semibold"
-                      >
-                        Access code
+                      <Text size="2" className="font-semibold">
+                        Access code*
                       </Text>
                       <Text size="1" color="gray">
                         Required
@@ -89,7 +86,7 @@ function SignInRoute({}: Route.ComponentProps) {
                   </label>
                   <TextField.Root
                     type="text"
-                    placeholder="A1B2C3"
+                    placeholder="Enter the access code - e.g. A1B2C3"
                     variant="soft"
                     {...form.register("otp")}
                   />

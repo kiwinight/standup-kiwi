@@ -3,6 +3,7 @@ import {
   Card,
   Container,
   Flex,
+  Separator,
   Text,
   TextField,
 } from "@radix-ui/themes";
@@ -48,7 +49,6 @@ function AccessRoute({}: Props) {
             access your personalized experience.
           </Text>
         </Flex>
-
         <Card
           size={{
             initial: "2",
@@ -79,11 +79,8 @@ function AccessRoute({}: Props) {
                 <Flex direction="column" gap="2">
                   <label>
                     <Flex align="center" gap="2">
-                      <Text
-                        size="2"
-                        className="font-semibold"
-                      >
-                        Email
+                      <Text size="2" className="font-semibold">
+                        Email*
                       </Text>
                       <Text size="1" color="gray">
                         Required
@@ -92,7 +89,7 @@ function AccessRoute({}: Props) {
                   </label>
                   <TextField.Root
                     type="text"
-                    placeholder="you@example.com"
+                    placeholder="Enter your email - e.g. your@email.com"
                     variant="soft"
                     {...form.register("email")}
                   />
@@ -119,6 +116,19 @@ function AccessRoute({}: Props) {
               </Flex>
             </Flex>
           </form>
+        </Card>
+        <Flex justify="center">
+          <Text>or</Text>
+        </Flex>
+        <Card
+          size={{
+            initial: "2",
+            sm: "4",
+          }}
+        >
+          <Text size="4" weight="bold">
+            Guest
+          </Text>
         </Card>
       </Flex>
     </Container>

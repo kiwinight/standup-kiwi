@@ -1,7 +1,7 @@
 import { getSession } from "./auth-session.server";
 
 import { redirect, type Session } from "react-router";
-import { isErrorData, type ApiData } from "types";
+import { createErrorData, isErrorData, type ApiData } from "types";
 import { commitSession } from "./auth-session.server";
 
 function verifyAccessToken(accessToken: string) {
@@ -10,9 +10,9 @@ function verifyAccessToken(accessToken: string) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-  }).then(
-    (response) => response.json() as Promise<ApiData<{ valid: boolean }>>
-  );
+  })
+    .then((response) => response.json() as Promise<ApiData<{ valid: boolean }>>)
+    .catch((error) => createErrorData(`${error.name} ${error.code}`, 500));
 }
 
 function refreshAccessToken(refreshToken: string) {
@@ -21,9 +21,12 @@ function refreshAccessToken(refreshToken: string) {
     {
       method: "POST",
     }
-  ).then(
-    (response) => response.json() as Promise<ApiData<{ access_token: string }>>
-  );
+  )
+    .then(
+      (response) =>
+        response.json() as Promise<ApiData<{ access_token: string }>>
+    )
+    .catch((error) => createErrorData(`${error.name} ${error.code}`, 500));
 }
 
 async function verifyTokenAndRefresh(session: Session) {

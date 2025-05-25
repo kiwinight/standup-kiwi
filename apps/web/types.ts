@@ -82,4 +82,16 @@ export function isErrorData(data: unknown): data is ErrorData {
   );
 }
 
+export function createErrorData(
+  message: string,
+  statusCode: number,
+  error?: string
+): ErrorData {
+  return {
+    message,
+    statusCode,
+    ...(error ? { error } : {}),
+  };
+}
+
 export type ApiData<T> = T | ErrorData;

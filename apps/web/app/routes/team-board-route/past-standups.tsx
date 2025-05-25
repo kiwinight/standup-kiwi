@@ -1,0 +1,201 @@
+import { DateTime } from "luxon";
+import { Suspense, use } from "react";
+import { useLoaderData } from "react-router";
+import type { loader } from "./team-board-route";
+import {
+  validateDynamicFormSchema,
+  type DynamicFormValues,
+} from "./dynamic-form";
+import { Box, Card, Flex, Skeleton, Text, Tooltip } from "@radix-ui/themes";
+import { type Standup } from "types";
+import { parseMarkdownToHtml } from "~/libs/markdown";
+
+type Props = {};
+
+function Standups() {
+  const { boardPromise, standupsPromise, standupFormStructuresPromise } =
+    useLoaderData<typeof loader>();
+
+  const board = use(boardPromise);
+
+  if (!board) {
+    return <SuspenseFallback />;
+  }
+
+  const standups = use(standupsPromise);
+  const standupFormStructures = use(standupFormStructuresPromise);
+
+  if (!standups || !standupFormStructures) {
+    return <SuspenseFallback />;
+  }
+
+  const boardTimezone = board.timezone;
+
+  const today = DateTime.now().setZone(boardTimezone).startOf("day"); // 2025-01-13T00:00:00.000Z
+
+  const pastStandups = standups.filter(
+    (standup) =>
+      !DateTime.fromISO(standup.createdAt, { zone: "utc" })
+        .setZone(boardTimezone)
+        .startOf("day")
+        .equals(today)
+  );
+
+  if (pastStandups.length === 0) {
+    return (
+      <Card
+        size={{
+          initial: "2",
+          sm: "4",
+        }}
+      >
+        <Flex
+          direction="column"
+          justify="center"
+          align="center"
+          gap="2"
+          py="128px"
+          maxWidth="360px"
+          mx="auto"
+        >
+          <Text weight="medium" size="2">
+            No past standups
+          </Text>
+          <Text size="2" align="center">
+            Standups submitted before today will appear here.
+          </Text>
+        </Flex>
+      </Card>
+    );
+  }
+
+  return pastStandups.map((standup) => {
+    const structure = standupFormStructures.find(
+      (structure) => structure.id === standup.formStructureId
+    );
+
+    const schema = validateDynamicFormSchema(structure?.schema);
+
+    if (!schema) {
+      return null;
+    }
+
+    return (
+      <Card
+        key={standup.id}
+        variant="surface"
+        size={{
+          initial: "2",
+          sm: "4",
+        }}
+      >
+        <Flex direction="column" gap="5" align="start">
+          <Tooltip
+            content={DateTime.fromISO(standup.createdAt)
+              .setZone(boardTimezone)
+              .toLocaleString(DateTime.DATETIME_FULL)}
+          >
+            <Text size="4" weight="bold">
+              {DateTime.fromISO(standup.createdAt)
+                .setZone(boardTimezone)
+                .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
+            </Text>
+          </Tooltip>
+          {schema.fields.map((field) => {
+            const value = (
+              standup.formData as Standup["formData"] as DynamicFormValues
+            )[field.name];
+
+            if (!value) {
+              return null;
+            }
+
+            const html = parseMarkdownToHtml(value);
+
+            return (
+              <Flex key={field.name} direction="column" gap="2">
+                <Text size="2" weight="medium">
+                  {field.label}
+                </Text>
+                <Box
+                  className="prose prose-sm prose-custom"
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              </Flex>
+            );
+          })}
+        </Flex>
+      </Card>
+    );
+  });
+}
+
+function PastStandups({}: Props) {
+  return (
+    <Flex direction="column" gap="5">
+      <Text size="3" weight="bold">
+        Past Standups
+      </Text>
+      <Suspense fallback={<SuspenseFallback />}>
+        <Standups />
+      </Suspense>
+    </Flex>
+  );
+}
+
+function SuspenseFallback() {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Card
+          key={index}
+          variant="surface"
+          size={{
+            initial: "2",
+            sm: "4",
+          }}
+        >
+          <Flex direction="column" gap="5" align="start">
+            <Text size="4" weight="bold">
+              <Skeleton>Fri, Jan 17, 2025</Skeleton>
+            </Text>
+            <Flex direction="column" gap="5">
+              <Flex direction="column" gap="2">
+                <Text size="2" weight="medium">
+                  <Skeleton>What did you do yesterday?</Skeleton>
+                </Text>
+                <Text size="2" className="max-h-[40px] overflow-hidden">
+                  <Skeleton width="100%">
+                    {Array.from({ length: 500 }).map((_, index) => "A ")}
+                  </Skeleton>
+                </Text>
+              </Flex>
+              <Flex direction="column" gap="2">
+                <Text size="2" weight="medium">
+                  <Skeleton>What did you do yesterday?</Skeleton>
+                </Text>
+                <Text size="2" className="max-h-[40px] overflow-hidden">
+                  <Skeleton width="100%">
+                    {Array.from({ length: 500 }).map((_, index) => "A ")}
+                  </Skeleton>
+                </Text>
+              </Flex>
+              <Flex direction="column" gap="2">
+                <Text size="2" weight="medium">
+                  <Skeleton>What did you do yesterday?</Skeleton>
+                </Text>
+                <Text size="2" className="max-h-[40px] overflow-hidden">
+                  <Skeleton width="100%">
+                    {Array.from({ length: 500 }).map((_, index) => "A ")}
+                  </Skeleton>
+                </Text>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Card>
+      ))}
+    </>
+  );
+}
+
+export default PastStandups;
