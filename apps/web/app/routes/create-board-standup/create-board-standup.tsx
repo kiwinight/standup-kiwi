@@ -1,4 +1,4 @@
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 import type { Route } from "./+types/create-board-standup";
 import { isErrorData } from "types";
 import type { ApiData } from "types";
@@ -29,8 +29,9 @@ function createStandup(
 export type ActionType = typeof action;
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const { accessToken, refreshed, session } =
-    await verifyAuthentication(request);
+  const { accessToken, refreshed, session } = await requireAuthenticated(
+    request
+  );
 
   const { formData, formStructureId } =
     (await request.json()) as CreateStandupRequestBody;

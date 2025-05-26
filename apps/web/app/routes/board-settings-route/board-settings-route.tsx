@@ -1,9 +1,10 @@
 import { data } from "react-router";
 import type { Route } from "./+types/board-settings-route";
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 import { isErrorData, type ApiData, type Board } from "types";
 import NameSetting from "./name-setting";
 import TimezoneSetting from "./timezone-setting";
+import { commitSession } from "~/libs/auth-session.server";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -14,7 +15,9 @@ function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { accessToken } = await verifyAuthentication(request);
+  const { accessToken, session, refreshed } = await requireAuthenticated(
+    request
+  );
 
   const boardId = params.boardId;
 
@@ -26,7 +29,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     return data;
   });
 
-  return data({ boardPromise });
+  return data(
+    { boardPromise },
+    {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    }
+  );
 }
 
 export default function BoardSettingsRoute({}: Route.ComponentProps) {

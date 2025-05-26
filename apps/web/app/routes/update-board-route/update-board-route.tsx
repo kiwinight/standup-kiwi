@@ -1,7 +1,7 @@
 import { isErrorData, type ApiData } from "types";
 import type { Board } from "types";
 import type { Route } from "./+types/update-board-route";
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
@@ -32,8 +32,9 @@ function updateBoard(
 export type ActionType = typeof action;
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const { accessToken, refreshed, session } =
-    await verifyAuthentication(request);
+  const { accessToken, refreshed, session } = await requireAuthenticated(
+    request
+  );
 
   const boardId = params.boardId;
 

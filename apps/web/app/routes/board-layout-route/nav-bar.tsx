@@ -1,6 +1,6 @@
 import { Suspense, useContext } from "react";
 import type { Route } from "./+types/board-layout-route";
-import { Await, Link, useLoaderData } from "react-router";
+import { Await, Link, useLoaderData, useRouteLoaderData } from "react-router";
 import { useParams } from "react-router";
 import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
 import {
@@ -15,9 +15,12 @@ import {
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
+import type { loader as rootLoader } from "~/root";
 
 function NavBar() {
-  const { currentUser, currentUserBoards } =
+  const { currentUserPromise } = useRouteLoaderData<typeof rootLoader>("root")!;
+
+  const { currentUserBoardsPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
 
   const { boardId } = useParams();
@@ -65,7 +68,7 @@ function NavBar() {
                 </>
               }
             >
-              <Await resolve={currentUserBoards}>
+              <Await resolve={currentUserBoardsPromise}>
                 {(data) => {
                   if (!data) {
                     return (
@@ -101,9 +104,7 @@ function NavBar() {
                             return (
                               <Link key={board.id} to={`/boards/${board.id}`}>
                                 <DropdownMenu.Item
-                                  className={
-                                    isActive ? "bg-(--accent-a3)" : ""
-                                  }
+                                  className={isActive ? "bg-(--accent-a3)" : ""}
                                 >
                                   <Text
                                   // weight={isActive ? "medium" : "regular"}
@@ -160,9 +161,7 @@ function NavBar() {
               <DropdownMenu.SubTrigger>Appearance</DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item
-                  className={
-                    appearance === "light" ? "bg-(--accent-a3)" : ""
-                  }
+                  className={appearance === "light" ? "bg-(--accent-a3)" : ""}
                   onClick={() => {
                     setAppearance("light");
                   }}
@@ -170,9 +169,7 @@ function NavBar() {
                   Light
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
-                  className={
-                    appearance === "dark" ? "bg-(--accent-a3)" : ""
-                  }
+                  className={appearance === "dark" ? "bg-(--accent-a3)" : ""}
                   onClick={() => {
                     setAppearance("dark");
                   }}
@@ -180,9 +177,7 @@ function NavBar() {
                   Dark
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
-                  className={
-                    appearance === "inherit" ? "bg-(--accent-a3)" : ""
-                  }
+                  className={appearance === "inherit" ? "bg-(--accent-a3)" : ""}
                   onClick={() => {
                     setAppearance("inherit");
                   }}
@@ -196,7 +191,7 @@ function NavBar() {
                 <PersonIcon />
                 <Text size="2">
                   <Suspense fallback={<Skeleton>Loading</Skeleton>}>
-                    <Await resolve={currentUser}>
+                    <Await resolve={currentUserPromise}>
                       {(data) => {
                         if (!data) {
                           return <Skeleton>Loading</Skeleton>;
