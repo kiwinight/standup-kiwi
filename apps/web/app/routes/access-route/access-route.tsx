@@ -79,10 +79,7 @@ function AccessRoute({}: Props) {
                 <Flex direction="column" gap="2">
                   <label>
                     <Flex align="center" gap="2">
-                      <Text
-                        size="2"
-                        className="font-semibold"
-                      >
+                      <Text size="2" className="font-semibold">
                         Email
                       </Text>
                       <Text size="1" color="gray">

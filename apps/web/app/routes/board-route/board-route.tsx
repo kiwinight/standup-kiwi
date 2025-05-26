@@ -9,13 +9,14 @@ import {
   type Standup,
   type StandupFormStructure,
 } from "types";
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
 import TodaysStandup from "./todays-standup";
 import PastStandups from "./past-standups";
 import { Suspense } from "react";
 import { Await, data, useLoaderData } from "react-router";
+import { commitSession } from "~/libs/auth-session.server";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -57,7 +58,9 @@ function listStandups(
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { accessToken } = await verifyAuthentication(request);
+  const { accessToken, session, refreshed } = await requireAuthenticated(
+    request
+  );
 
   const boardId = params.boardId;
 
@@ -131,13 +134,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     });
   });
 
-  return data({
-    boardDataPromise,
-    boardPromise,
-    standupsPromise,
-    boardActiveStandupFormStructurePromise,
-    standupFormStructuresPromise,
-  });
+  return data(
+    {
+      boardDataPromise,
+      boardPromise,
+      standupsPromise,
+      boardActiveStandupFormStructurePromise,
+      standupFormStructuresPromise,
+    },
+    {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    }
+  );
 }
 
 function BoardExistanceGuard() {

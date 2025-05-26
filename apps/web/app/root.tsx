@@ -1,10 +1,12 @@
 import {
+  data,
   Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   type ErrorResponse,
 } from "react-router";
 
@@ -19,6 +21,12 @@ import {
   useColorScheme,
   colorSchemeFlickerPrevention,
 } from "./context/ColorSchemeContext";
+import { createErrorData, isErrorData, type User } from "types";
+import type { ApiData } from "types";
+import { verifyAndRefreshAccessToken } from "./libs/auth";
+import { commitSession, getSession } from "./libs/auth-session.server";
+import { useEffect } from "react";
+import posthog from "posthog-js";
 
 export function meta(args?: Route.MetaArgs) {
   const description =
@@ -94,7 +102,65 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+function getCurrentUser(accessToken: string) {
+  return fetch(import.meta.env.VITE_API_URL + "/auth/users/me", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+    .then((response) => response.json() as Promise<ApiData<User>>)
+    .catch((error) => {
+      console.error(error);
+      return createErrorData(error.message, 500);
+    });
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const session = await getSession(request.headers.get("Cookie"));
+
+  const {
+    isValid,
+    refreshed,
+    accessToken,
+    session: newSession,
+  } = await verifyAndRefreshAccessToken(session);
+
+  return data(
+    {
+      currentUserPromise: isValid
+        ? getCurrentUser(accessToken).then((data) => {
+            if (isErrorData(data)) {
+              return null;
+            }
+            return data;
+          })
+        : null,
+    },
+    {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(newSession) } : {}),
+      },
+    }
+  );
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { currentUserPromise } = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    if (currentUserPromise) {
+      currentUserPromise.then((data) => {
+        if (data) {
+          posthog.identify(data.id, {
+            email: data.primary_email,
+            name: data.display_name,
+            ...data,
+          });
+        }
+      });
+    }
+  }, [currentUserPromise]);
+
   return (
     <html lang="en">
       <head>
