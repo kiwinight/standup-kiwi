@@ -1,10 +1,13 @@
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 import type { Route } from "./+types/index-route";
 import { isErrorData, type ApiData, type Board, type User } from "types";
 import { redirect } from "react-router";
+import { commitSession } from "~/libs/auth-session.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const { accessToken } = await verifyAuthentication(request);
+  const { accessToken, session, refreshed } = await requireAuthenticated(
+    request
+  );
 
   const currentUser = await fetch(
     import.meta.env.VITE_API_URL + "/auth/users/me",
@@ -24,7 +27,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 
   if (!currentUser) {
-    return redirect("/access");
+    return redirect("/access", {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    });
   }
 
   const lastAccessedBoardId =
@@ -32,8 +39,16 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   if (lastAccessedBoardId) {
     const boardPath = `/boards/${lastAccessedBoardId}`;
-    return redirect(boardPath);
+    return redirect(boardPath, {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    });
   }
 
-  return redirect("/boards/create");
+  return redirect("/boards/create", {
+    headers: {
+      ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+    },
+  });
 }

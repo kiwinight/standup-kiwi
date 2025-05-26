@@ -67,10 +67,22 @@ export interface Standup {
  * API
  */
 
-interface ErrorData {
+export interface ErrorData {
   message: string;
   statusCode: number;
   error?: string;
+}
+
+export function createErrorData(
+  message: string,
+  statusCode: number,
+  error?: string
+): ErrorData {
+  return {
+    message,
+    statusCode,
+    ...(error ? { error } : {}),
+  };
 }
 
 export function isErrorData(data: unknown): data is ErrorData {

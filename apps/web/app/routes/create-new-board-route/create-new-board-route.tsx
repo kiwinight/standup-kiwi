@@ -13,13 +13,13 @@ import {
   type ActionFunctionArgs,
   type ClientActionFunctionArgs,
 } from "react-router";
-import verifyAuthentication from "~/libs/auth";
+import requireAuthenticated from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
 import type { Route } from "./+types/create-new-board-route";
 import { isErrorData, type ApiData, type Board } from "types";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  await verifyAuthentication(request);
+  await requireAuthenticated(request);
 }
 
 function getFormName(formData: FormData): string | undefined {
@@ -51,8 +51,9 @@ export async function clientAction({
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { accessToken, refreshed, session } =
-    await verifyAuthentication(request);
+  const { accessToken, refreshed, session } = await requireAuthenticated(
+    request
+  );
 
   let formData = await request.formData();
 
