@@ -7,6 +7,9 @@ import favicon32 from "../assets/favicon-32x32.png";
 import ogImage from "../assets/og-image.png";
 import appleTouchIcon from "../assets/apple-touch-icon.png";
 import PostHogScript from "../components/posthog-script.astro";
+
+const description =
+  "Standup Kiwi is an open-source standup board for teams and solo experts — a calm, clear, and effortless way to share and record daily standups, whether async or live.";
 ---
 
 <html lang="en">
@@ -29,16 +32,14 @@ import PostHogScript from "../components/posthog-script.astro";
     <title>The standup board for teams and solo experts • Standup Kiwi</title>
 
     <meta name="generator" content={Astro.generator} />
-    <meta
-      name="description"
-      content="Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless."
-    />
+    <meta name="description" content={description} />
     <meta property="og:title" content="Standup Kiwi" />
-    <meta
-      property="og:description"
-      content="Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless."
-    />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage.src} />
+    <meta property="og:url" content="https://standupkiwi.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Standup Kiwi" />
+    <meta property="og:locale" content="en_US" />
   </head>
 
   <body>

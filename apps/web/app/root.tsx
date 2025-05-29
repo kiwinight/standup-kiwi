@@ -30,7 +30,7 @@ import posthog from "posthog-js";
 
 export function meta(args?: Route.MetaArgs) {
   const description =
-    "Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless.";
+    "Standup Kiwi is an open-source standup board for teams and solo experts — a calm, clear, and effortless way to share and record daily standups, whether async or live.";
 
   return [
     {
