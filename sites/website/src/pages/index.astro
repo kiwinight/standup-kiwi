@@ -6,13 +6,14 @@ import favicon16 from "../assets/favicon-16x16.png";
 import favicon32 from "../assets/favicon-32x32.png";
 import ogImage from "../assets/og-image.png";
 import appleTouchIcon from "../assets/apple-touch-icon.png";
+import PostHogScript from "../components/posthog-script.astro";
 ---
 
-<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+
     <link rel="icon" type="image/png" href={favicon16.src} />
     <link rel="icon" type="image/png" href={favicon32.src} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,8 +23,12 @@ import appleTouchIcon from "../assets/apple-touch-icon.png";
       rel="stylesheet"
     />
     <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon.src} />
-    <meta name="generator" content={Astro.generator} />
+
+    <PostHogScript />
+
     <title>The standup board for teams and solo experts • Standup Kiwi</title>
+
+    <meta name="generator" content={Astro.generator} />
     <meta
       name="description"
       content="Standup Kiwi is a standup board for teams and solo experts. It is designed to keep your updates calm, clear, and effortless."
