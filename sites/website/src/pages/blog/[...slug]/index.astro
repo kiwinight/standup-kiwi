@@ -1,0 +1,34 @@
+---
+import "@radix-ui/themes/styles.css";
+import "../../../styles/global.css";
+import { type CollectionEntry, getCollection } from "astro:content";
+import { render } from "astro:content";
+import BaseHead from "../../../components/base-head.astro";
+import ContentHead from "../../../components/content-head.astro";
+import Content from "./content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<"blog">;
+
+const post = Astro.props;
+const { Content: PostContent } = await render(post);
+---
+
+<html lang="en">
+  <head>
+    <BaseHead />
+    <ContentHead title={post.data.title} description={post.data.description} />
+  </head>
+
+  <body>
+    <Content post={post} client:load>
+      <PostContent />
+    </Content>
+  </body>
+</html>

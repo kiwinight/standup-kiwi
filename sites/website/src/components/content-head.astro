@@ -1,0 +1,24 @@
+---
+import ogImage from "../assets/og-image.png";
+import { SITE_NAME } from "../constants";
+
+const { title, description } = Astro.props;
+---
+
+<title>{title} • {SITE_NAME}</title>
+<meta name="title" content={`${title} • ${SITE_NAME}`} />
+<meta name="description" content={description} />
+
+<meta property="og:title" content={`${title} • ${SITE_NAME}`} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage.src} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content="en_US" />
+
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={`${title} • ${SITE_NAME}`} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={ogImage.src} />
