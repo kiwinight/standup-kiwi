@@ -2,44 +2,19 @@
 import "@radix-ui/themes/styles.css";
 import "../styles/global.css";
 import IndexContent from "./index-content.tsx";
-import favicon16 from "../assets/favicon-16x16.png";
-import favicon32 from "../assets/favicon-32x32.png";
-import ogImage from "../assets/og-image.png";
-import appleTouchIcon from "../assets/apple-touch-icon.png";
-import PostHogScript from "../components/posthog-script.astro";
 
-const description =
-  "Standup Kiwi is an open-source standup board for teams and solo experts — a calm, clear, and effortless way to share and record daily standups, whether async or live.";
+import BaseHead from "../components/base-head.astro";
+import ContentHead from "../components/content-head.astro";
+import { SITE_DESCRIPTION } from "../constants.ts";
 ---
 
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-
-    <link rel="icon" type="image/png" href={favicon16.src} />
-    <link rel="icon" type="image/png" href={favicon32.src} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-      rel="stylesheet"
+    <BaseHead />
+    <ContentHead
+      title="The standup board for teams and solo experts"
+      description={SITE_DESCRIPTION}
     />
-    <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon.src} />
-
-    <PostHogScript />
-
-    <title>The standup board for teams and solo experts • Standup Kiwi</title>
-
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
-    <meta property="og:title" content="Standup Kiwi" />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage.src} />
-    <meta property="og:url" content="https://standupkiwi.com" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Standup Kiwi" />
-    <meta property="og:locale" content="en_US" />
   </head>
 
   <body>
