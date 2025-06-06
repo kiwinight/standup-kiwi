@@ -11,6 +11,7 @@ import {
 } from "@radix-ui/themes";
 import { NavBar } from "../../components/nav-bar";
 import type { InferEntrySchema, RenderedContent } from "astro:content";
+import { PAGE_DESCRIPTION } from "./constants";
 
 type Props = {
   posts: {
@@ -60,8 +61,7 @@ function Content({ posts }: Props) {
                   Blog
                 </Heading>
                 <Text size="4" color="gray">
-                  Thoughts, updates, and helpful tips from the Standup Kiwi
-                  team.
+                  {PAGE_DESCRIPTION}
                 </Text>
               </Flex>
             </Flex>

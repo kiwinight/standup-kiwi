@@ -5,6 +5,7 @@ import BaseHead from "../../components/base-head.astro";
 import { getCollection } from "astro:content";
 import ContentHead from "../../components/content-head.astro";
 import Content from "./content";
+import { PAGE_DESCRIPTION } from "./constants";
 
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -15,7 +16,7 @@ const posts = (await getCollection("blog")).sort(
 <html lang="en">
   <head>
     <BaseHead />
-    <ContentHead title="Blog" description="Blog" />
+    <ContentHead title="Blog" description={PAGE_DESCRIPTION} />
   </head>
   <body>
     <Content posts={posts} client:load />

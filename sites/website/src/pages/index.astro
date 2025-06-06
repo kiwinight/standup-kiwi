@@ -5,9 +5,7 @@ import IndexContent from "./index-content.tsx";
 
 import BaseHead from "../components/base-head.astro";
 import ContentHead from "../components/content-head.astro";
-
-const description =
-  "Standup Kiwi is an open-source standup board for teams and solo experts — a calm, clear, and effortless way to share and record daily standups, whether async or live.";
+import { SITE_DESCRIPTION } from "../constants.ts";
 ---
 
 <html lang="en">
@@ -15,7 +13,7 @@ const description =
     <BaseHead />
     <ContentHead
       title="The standup board for teams and solo experts"
-      description={description}
+      description={SITE_DESCRIPTION}
     />
   </head>
 
