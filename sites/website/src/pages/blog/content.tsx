@@ -88,6 +88,7 @@ function Content({ posts }: Props) {
                 return (
                   <Card
                     asChild
+                    key={post.id}
                     size={{
                       initial: "2",
                       sm: "4",
