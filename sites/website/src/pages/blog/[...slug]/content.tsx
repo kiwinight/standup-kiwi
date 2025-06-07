@@ -9,13 +9,13 @@ import {
   Card,
   Inset,
   Button,
+  Link,
 } from "@radix-ui/themes";
 import { NavBar } from "../../../components/nav-bar";
 import type { RenderedContent } from "astro:content";
 import type { InferEntrySchema } from "astro:content";
-import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 import type { ReactNode } from "react";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { ArrowLeftIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 
 type Props = {
   post: {
@@ -38,6 +38,10 @@ function Content({ post, children }: Props) {
           size={{
             initial: "3",
             sm: "4",
+          }}
+          pb={{
+            initial: "48px",
+            sm: "56px",
           }}
           className="relative"
         >
@@ -67,19 +71,38 @@ function Content({ post, children }: Props) {
                 >
                   {post.data.title}
                 </Heading>
-                <Text size="2" color="gray">
+
+                <Text size="3" color="gray">
                   Posted on{" "}
                   {post.data.pubDate.toLocaleDateString("en-US", {
                     month: "long",
                     day: "numeric",
                     year: "numeric",
                   })}{" "}
-                  • Edited on{" "}
-                  {post.data.updatedDate?.toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {post.data.updatedDate && (
+                    <>
+                      • Edited on{" "}
+                      {post.data.updatedDate?.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </>
+                  )}{" "}
+                </Text>
+
+                <Text size="3" color="gray">
+                  <Link
+                    href="https://www.linkedin.com/in/hyoku-alex-kwon/"
+                    target="_blank"
+                  >
+                    {post.data.author}
+                  </Link>
+                  {post.data.authorTitle && (
+                    <Text size="3" color="gray">
+                      {", " + post.data.authorTitle}
+                    </Text>
+                  )}
                 </Text>
               </Flex>
             </Flex>
@@ -105,8 +128,8 @@ function Content({ post, children }: Props) {
             <Flex
               direction="column"
               gap={{
-                initial: "7",
-                sm: "8",
+                initial: "5",
+                sm: "6",
               }}
             >
               <Card
