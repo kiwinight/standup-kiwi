@@ -6,13 +6,23 @@ import {
   validateDynamicFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
-import { Box, Card, Flex, Skeleton, Text, Tooltip } from "@radix-ui/themes";
+import {
+  Box,
+  Card,
+  Flex,
+  Skeleton,
+  Text,
+  Tooltip,
+  useThemeContext,
+} from "@radix-ui/themes";
 import { type Standup } from "types";
 import { parseMarkdownToHtml } from "~/libs/markdown";
 
 type Props = {};
 
 function Standups() {
+  const { appearance } = useThemeContext();
+
   const { boardPromise, standupsPromise, standupFormStructuresPromise } =
     useLoaderData<typeof loader>();
 
@@ -118,7 +128,9 @@ function Standups() {
                   {field.label}
                 </Text>
                 <Box
-                  className="prose prose-sm prose-custom"
+                  className={`prose prose-sm ${
+                    appearance === "dark" ? "dark:prose-invert" : ""
+                  }`}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
               </Flex>
