@@ -1,4 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@config "../tailwind.config.ts";
 
 /* html,
 body {

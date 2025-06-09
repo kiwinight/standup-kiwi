@@ -2,7 +2,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Flex, Box, TextArea, Button, Text, Skeleton } from "@radix-ui/themes";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
-import { useImperativeHandle, type Ref } from "react";
+import { useImperativeHandle, useEffect, useRef, type Ref } from "react";
+import type { ComponentProps } from "react";
+
+function AutoSizeTextArea({ ...props }: ComponentProps<typeof TextArea>) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [props.value]);
+
+  return <TextArea ref={textareaRef} {...props} />;
+}
 
 export function validateDynamicFormSchema(schema: unknown) {
   try {
@@ -87,26 +102,23 @@ function DynamicForm({
   const { title, description, fields } = schema;
 
   const dynamicFormSchema = z.object(
-    fields.reduce(
-      (acc, field) => {
-        if (field.type === "textarea") {
-          let fieldValidation = z.string();
+    fields.reduce((acc, field) => {
+      if (field.type === "textarea") {
+        let fieldValidation = z.string();
 
-          if (field.validations) {
-            fieldValidation = fieldValidation
-              .min(field.validations.minLength || 0)
-              .max(field.validations.maxLength || Infinity);
-          }
-
-          acc[field.name] = field.required
-            ? fieldValidation.nonempty()
-            : fieldValidation.optional();
+        if (field.validations) {
+          fieldValidation = fieldValidation
+            .min(field.validations.minLength || 0)
+            .max(field.validations.maxLength || Infinity);
         }
 
-        return acc;
-      },
-      {} as { [key: string]: z.ZodType }
-    )
+        acc[field.name] = field.required
+          ? fieldValidation.nonempty()
+          : fieldValidation.optional();
+      }
+
+      return acc;
+    }, {} as { [key: string]: z.ZodType })
   );
 
   const {
@@ -154,10 +166,7 @@ function DynamicForm({
               <Flex key={field.name} direction="column" gap="2">
                 <label>
                   <Flex align="center" gap="2">
-                    <Text
-                      size="2"
-                      className="font-semibold"
-                    >
+                    <Text size="2" className="font-semibold">
                       {field.label}
                     </Text>
                     {field.required && (
@@ -172,13 +181,13 @@ function DynamicForm({
                     name={field.name}
                     control={control}
                     render={({ field: { onChange, value } }) => (
-                      <TextArea
+                      <AutoSizeTextArea
+                        variant="soft"
+                        className="w-full min-h-[72px]!"
+                        resize="none"
                         value={value}
                         onChange={onChange}
-                        variant="soft"
                         placeholder={field.placeholder}
-                        className="w-full min-h-[80px]!"
-                        resize="vertical"
                       />
                     )}
                   />
@@ -238,15 +247,9 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Text
-              size="2"
-              color="gray"
-              className="max-h-[80px] overflow-hidden"
-            >
-              <Skeleton width="100%">
-                {Array.from({ length: 500 }).map((_, index) => "A")}
-              </Skeleton>
-            </Text>
+            <Skeleton width="100%">
+              <Box py="1" px="2" height="72px" />
+            </Skeleton>
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
@@ -257,15 +260,9 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Text
-              size="2"
-              color="gray"
-              className="max-h-[80px] overflow-hidden"
-            >
-              <Skeleton width="100%">
-                {Array.from({ length: 500 }).map((_, index) => "A")}
-              </Skeleton>
-            </Text>
+            <Skeleton width="100%">
+              <Box py="1" px="2" height="72px" />
+            </Skeleton>
           </Flex>
 
           <Flex direction="column" gap="2" mt="5">
@@ -276,15 +273,9 @@ export function FormSkeleton() {
                 </Text>
               </Flex>
             </label>
-            <Text
-              size="2"
-              color="gray"
-              className="max-h-[80px] overflow-hidden"
-            >
-              <Skeleton width="100%">
-                {Array.from({ length: 500 }).map((_, index) => "A")}
-              </Skeleton>
-            </Text>
+            <Skeleton width="100%">
+              <Box py="1" px="2" height="72px" />
+            </Skeleton>
           </Flex>
         </Box>
         <Flex justify="end" mt="5" gap="2">
