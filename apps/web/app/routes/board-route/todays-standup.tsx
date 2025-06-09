@@ -1,4 +1,11 @@
-import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Text,
+  useThemeContext,
+} from "@radix-ui/themes";
 import {
   Suspense,
   useEffect,
@@ -44,6 +51,8 @@ function Content({
   standups: Standup[];
   structure: StandupFormStructure;
 }) {
+  const { appearance } = useThemeContext();
+
   const schema = validateDynamicFormSchema(structure.schema);
 
   if (!schema) {
@@ -236,7 +245,9 @@ function Content({
                     {field.label}
                   </Text>
                   <Box
-                    className="prose prose-sm prose-custom"
+                    className={`prose prose-sm ${
+                      appearance === "dark" ? "dark:prose-invert" : ""
+                    }`}
                     dangerouslySetInnerHTML={{ __html: html }}
                   />
                 </Flex>
