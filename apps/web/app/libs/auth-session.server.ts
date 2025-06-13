@@ -12,8 +12,6 @@ type SessionFlashData = {
 const authSessionCookieName = process.env.AUTH_SESSION_COOKIE_NAME!;
 const authSessionCookieSecret = process.env.AUTH_SESSION_COOKIE_SECRET!;
 
-console.log("authSessionCookieName", authSessionCookieName);
-
 // authCookieSessionStorage
 const authSession = createCookieSessionStorage<SessionData, SessionFlashData>({
   // a Cookie from `createCookie` or the CookieOptions to create one
@@ -32,7 +30,7 @@ const authSession = createCookieSessionStorage<SessionData, SessionFlashData>({
     // path: "/",
     // sameSite: "lax",
     secrets: [authSessionCookieSecret],
-    secure: true,
+    secure: process.env.NODE_ENV === "production", // NOTE: Secure cookie is enabled only in production for HTTPS. In development, it's disabled to allow cookie storage in Safari during local testing. WARNING: Always ensure this is TRUE in production to prevent session hijacking.
   },
 });
 
