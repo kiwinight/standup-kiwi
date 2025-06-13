@@ -26,7 +26,7 @@ const authSession = createCookieSessionStorage<SessionData, SessionFlashData>({
     //
     // expires: new Date(Date.now() + 60_000),
     httpOnly: true,
-    // maxAge: 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
     // path: "/",
     // sameSite: "lax",
     secrets: [authSessionCookieSecret],
