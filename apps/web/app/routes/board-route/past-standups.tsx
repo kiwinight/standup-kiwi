@@ -6,14 +6,24 @@ import {
   validateDynamicFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
-import { Box, Card, Flex, Skeleton, Text, Tooltip } from "@radix-ui/themes";
+import {
+  Box,
+  Card,
+  Flex,
+  Skeleton,
+  Text,
+  Tooltip,
+  useThemeContext,
+} from "@radix-ui/themes";
 import { type Standup } from "types";
 import { parseMarkdownToHtml } from "~/libs/markdown";
 
 type Props = {};
 
 function Standups() {
-  const { boardPromise, standupsPromise, standupFormStructuresPromise } =
+  const { appearance } = useThemeContext();
+
+  const { boardPromise, standupsPromise, standupFormsPromise } =
     useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
@@ -23,9 +33,9 @@ function Standups() {
   }
 
   const standups = use(standupsPromise);
-  const standupFormStructures = use(standupFormStructuresPromise);
+  const standupForms = use(standupFormsPromise);
 
-  if (!standups || !standupFormStructures) {
+  if (!standups || !standupForms) {
     return <SuspenseFallback />;
   }
 
@@ -70,11 +80,9 @@ function Standups() {
   }
 
   return pastStandups.map((standup) => {
-    const structure = standupFormStructures.find(
-      (structure) => structure.id === standup.formStructureId
-    );
+    const form = standupForms.find((form) => form.id === standup.formId);
 
-    const schema = validateDynamicFormSchema(structure?.schema);
+    const schema = validateDynamicFormSchema(form?.schema);
 
     if (!schema) {
       return null;
@@ -118,7 +126,9 @@ function Standups() {
                   {field.label}
                 </Text>
                 <Box
-                  className="prose prose-sm prose-custom"
+                  className={`prose prose-sm ${
+                    appearance === "dark" ? "dark:prose-invert" : ""
+                  }`}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
               </Flex>

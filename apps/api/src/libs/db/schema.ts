@@ -13,9 +13,9 @@ import {
 
 export const boards = pgTable('boards', {
   id: serial('id').primaryKey(),
-  activeStandupFormStructureId: integer(
-    'active_standup_form_structure_id',
-  ).references((): AnyPgColumn => standupFormStructures.id),
+  activeStandupFormId: integer('active_standup_form_id').references(
+    (): AnyPgColumn => standupForms.id,
+  ),
   name: text().notNull(),
   timezone: text().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -25,7 +25,9 @@ export const boards = pgTable('boards', {
 export type Board = typeof boards.$inferSelect;
 export type InsertBoard = typeof boards.$inferInsert;
 
-export const standupFormStructures = pgTable('standup_form_structures', {
+// NOTE: This is insert only table
+// TODO: Add a trigger to prevent updating and deleting rows
+export const standupForms = pgTable('standup_forms', {
   id: serial('id').primaryKey(),
   boardId: integer('board_id')
     .notNull()
@@ -35,9 +37,8 @@ export const standupFormStructures = pgTable('standup_form_structures', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export type StandupFormStructure = typeof standupFormStructures.$inferSelect;
-export type InsertStandupFormStructure =
-  typeof standupFormStructures.$inferInsert;
+export type StandupForm = typeof standupForms.$inferSelect;
+export type InsertStandupForm = typeof standupForms.$inferInsert;
 
 export const usersToBoards = pgTable(
   'users_to_boards',
@@ -50,9 +51,7 @@ export const usersToBoards = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.userId, t.boardId] }),
-  }),
+  (t) => [primaryKey({ columns: [t.userId, t.boardId] })],
 );
 
 export const standups = pgTable('standups', {
@@ -61,10 +60,9 @@ export const standups = pgTable('standups', {
     .notNull()
     .references(() => boards.id),
   userId: uuid('user_id').notNull(), // User who submitted the standup
-  formStructureId: integer('form_structure_id')
+  formId: integer('form_id')
     .notNull()
-    .references(() => standupFormStructures.id),
-  // TODO: I think this column name should be formValues
+    .references(() => standupForms.id),
   formData: jsonb('form_data').notNull(), // The actual standup responses
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -77,22 +75,19 @@ export const standups = pgTable('standups', {
 export const boardsRelations = relations(boards, ({ many, one }) => ({
   usersToBoards: many(usersToBoards),
   standups: many(standups),
-  standupFormStructures: many(standupFormStructures),
-  activeStandupFormStructure: one(standupFormStructures, {
-    fields: [boards.activeStandupFormStructureId],
-    references: [standupFormStructures.id],
+  standupForms: many(standupForms),
+  activeStandupForm: one(standupForms, {
+    fields: [boards.activeStandupFormId],
+    references: [standupForms.id],
   }),
 }));
 
-export const standupFormStructuresRelations = relations(
-  standupFormStructures,
-  ({ one }) => ({
-    board: one(boards, {
-      fields: [standupFormStructures.boardId],
-      references: [boards.id],
-    }),
+export const standupFormsRelations = relations(standupForms, ({ one }) => ({
+  board: one(boards, {
+    fields: [standupForms.boardId],
+    references: [boards.id],
   }),
-);
+}));
 
 export const usersToBoardsRelations = relations(usersToBoards, ({ one }) => ({
   board: one(boards, {
@@ -106,9 +101,9 @@ export const standupsRelations = relations(standups, ({ one }) => ({
     fields: [standups.boardId],
     references: [boards.id],
   }),
-  formStructure: one(standupFormStructures, {
-    fields: [standups.formStructureId],
-    references: [standupFormStructures.id],
+  form: one(standupForms, {
+    fields: [standups.formId],
+    references: [standupForms.id],
   }),
 }));
 

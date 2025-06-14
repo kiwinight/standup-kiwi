@@ -3,11 +3,11 @@ import { BoardsController } from './boards.controller';
 import { BoardsService } from './boards.service';
 import { AuthModule } from '../auth/auth.module';
 import { StandupsModule } from './standups/standups.module';
-import { StandupFormStructuresModule } from './standup-form-structures/standup-form-structures.module';
+import { StandupFormsModule } from './standup-forms/standup-forms.module';
 import { DbModule } from '../db/db.module';
 import { UsersService } from 'src/auth/users/users.service';
 @Module({
-  imports: [AuthModule, StandupsModule, StandupFormStructuresModule, DbModule],
+  imports: [AuthModule, StandupsModule, StandupFormsModule, DbModule],
   controllers: [BoardsController],
   providers: [BoardsService, UsersService],
 })

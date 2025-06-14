@@ -1,16 +1,12 @@
-import {
-  data,
-  Outlet,
-  useLoaderData,
-  type ShouldRevalidateFunctionArgs,
-} from "react-router";
+import { data, Outlet, useLoaderData } from "react-router";
 import { Box } from "@radix-ui/themes";
-import { isErrorData, type ApiData, type Board, type User } from "types";
+import { isErrorData, type ApiData, type Board } from "types";
 import type { Route } from "./+types/board-layout-route";
 import NavBar from "./nav-bar";
 import requireAuthenticated from "~/libs/auth";
 import { useEffect } from "react";
 import { commitSession } from "~/libs/auth-session.server";
+import AutoRevalidator from "~/components/auto-revalidator";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
@@ -49,22 +45,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   );
 }
 
-export function shouldRevalidate(arg: ShouldRevalidateFunctionArgs) {
-  const hasBoardCreated =
-    arg.formAction === "/boards/create" && arg.formMethod === "POST";
-
-  const hasBoardIdChanged =
-    Boolean(arg.currentParams.boardId) &&
-    Boolean(arg.nextParams.boardId) &&
-    arg.currentParams.boardId !== arg.nextParams.boardId;
-
-  if (hasBoardIdChanged || hasBoardCreated) {
-    return true;
-  }
-
-  return false;
-}
-
 function BoardLayoutRoute(props: Route.ComponentProps) {
   const { params } = props;
 
@@ -91,12 +71,15 @@ function BoardLayoutRoute(props: Route.ComponentProps) {
   }, [currentUserBoardsPromise, boardId]);
 
   return (
-    <div>
-      <NavBar />
-      <Box>
-        <Outlet />
-      </Box>
-    </div>
+    <>
+      <AutoRevalidator />
+      <div>
+        <NavBar />
+        <Box>
+          <Outlet />
+        </Box>
+      </div>
+    </>
   );
 }
 

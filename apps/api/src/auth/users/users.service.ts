@@ -117,7 +117,7 @@ export class UsersService {
         id: boards.id,
         name: boards.name,
         timezone: boards.timezone,
-        activeStandupFormStructureId: boards.activeStandupFormStructureId,
+        activeStandupFormId: boards.activeStandupFormId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
         usersCount: count(usersToBoards.userId),
