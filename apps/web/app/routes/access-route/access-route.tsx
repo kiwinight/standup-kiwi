@@ -36,7 +36,7 @@ function AccessRoute({}: Props) {
   }, [fetcher.data]);
 
   return (
-    <Container my="7" maxWidth="672px" px="4">
+    <Container py="7" maxWidth="672px" px="4">
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">

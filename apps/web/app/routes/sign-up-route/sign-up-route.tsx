@@ -31,7 +31,7 @@ function SignUpRoute({}: Route.ComponentProps) {
   });
 
   return (
-    <Container my="7" maxWidth="672px" px="4">
+    <Container py="7" maxWidth="672px" px="4">
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">
@@ -69,10 +69,7 @@ function SignUpRoute({}: Route.ComponentProps) {
                 <Flex direction="column" gap="2">
                   <label>
                     <Flex align="center" gap="2">
-                      <Text
-                        size="2"
-                        className="font-semibold"
-                      >
+                      <Text size="2" className="font-semibold">
                         Access code
                       </Text>
                       <Text size="1" color="gray">
