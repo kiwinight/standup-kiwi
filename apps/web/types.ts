@@ -7,12 +7,12 @@ export type Board = {
   id: number;
   name: string;
   timezone: string;
-  activeStandupFormStructureId: number | null;
+  activeStandupFormId: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type StandupFormStructure = {
+export type StandupForm = {
   id: number;
   createdAt: Date;
   updatedAt: Date;
@@ -57,7 +57,7 @@ export interface Standup {
   id: number;
   boardId: number;
   userId: string;
-  formStructureId: number;
+  formId: number;
   formData: unknown;
   createdAt: string;
   updatedAt: string;

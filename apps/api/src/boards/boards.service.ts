@@ -4,8 +4,8 @@ import {
   InsertBoard,
   usersToBoards,
   Board,
-  standupFormStructures,
-  StandupFormStructure,
+  standupForms,
+  StandupForm,
 } from '../libs/db/schema';
 import { and, count, eq, sql } from 'drizzle-orm';
 import { Database, DATABASE_TOKEN } from 'src/db/db.module';
@@ -55,7 +55,7 @@ export class BoardsService {
 
     await this.associateUser(result.id, userId);
 
-    await this.createDefaultFormStructure(result.id);
+    await this.createDefaultForm(result.id);
 
     return result;
   }
@@ -67,7 +67,7 @@ export class BoardsService {
     });
   }
 
-  private async createDefaultFormStructure(boardId: number): Promise<void> {
+  private async createDefaultForm(boardId: number): Promise<void> {
     const schema = {
       title: "Today's Standup",
       fields: [
@@ -98,21 +98,18 @@ export class BoardsService {
     };
 
     const result = await this.db
-      .insert(standupFormStructures)
+      .insert(standupForms)
       .values({
         boardId,
         schema,
       })
       .returning()
-      .then(
-        (standupFormStructures): StandupFormStructure =>
-          standupFormStructures[0],
-      );
+      .then((standupForms): StandupForm => standupForms[0]);
 
     await this.db
       .update(boards)
       .set({
-        activeStandupFormStructureId: result.id,
+        activeStandupFormId: result.id,
       })
       .where(eq(boards.id, boardId));
   }
