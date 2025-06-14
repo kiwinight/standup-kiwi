@@ -273,11 +273,8 @@ function Content({
 function TodaysStandup() {
   const contentRef = useRef<ContentRef>(null);
 
-  const {
-    boardPromise,
-    standupsPromise,
-    boardActiveStandupFormStructurePromise,
-  } = useLoaderData<typeof loader>();
+  const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
+    useLoaderData<typeof loader>();
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -311,7 +308,7 @@ function TodaysStandup() {
                 {(standups) => {
                   return (
                     <Await
-                      resolve={boardActiveStandupFormStructurePromise}
+                      resolve={boardActiveStandupFormPromise}
                       children={(structure) => {
                         if (!board || !standups || !structure) {
                           return <FormSkeleton />;

@@ -5,18 +5,18 @@ import { DATABASE_TOKEN } from 'src/db/db.module';
 import { Database } from 'src/db/db.module';
 
 @Injectable()
-export class StandupFormStructuresService {
+export class StandupFormsService {
   constructor(
     @Inject(DATABASE_TOKEN)
     private readonly db: Database,
   ) {}
 
-  // create(createStandupFormStructureDto: CreateStandupFormStructureDto) {
-  //   return 'This action adds a new standupFormStructure';
+  // create(createStandupFormDto: CreateStandupFormDto) {
+  //   return 'This action adds a new standupForm';
   // }
 
   // findAll() {
-  //   return `This action returns all standupFormStructures`;
+  //   return `This action returns all standupForms`;
   // }
 
   get(id: number) {
@@ -24,7 +24,7 @@ export class StandupFormStructuresService {
       .select()
       .from(standupForms)
       .where(eq(standupForms.id, id))
-      .then(([standupFormStructure]) => standupFormStructure);
+      .then(([standupForm]) => standupForm);
   }
 
   list(boardId: number, ids?: number[]) {
@@ -43,11 +43,11 @@ export class StandupFormStructuresService {
       .where(eq(standupForms.boardId, boardId));
   }
 
-  // update(id: number, updateStandupFormStructureDto: UpdateStandupFormStructureDto) {
-  //   return `This action updates a #${id} standupFormStructure`;
+  // update(id: number, updateStandupFormDto: UpdateStandupFormDto) {
+  //   return `This action updates a #${id} standupForm`;
   // }
 
   // remove(id: number) {
-  //   return `This action removes a #${id} standupFormStructure`;
+  //   return `This action removes a #${id} standupForm`;
   // }
 }

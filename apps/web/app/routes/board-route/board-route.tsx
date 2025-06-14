@@ -26,16 +26,13 @@ function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   }).then((response) => response.json() as Promise<ApiData<Board>>);
 }
 
-function getStandupFormStructure(
-  {
-    standupFormStructureId,
-    boardId,
-  }: { standupFormStructureId: number; boardId: number },
+function getStandupForm(
+  { standupFormId, boardId }: { standupFormId: number; boardId: number },
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
     import.meta.env.VITE_API_URL +
-      `/boards/${boardId}/standup-form-structures/${standupFormStructureId}`,
+      `/boards/${boardId}/standup-forms/${standupFormId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -80,7 +77,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
   );
 
-  const standupFormStructuresPromise = standupsPromise.then((standups) => {
+  const standupFormsPromise = standupsPromise.then((standups) => {
     if (!standups) {
       return null;
     }
@@ -89,7 +86,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     return fetch(
       import.meta.env.VITE_API_URL +
-        `/boards/${boardId}/standup-form-structures?ids=${ids.join(",")}`,
+        `/boards/${boardId}/standup-forms?ids=${ids.join(",")}`,
       {
         method: "GET",
         headers: {
@@ -106,7 +103,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       });
   });
 
-  const boardActiveStandupFormStructurePromise = boardPromise.then((board) => {
+  const boardActiveStandupFormPromise = boardPromise.then((board) => {
     if (!board) {
       return null;
     }
@@ -115,9 +112,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return null;
     }
 
-    return getStandupFormStructure(
+    return getStandupForm(
       {
-        standupFormStructureId: board.activeStandupFormId,
+        standupFormId: board.activeStandupFormId,
         boardId: board.id,
       },
       { accessToken }
@@ -134,8 +131,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       boardDataPromise,
       boardPromise,
       standupsPromise,
-      boardActiveStandupFormStructurePromise,
-      standupFormStructuresPromise,
+      boardActiveStandupFormPromise,
+      standupFormsPromise,
     },
     {
       headers: {

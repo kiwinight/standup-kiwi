@@ -55,7 +55,7 @@ export class BoardsService {
 
     await this.associateUser(result.id, userId);
 
-    await this.createDefaultFormStructure(result.id);
+    await this.createDefaultForm(result.id);
 
     return result;
   }
@@ -67,7 +67,7 @@ export class BoardsService {
     });
   }
 
-  private async createDefaultFormStructure(boardId: number): Promise<void> {
+  private async createDefaultForm(boardId: number): Promise<void> {
     const schema = {
       title: "Today's Standup",
       fields: [
@@ -104,7 +104,7 @@ export class BoardsService {
         schema,
       })
       .returning()
-      .then((standupFormStructures): StandupForm => standupFormStructures[0]);
+      .then((standupForms): StandupForm => standupForms[0]);
 
     await this.db
       .update(boards)
