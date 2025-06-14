@@ -101,7 +101,7 @@ function CreateNewBoardRoute({}: Props) {
   const fetcher = useFetcher<typeof clientAction>();
 
   return (
-    <Container my="7" maxWidth="672px" px="4">
+    <Container py="7" maxWidth="672px" px="4">
       <Text size="6" weight="bold">
         Create a new board
       </Text>

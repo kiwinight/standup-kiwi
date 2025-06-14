@@ -164,7 +164,7 @@ export default function BoardRoute({}: Route.ComponentProps) {
     <>
       <BoardExistanceGuard />
 
-      <Container my="7" maxWidth="672px" px="4">
+      <Container py="7" maxWidth="672px" px="4">
         <Flex direction="column" gap="7">
           <Toolbar />
           <TodaysStandup />
