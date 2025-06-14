@@ -30,7 +30,7 @@ import {
 } from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 
-import type { Board, Standup, StandupFormStructure } from "types";
+import type { Board, Standup, StandupForm } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 
@@ -49,7 +49,7 @@ function Content({
   ref: Ref<ContentRef>;
   board: Board;
   standups: Standup[];
-  structure: StandupFormStructure;
+  structure: StandupForm;
 }) {
   const { appearance } = useThemeContext();
 
@@ -106,14 +106,14 @@ function Content({
   }
 
   if (createStandupFetcher.json) {
-    const { formData, formStructureId } =
+    const { formData, formId } =
       (createStandupFetcher.json as unknown as CreateStandupRequestBody) || {};
 
     todayStandup = {
       id: 0,
       boardId: board.id,
       userId: "",
-      formStructureId: formStructureId,
+      formId: formId,
       formData: formData,
       createdAt: "",
       updatedAt: "",
@@ -192,7 +192,7 @@ function Content({
               createStandupFetcher.submit(
                 {
                   formData: data,
-                  formStructureId: structure.id,
+                  formId: structure.id,
                 },
                 {
                   encType: "application/json",

@@ -81,7 +81,7 @@ function Standups() {
 
   return pastStandups.map((standup) => {
     const structure = standupFormStructures.find(
-      (structure) => structure.id === standup.formStructureId
+      (structure) => structure.id === standup.formId
     );
 
     const schema = validateDynamicFormSchema(structure?.schema);

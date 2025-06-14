@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { standupFormStructures } from 'src/libs/db/schema';
+import { standupForms } from 'src/libs/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { DATABASE_TOKEN } from 'src/db/db.module';
 import { Database } from 'src/db/db.module';
@@ -22,8 +22,8 @@ export class StandupFormStructuresService {
   get(id: number) {
     return this.db
       .select()
-      .from(standupFormStructures)
-      .where(eq(standupFormStructures.id, id))
+      .from(standupForms)
+      .where(eq(standupForms.id, id))
       .then(([standupFormStructure]) => standupFormStructure);
   }
 
@@ -31,19 +31,16 @@ export class StandupFormStructuresService {
     if (ids) {
       return this.db
         .select()
-        .from(standupFormStructures)
+        .from(standupForms)
         .where(
-          and(
-            eq(standupFormStructures.boardId, boardId),
-            inArray(standupFormStructures.id, ids),
-          ),
+          and(eq(standupForms.boardId, boardId), inArray(standupForms.id, ids)),
         );
     }
 
     return this.db
       .select()
-      .from(standupFormStructures)
-      .where(eq(standupFormStructures.boardId, boardId));
+      .from(standupForms)
+      .where(eq(standupForms.boardId, boardId));
   }
 
   // update(id: number, updateStandupFormStructureDto: UpdateStandupFormStructureDto) {

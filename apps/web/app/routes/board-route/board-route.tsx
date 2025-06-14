@@ -7,7 +7,7 @@ import {
   type ApiData,
   type Board,
   type Standup,
-  type StandupFormStructure,
+  type StandupForm,
 } from "types";
 import requireAuthenticated from "~/libs/auth";
 
@@ -41,9 +41,7 @@ function getStandupFormStructure(
         Authorization: `Bearer ${accessToken}`,
       },
     }
-  ).then(
-    (response) => response.json() as Promise<ApiData<StandupFormStructure>>
-  );
+  ).then((response) => response.json() as Promise<ApiData<StandupForm>>);
 }
 
 function listStandups(
@@ -87,7 +85,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return null;
     }
 
-    const ids = standups.map((standup) => standup.formStructureId);
+    const ids = standups.map((standup) => standup.formId);
 
     return fetch(
       import.meta.env.VITE_API_URL +
@@ -99,10 +97,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         },
       }
     )
-      .then(
-        (response) =>
-          response.json() as Promise<ApiData<StandupFormStructure[]>>
-      )
+      .then((response) => response.json() as Promise<ApiData<StandupForm[]>>)
       .then((data) => {
         if (isErrorData(data)) {
           return null;
@@ -116,13 +111,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return null;
     }
 
-    if (!board.activeStandupFormStructureId) {
+    if (!board.activeStandupFormId) {
       return null;
     }
 
     return getStandupFormStructure(
       {
-        standupFormStructureId: board.activeStandupFormStructureId,
+        standupFormStructureId: board.activeStandupFormId,
         boardId: board.id,
       },
       { accessToken }
