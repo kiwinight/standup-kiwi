@@ -14,12 +14,12 @@ export class StandupsService {
     boardId,
     userId,
     formData,
-    formStructureId,
+    formId,
   }: {
     boardId: InsertStandup['boardId'];
     userId: InsertStandup['userId'];
     formData: InsertStandup['formData'];
-    formStructureId: InsertStandup['formStructureId'];
+    formId: InsertStandup['formId'];
   }): Promise<Standup> {
     return this.db
       .insert(standups)
@@ -27,7 +27,7 @@ export class StandupsService {
         boardId,
         userId,
         formData,
-        formStructureId,
+        formId,
       })
       .returning()
       .then(([standup]) => standup);

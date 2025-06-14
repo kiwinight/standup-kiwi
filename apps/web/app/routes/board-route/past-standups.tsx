@@ -23,7 +23,7 @@ type Props = {};
 function Standups() {
   const { appearance } = useThemeContext();
 
-  const { boardPromise, standupsPromise, standupFormStructuresPromise } =
+  const { boardPromise, standupsPromise, standupFormsPromise } =
     useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
@@ -33,9 +33,9 @@ function Standups() {
   }
 
   const standups = use(standupsPromise);
-  const standupFormStructures = use(standupFormStructuresPromise);
+  const standupForms = use(standupFormsPromise);
 
-  if (!standups || !standupFormStructures) {
+  if (!standups || !standupForms) {
     return <SuspenseFallback />;
   }
 
@@ -80,11 +80,9 @@ function Standups() {
   }
 
   return pastStandups.map((standup) => {
-    const structure = standupFormStructures.find(
-      (structure) => structure.id === standup.formStructureId
-    );
+    const form = standupForms.find((form) => form.id === standup.formId);
 
-    const schema = validateDynamicFormSchema(structure?.schema);
+    const schema = validateDynamicFormSchema(form?.schema);
 
     if (!schema) {
       return null;
