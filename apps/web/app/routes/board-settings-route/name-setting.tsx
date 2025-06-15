@@ -5,12 +5,13 @@ import { Controller, useForm } from "react-hook-form";
 import { useFetcher, useLoaderData } from "react-router";
 import { type ActionType as UpdateBoardActionType } from "../update-board-route/update-board-route";
 import type { loader } from "./board-settings-route";
+import { useToast } from "~/hooks/use-toast";
 
 type Props = {};
 
 function NameSetting({}: Props) {
   const updateBoardNameFetcher = useFetcher<UpdateBoardActionType>();
-
+  const { toast } = useToast();
   const { boardPromise } = useLoaderData<typeof loader>();
 
   const board = use(boardPromise);
@@ -42,10 +43,10 @@ function NameSetting({}: Props) {
     if (updateBoardNameFetcher.data) {
       const error = updateBoardNameFetcher.data.error;
       if (error) {
-        // TODO: properly toast that there was an error updating the standup
-        alert(error);
+        toast.error(error);
+        console.error(error);
       } else {
-        console.log("Board name updated");
+        toast.success("Board name has been saved");
       }
     }
   }, [updateBoardNameFetcher.data]);

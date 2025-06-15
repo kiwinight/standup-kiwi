@@ -5,6 +5,7 @@ import type { loader } from "./board-settings-route";
 import { useLoaderData } from "react-router";
 import { type ActionType as UpdateBoardActionType } from "../update-board-route/update-board-route";
 import { useForm } from "react-hook-form";
+import { useToast } from "~/hooks/use-toast";
 
 function getTimezoneOptions() {
   // Get all timezone identifiers
@@ -105,6 +106,7 @@ type Props = {};
 
 function TimezoneSetting({}: Props) {
   const updateBoardTimezoneFetcher = useFetcher<UpdateBoardActionType>();
+  const { toast } = useToast();
 
   const { boardPromise } = useLoaderData<typeof loader>();
 
@@ -133,10 +135,10 @@ function TimezoneSetting({}: Props) {
     if (updateBoardTimezoneFetcher.data) {
       const error = updateBoardTimezoneFetcher.data.error;
       if (error) {
-        // TODO: properly toast that there was an error updating the standup
-        alert(error);
+        toast.error(error);
+        console.error(error);
       } else {
-        console.log("Board timezone updated");
+        toast.success("Board timezone has been saved");
       }
     }
   }, [updateBoardTimezoneFetcher.data]);
