@@ -6,6 +6,13 @@ import {
 } from "../context/ToastContext";
 import type { ToastData } from "../context/ToastContext";
 import { useState } from "react";
+import { Button, Card, Flex, Text } from "@radix-ui/themes";
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  ExclamationTriangleIcon,
+  InfoCircledIcon,
+} from "@radix-ui/react-icons";
 
 /**
  * ToastsRenderer - Renders all toasts from the ToastsContext
@@ -76,38 +83,47 @@ function ToastItem({
   };
 
   return (
-    <Toast.Root
-      className={`bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 border-l-4 ${getBorderColor(
-        toast.type
-      )} relative`}
-      open={open}
-      onOpenChange={handleOpenChange}
-      duration={toast.duration || 5000}
-      type={toast.type === "error" ? "foreground" : "background"}
-    >
-      {toast.title && (
-        <Toast.Title className="font-medium text-gray-900 dark:text-white text-sm mb-1">
-          {toast.title}
-        </Toast.Title>
-      )}
-      <Toast.Description className="text-gray-600 dark:text-gray-300 text-sm">
-        {toast.description}
-      </Toast.Description>
-      {toast.action && (
-        <Toast.Action
-          className="mt-3 px-3 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          altText={toast.action.altText || `${toast.action.label} action`}
-          onClick={toast.action.onClick}
-        >
-          {toast.action.label}
-        </Toast.Action>
-      )}
-      <Toast.Close
-        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-        aria-label="Close"
+    <Card size="2" asChild>
+      <Toast.Root
+        open={open}
+        onOpenChange={handleOpenChange}
+        duration={toast.duration || 5000}
       >
-        ×
-      </Toast.Close>
-    </Toast.Root>
+        <Flex direction="column" gap="1">
+          {toast.title && (
+            <Flex asChild align="center" gap="2">
+              <Toast.Title>
+                {toast.type === "success" && <CheckCircledIcon />}
+                {toast.type === "error" && <CrossCircledIcon />}
+                {toast.type === "warning" && <ExclamationTriangleIcon />}
+                {toast.type === "info" && <InfoCircledIcon />}
+                <Text size="2" weight="medium">
+                  {toast.title}
+                </Text>
+              </Toast.Title>
+            </Flex>
+          )}
+          {toast.description && (
+            <Toast.Description>
+              <Text size="2">{toast.description}</Text>
+            </Toast.Description>
+          )}
+          {toast.action && (
+            <Flex justify="start" mt="1">
+              <Button asChild highContrast variant="surface" size="2">
+                <Toast.Action
+                  altText={
+                    toast.action.altText || `${toast.action.label} action`
+                  }
+                  onClick={toast.action.onClick}
+                >
+                  {toast.action.label}
+                </Toast.Action>
+              </Button>
+            </Flex>
+          )}
+        </Flex>
+      </Toast.Root>
+    </Card>
   );
 }

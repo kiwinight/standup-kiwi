@@ -2,8 +2,8 @@ import * as React from "react";
 
 export interface ToastData {
   id: string;
-  title?: string;
-  description: string;
+  title: string;
+  description?: string;
   type?: "success" | "error" | "warning" | "info";
   duration?: number;
   action?: {

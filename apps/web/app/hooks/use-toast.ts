@@ -11,13 +11,13 @@ export function useToast() {
 
   const toast = {
     success: (
-      description: string,
-      options?: Partial<Omit<ToastData, "id" | "description" | "type">>
+      title: string,
+      options?: Partial<Omit<ToastData, "id" | "title" | "type">>
     ) => {
       dispatch({
         type: TOASTS_ACTIONS.ADD_TOAST,
         payload: {
-          description,
+          title,
           type: "success",
           ...options,
         },
@@ -25,28 +25,28 @@ export function useToast() {
     },
 
     error: (
-      description: string,
-      options?: Partial<Omit<ToastData, "id" | "description" | "type">>
+      title: string,
+      options?: Partial<Omit<ToastData, "id" | "title" | "type">>
     ) => {
       dispatch({
         type: TOASTS_ACTIONS.ADD_TOAST,
         payload: {
-          description,
+          title,
           type: "error",
-          duration: 7000, // Error toasts stay longer by default
+          // duration: 7000, // Error toasts stay longer by default
           ...options,
         },
       });
     },
 
     info: (
-      description: string,
-      options?: Partial<Omit<ToastData, "id" | "description" | "type">>
+      title: string,
+      options?: Partial<Omit<ToastData, "id" | "title" | "type">>
     ) => {
       dispatch({
         type: TOASTS_ACTIONS.ADD_TOAST,
         payload: {
-          description,
+          title,
           type: "info",
           ...options,
         },
@@ -54,13 +54,13 @@ export function useToast() {
     },
 
     warning: (
-      description: string,
-      options?: Partial<Omit<ToastData, "id" | "description" | "type">>
+      title: string,
+      options?: Partial<Omit<ToastData, "id" | "title" | "type">>
     ) => {
       dispatch({
         type: TOASTS_ACTIONS.ADD_TOAST,
         payload: {
-          description,
+          title,
           type: "warning",
           ...options,
         },

@@ -21,8 +21,6 @@ import {
   useColorScheme,
   colorSchemeFlickerPrevention,
 } from "./context/ColorSchemeContext";
-import { ToastsProvider } from "./context/ToastContext";
-import { ToastsRenderer } from "./components/toasts-renderer";
 import { createErrorData, isErrorData, type User } from "types";
 import type { ApiData } from "types";
 import { verifyAndRefreshAccessToken } from "./libs/auth";
@@ -196,10 +194,7 @@ export default function App() {
       accentColor="gray"
       {...(colorScheme !== null ? { appearance: colorScheme } : {})}
     >
-      <ToastsProvider>
-        <Outlet />
-        <ToastsRenderer />
-      </ToastsProvider>
+      <Outlet />
     </Theme>
   );
 }
