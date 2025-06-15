@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createRandomUUID } from "~/libs/id";
 
 export interface ToastData {
   id: string;
@@ -29,7 +30,7 @@ const ToastsDispatchContext =
 function toastsReducer(toasts: ToastData[], action: ToastAction): ToastData[] {
   switch (action.type) {
     case TOASTS_ACTIONS.ADD_TOAST: {
-      const id = crypto.randomUUID();
+      const id = createRandomUUID();
       return [...toasts, { ...action.payload, id }];
     }
     case TOASTS_ACTIONS.REMOVE_TOAST: {

@@ -5,7 +5,7 @@ import {
   TOASTS_ACTIONS,
 } from "../context/ToastContext";
 import type { ToastData } from "../context/ToastContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Flex, Text } from "@radix-ui/themes";
 import {
   CheckCircledIcon,
@@ -13,6 +13,7 @@ import {
   ExclamationTriangleIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
+import styles from "./toasts-renderer.module.css";
 
 /**
  * ToastsRenderer - Renders all toasts from the ToastsContext
@@ -33,7 +34,7 @@ export function ToastsRenderer() {
   const dispatch = useToastsDispatch();
 
   return (
-    <Toast.Provider swipeDirection="right">
+    <Toast.Provider swipeDirection="right" duration={3000}>
       {toasts.map((toast) => (
         <ToastItem
           key={toast.id}
@@ -46,7 +47,7 @@ export function ToastsRenderer() {
           }
         />
       ))}
-      <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col p-6 gap-2 w-96 max-w-full m-0 list-none z-50 outline-none" />
+      <Toast.Viewport className={styles["toast-viewport"]} />
     </Toast.Provider>
   );
 }
@@ -60,35 +61,26 @@ function ToastItem({
 }) {
   const [open, setOpen] = useState(true);
 
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        onRemove();
+      }, 300);
+    }
+  }, [open]);
+
   function handleOpenChange(open: boolean) {
     setOpen(open);
-    if (!open) {
-      onRemove();
-    }
   }
 
-  const getBorderColor = (type: ToastData["type"]) => {
-    switch (type) {
-      case "success":
-        return "border-l-green-500";
-      case "error":
-        return "border-l-red-500";
-      case "warning":
-        return "border-l-yellow-500";
-      case "info":
-        return "border-l-blue-500";
-      default:
-        return "border-l-blue-500";
-    }
-  };
-
   return (
-    <Card size="2" asChild>
-      <Toast.Root
-        open={open}
-        onOpenChange={handleOpenChange}
-        duration={toast.duration || 5000}
-      >
+    <Toast.Root
+      className={styles["toast-root"]}
+      open={open}
+      onOpenChange={handleOpenChange}
+      duration={toast.duration}
+    >
+      <Card size="2">
         <Flex direction="column" gap="1">
           {toast.title && (
             <Flex asChild align="center" gap="2">
@@ -123,7 +115,7 @@ function ToastItem({
             </Flex>
           )}
         </Flex>
-      </Toast.Root>
-    </Card>
+      </Card>
+    </Toast.Root>
   );
 }

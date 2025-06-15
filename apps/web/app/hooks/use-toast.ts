@@ -33,7 +33,6 @@ export function useToast() {
         payload: {
           title,
           type: "error",
-          // duration: 7000, // Error toasts stay longer by default
           ...options,
         },
       });
