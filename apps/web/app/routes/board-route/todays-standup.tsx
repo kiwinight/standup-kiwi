@@ -33,6 +33,7 @@ import { type ActionType as UpdateStandupActionType } from "../update-board-stan
 import type { Board, Standup, StandupForm } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
+import { useToast } from "~/hooks/use-toast";
 
 interface ContentRef {
   edit: () => void;
@@ -52,7 +53,7 @@ function Content({
   structure: StandupForm;
 }) {
   const { appearance } = useThemeContext();
-
+  const { toast } = useToast();
   const schema = validateDynamicFormSchema(structure.schema);
 
   if (!schema) {
@@ -124,9 +125,11 @@ function Content({
     if (createStandupFetcher.data) {
       const { error } = createStandupFetcher.data;
       if (error) {
-        // TODO: properly toast that there was an error creating the standup
-        alert(error);
+        toast.error(error);
+        console.error(error);
         setIsEditing(true);
+      } else {
+        toast.success("Your standup has been saved");
       }
     }
   }, [createStandupFetcher.data]);
@@ -156,9 +159,11 @@ function Content({
     if (updateStandupFetcher.data) {
       const error = updateStandupFetcher.data.error;
       if (error) {
-        // TODO: properly toast that there was an error updating the standup
-        alert(error);
+        toast.error(error);
+        console.error(error);
         setIsEditing(true);
+      } else {
+        toast.success("Your standup has been saved");
       }
     }
   }, [updateStandupFetcher.data]);

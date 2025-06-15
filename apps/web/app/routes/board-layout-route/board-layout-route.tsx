@@ -7,6 +7,8 @@ import requireAuthenticated from "~/libs/auth";
 import { useEffect } from "react";
 import { commitSession } from "~/libs/auth-session.server";
 import AutoRevalidator from "~/components/auto-revalidator";
+import { ToastsProvider } from "~/context/ToastContext";
+import { ToastsRenderer } from "~/components/toasts-renderer";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
@@ -71,7 +73,7 @@ function BoardLayoutRoute(props: Route.ComponentProps) {
   }, [currentUserBoardsPromise, boardId]);
 
   return (
-    <>
+    <ToastsProvider>
       <AutoRevalidator />
       <div>
         <NavBar />
@@ -79,7 +81,8 @@ function BoardLayoutRoute(props: Route.ComponentProps) {
           <Outlet />
         </Box>
       </div>
-    </>
+      <ToastsRenderer />
+    </ToastsProvider>
   );
 }
 
