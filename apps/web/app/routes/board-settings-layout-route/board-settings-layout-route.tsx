@@ -10,7 +10,7 @@ function BoardSettingsLayoutRoute({}: Route.ComponentProps) {
   const locationPathname = location.pathname;
 
   return (
-    <Container my="7" maxWidth="672px" px="4">
+    <Container py="7" maxWidth="672px" px="4">
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="4">
           <Flex>
