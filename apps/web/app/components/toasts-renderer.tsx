@@ -63,11 +63,15 @@ function ToastItem({
 
   useEffect(() => {
     if (!open) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         onRemove();
       }, 300);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
-  }, [open]);
+  }, [open, onRemove]);
 
   function handleOpenChange(open: boolean) {
     setOpen(open);
