@@ -7,11 +7,12 @@ heroImage: "/introducing-standup-kiwi-open-source-tool-daily-standups-hero-image
 # Hero image generated from - https://og-playground.vercel.app/?share=vVJdT8IwFP0rTYlBkxFREcmCJH6HmPiCiS-8lPVuXOzaZbsT5rL_bsuoCD_APiy35zTnnHt3ax4ZCTzkY4lfc81YQZWC27p2NWMSi0yJKmTdWMGmG7ToEjBZkgUv-v0TD65R0vIIEwoTPSVIC0tEoAlyT63KgjCuHowFtdM6pJ3dI-YQERrtWKPKVHt2IaLPJDelltNUJGB5hRpE3ktyIdEKnZJhZDKWu6AB69xEVwKkLQbxYAjXZ15IAVnTWSYi1EnIepfe3sZ6Fikq1_r0bzCCDd25to4iN437Tua6fcaYH6g7h0N1x_ZjcivRibfHq3vvj92Eh_3-ETPDb9vvYORR59vWkxkJLcuMveIax-fW_jfN_2d5M2uGmt0DiX2Uud7XPOAmcz-34GHNt8vDw5G14O128XDgLhIWZcLDWKgCAg6pWeF7lbmFpfX2ZnVclKd0AZKHlJfQBJzEwr542S1DwZsf
 author: "H. Alex Kwon"
 authorTitle: "Product Engineer"
+authorLink: "https://x.com/hyokualexkwon"
 ---
 
 Hey there! I'm Alex, a developer who recently built and released an open source standup tool called **Standup Kiwi**.
 
-I'm excited to announce the **beta release** of Standup Kiwi — a lightweight, open source tool designed specifically for async daily standups.
+I'm ready to share the **early beta release** of Standup Kiwi — a lightweight, open source tool designed specifically for async daily standups. It's still in early preview, but I think it's already useful enough to try out. And it's completely free during this early preview period.
 
 ## Why I built this
 
@@ -86,7 +87,7 @@ We're just getting started, and your feedback will help shape what comes next!
 ## You might be wondering…
 
 - **Is it free?**
-  It's free to use now. Later, the managed version will require payment, but it will include a free trial. Self-hosting will remain free, and I'll ensure it's easy to self-host and migrate your data.
+  Yes, it's completely free during this early preview period. Later there will be a paid plan and a free plan with limited usage. Self-hosting will remain free, and I'll ensure it's easy to self-host and migrate your data.
 
 - **Can I use it with a team?**
   Not yet. Team boards are in progress.

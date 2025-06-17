@@ -92,10 +92,7 @@ function Content({ post, children }: Props) {
                 </Text>
 
                 <Text size="3" color="gray">
-                  <Link
-                    href="https://www.linkedin.com/in/hyoku-alex-kwon/"
-                    target="_blank"
-                  >
+                  <Link href={post.data.authorLink} target="_blank">
                     {post.data.author}
                   </Link>
                   {post.data.authorTitle && (
