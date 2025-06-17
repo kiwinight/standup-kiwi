@@ -10,9 +10,9 @@ authorTitle: "Product Engineer"
 authorLink: "https://x.com/hyokualexkwon"
 ---
 
-Hey there! I'm Alex, a developer who recently built and released an open source standup tool called **Standup Kiwi**.
+Hey there! I'm Alex, a developer who has spent the last few months building an open source standup tool called **Standup Kiwi**.
 
-I'm ready to share the **early beta release** of Standup Kiwi — a lightweight, open source tool designed specifically for async daily standups. It's still in early preview, but I think it's already useful enough to try out. And it's completely free during this early preview period.
+Today, I'm excited to introduce Standup Kiwi with its first public beta — a lightweight, open source tool designed specifically for async daily standups. It's still in the very earliest stages of beta, but I think it's already useful enough to try out. And it's completely free during this beta period.
 
 ## Why I built this
 
@@ -87,7 +87,7 @@ We're just getting started, and your feedback will help shape what comes next!
 ## You might be wondering…
 
 - **Is it free?**
-  Yes, it's completely free during this early preview period. Later there will be a paid plan and a free plan with limited usage. Self-hosting will remain free, and I'll ensure it's easy to self-host and migrate your data.
+  Yes, it's completely free right now. During the beta period, I'll be introducing paid plans alongside a free plan with limited usage. Self-hosting will remain free, and I'll ensure it's easy to self-host and migrate your data.
 
 - **Can I use it with a team?**
   Not yet. Team boards are in progress.
