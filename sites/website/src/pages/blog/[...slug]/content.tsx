@@ -92,12 +92,13 @@ function Content({ post, children }: Props) {
                 </Text>
 
                 <Text size="3" color="gray">
-                  <Link
-                    href="https://www.linkedin.com/in/hyoku-alex-kwon/"
-                    target="_blank"
-                  >
-                    {post.data.author}
-                  </Link>
+                  {post.data.authorLink ? (
+                    <Link href={post.data.authorLink} target="_blank">
+                      {post.data.author}
+                    </Link>
+                  ) : (
+                    post.data.author
+                  )}
                   {post.data.authorTitle && (
                     <Text size="3" color="gray">
                       {", " + post.data.authorTitle}
