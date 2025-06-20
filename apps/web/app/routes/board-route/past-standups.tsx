@@ -55,7 +55,7 @@ function Standups() {
     return (
       <Card
         size={{
-          initial: "2",
+          initial: "3",
           sm: "4",
         }}
       >
@@ -89,67 +89,66 @@ function Standups() {
     }
 
     return (
-      <Card
-        key={standup.id}
-        variant="surface"
-        size={{
-          initial: "2",
-          sm: "4",
-        }}
-      >
-        <Flex direction="column" gap="5" align="start">
+      <Flex direction="column" gap="5">
+        <Box>
           <Tooltip
             content={DateTime.fromISO(standup.createdAt)
               .setZone(boardTimezone)
               .toLocaleString(DateTime.DATETIME_FULL)}
           >
-            <Text size="4" weight="bold">
+            <Text size="3" weight="bold">
               {DateTime.fromISO(standup.createdAt)
                 .setZone(boardTimezone)
                 .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)}
             </Text>
           </Tooltip>
-          {schema.fields.map((field) => {
-            const value = (
-              standup.formData as Standup["formData"] as DynamicFormValues
-            )[field.name];
+        </Box>
+        <Card
+          key={standup.id}
+          variant="surface"
+          size={{
+            initial: "3",
+            sm: "4",
+          }}
+        >
+          <Flex direction="column" gap="5" align="start">
+            {schema.fields.map((field) => {
+              const value = (
+                standup.formData as Standup["formData"] as DynamicFormValues
+              )[field.name];
 
-            if (!value) {
-              return null;
-            }
+              if (!value) {
+                return null;
+              }
 
-            const html = parseMarkdownToHtml(value);
+              const html = parseMarkdownToHtml(value);
 
-            return (
-              <Flex key={field.name} direction="column" gap="2">
-                <Text size="2" weight="medium">
-                  {field.label}
-                </Text>
-                <Box
-                  className={`prose prose-sm ${
-                    appearance === "dark" ? "dark:prose-invert" : ""
-                  }`}
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-              </Flex>
-            );
-          })}
-        </Flex>
-      </Card>
+              return (
+                <Flex key={field.name} direction="column" gap="2">
+                  <Text size="2" weight="medium">
+                    {field.label}
+                  </Text>
+                  <Box
+                    className={`prose prose-sm ${
+                      appearance === "dark" ? "dark:prose-invert" : ""
+                    }`}
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                </Flex>
+              );
+            })}
+          </Flex>
+        </Card>
+      </Flex>
     );
   });
 }
 
 function PastStandups({}: Props) {
   return (
-    <Flex direction="column" gap="5">
-      <Text size="3" weight="bold">
-        Past Standups
-      </Text>
-      <Suspense fallback={<SuspenseFallback />}>
-        <Standups />
-      </Suspense>
-    </Flex>
+    <Suspense fallback={<SuspenseFallback />}>
+      <Standups />
+    </Suspense>
   );
 }
 
@@ -157,52 +156,57 @@ function SuspenseFallback() {
   return (
     <>
       {Array.from({ length: 5 }).map((_, index) => (
-        <Card
-          key={index}
-          variant="surface"
-          size={{
-            initial: "2",
-            sm: "4",
-          }}
-        >
-          <Flex direction="column" gap="5" align="start">
-            <Text size="4" weight="bold">
+        <Flex direction="column" gap="5">
+          <Text size="3" weight="bold">
+            <Skeleton>Thu, Jun 19, 2025</Skeleton>
+          </Text>
+          <Card
+            key={index}
+            variant="surface"
+            size={{
+              initial: "3",
+              sm: "4",
+            }}
+          >
+            <Flex direction="column" gap="5" align="start">
+              {/* <Text size="4" weight="bold">
               <Skeleton>Fri, Jan 17, 2025</Skeleton>
-            </Text>
-            <Flex direction="column" gap="5">
-              <Flex direction="column" gap="2">
-                <Text size="2" weight="medium">
-                  <Skeleton>What did you do yesterday?</Skeleton>
-                </Text>
-                <Text size="2" className="max-h-[40px] overflow-hidden">
-                  <Skeleton width="100%">
-                    {Array.from({ length: 500 }).map((_, index) => "A ")}
-                  </Skeleton>
-                </Text>
-              </Flex>
-              <Flex direction="column" gap="2">
-                <Text size="2" weight="medium">
-                  <Skeleton>What did you do yesterday?</Skeleton>
-                </Text>
-                <Text size="2" className="max-h-[40px] overflow-hidden">
-                  <Skeleton width="100%">
-                    {Array.from({ length: 500 }).map((_, index) => "A ")}
-                  </Skeleton>
-                </Text>
-              </Flex>
-              <Flex direction="column" gap="2">
-                <Text size="2" weight="medium">
-                  <Skeleton>What did you do yesterday?</Skeleton>
-                </Text>
-                <Text size="2" className="max-h-[40px] overflow-hidden">
-                  <Skeleton width="100%">
-                    {Array.from({ length: 500 }).map((_, index) => "A ")}
-                  </Skeleton>
-                </Text>
+            </Text> */}
+              <Flex direction="column" gap="5">
+                <Flex direction="column" gap="2">
+                  <Text size="2" weight="medium">
+                    <Skeleton>What did you do yesterday?</Skeleton>
+                  </Text>
+                  <Text size="2" className="max-h-[40px] overflow-hidden">
+                    <Skeleton width="100%">
+                      {Array.from({ length: 500 }).map((_, index) => "A ")}
+                    </Skeleton>
+                  </Text>
+                </Flex>
+                <Flex direction="column" gap="2">
+                  <Text size="2" weight="medium">
+                    <Skeleton>What did you do yesterday?</Skeleton>
+                  </Text>
+                  <Text size="2" className="max-h-[40px] overflow-hidden">
+                    <Skeleton width="100%">
+                      {Array.from({ length: 500 }).map((_, index) => "A ")}
+                    </Skeleton>
+                  </Text>
+                </Flex>
+                <Flex direction="column" gap="2">
+                  <Text size="2" weight="medium">
+                    <Skeleton>What did you do yesterday?</Skeleton>
+                  </Text>
+                  <Text size="2" className="max-h-[40px] overflow-hidden">
+                    <Skeleton width="100%">
+                      {Array.from({ length: 500 }).map((_, index) => "A ")}
+                    </Skeleton>
+                  </Text>
+                </Flex>
               </Flex>
             </Flex>
-          </Flex>
-        </Card>
+          </Card>
+        </Flex>
       ))}
     </>
   );
