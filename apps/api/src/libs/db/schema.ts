@@ -9,7 +9,11 @@ import {
   primaryKey,
   jsonb,
   AnyPgColumn,
+  pgEnum,
 } from 'drizzle-orm/pg-core';
+
+// Member roles enum
+export const memberRoleEnum = pgEnum('member_role', ['admin', 'member']);
 
 export const boards = pgTable('boards', {
   id: serial('id').primaryKey(),
@@ -47,7 +51,7 @@ export const usersToBoards = pgTable(
     boardId: integer('board_id')
       .notNull()
       .references(() => boards.id),
-    // TODO: add role - admin, member
+    role: memberRoleEnum('role').notNull().default('member'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -109,3 +113,7 @@ export const standupsRelations = relations(standups, ({ one }) => ({
 
 export type Standup = typeof standups.$inferSelect;
 export type InsertStandup = typeof standups.$inferInsert;
+
+export type UsersToBoards = typeof usersToBoards.$inferSelect;
+export type InsertUsersToBoards = typeof usersToBoards.$inferInsert;
+export type MemberRole = (typeof memberRoleEnum.enumValues)[number];
