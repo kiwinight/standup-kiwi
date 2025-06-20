@@ -272,7 +272,7 @@ function Content({
   );
 }
 
-function TodaysStandup() {
+function TodayStandup() {
   const contentRef = useRef<ContentRef>(null);
 
   const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
@@ -344,4 +344,4 @@ function TodaysStandup() {
   );
 }
 
-export default TodaysStandup;
+export default TodayStandup;
