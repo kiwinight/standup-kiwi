@@ -12,7 +12,7 @@ import {
 import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
-import TodaysStandup from "./todays-standup";
+import TodayStandup from "./today-standup";
 import PastStandups from "./past-standups";
 import { Suspense } from "react";
 import { Await, data, useLoaderData } from "react-router";
@@ -167,7 +167,7 @@ export default function BoardRoute({}: Route.ComponentProps) {
       <Container py="7" maxWidth="672px" px="4">
         <Flex direction="column" gap="7">
           <Toolbar />
-          <TodaysStandup />
+          <TodayStandup />
           <PastStandups />
         </Flex>
       </Container>

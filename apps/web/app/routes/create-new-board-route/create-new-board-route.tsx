@@ -107,7 +107,7 @@ function CreateNewBoardRoute({}: Props) {
       </Text>
       <Card
         size={{
-          initial: "2",
+          initial: "3",
           sm: "4",
         }}
         mt="7"

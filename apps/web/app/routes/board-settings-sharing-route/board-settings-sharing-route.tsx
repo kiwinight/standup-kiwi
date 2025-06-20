@@ -20,7 +20,7 @@ export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
       </Callout.Root>
       <Card
         size={{
-          initial: "2",
+          initial: "3",
           sm: "4",
         }}
         className="blur-[2px] pointer-events-none select-none"
@@ -60,8 +60,12 @@ export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
       </Card>
 
       {/* <Card
+        // size={{
+        //   initial: "2",
+        //   sm: "4",
+        // }}
         size={{
-          initial: "2",
+          initial: "3",
           sm: "4",
         }}
       >
