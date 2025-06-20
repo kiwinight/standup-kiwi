@@ -230,9 +230,6 @@ function Content({
 
       {!isEditing && (
         <Flex direction="column" gap="5">
-          <Text size="4" weight="bold">
-            Today's Standup
-          </Text>
           <Flex direction="column" gap="5">
             {schema.fields.map((field) => {
               const value = (todayStandup?.formData as DynamicFormValues)[
@@ -296,47 +293,54 @@ function TodaysStandup() {
   }
 
   return (
-    <Card
-      tabIndex={0}
-      size={{
-        initial: "2",
-        sm: "4",
-      }}
-      onKeyDown={handleKeyDown}
-    >
-      <Suspense fallback={<FormSkeleton />}>
-        <Await
-          resolve={boardPromise}
-          children={(board) => {
-            return (
-              <Await resolve={standupsPromise}>
-                {(standups) => {
-                  return (
-                    <Await
-                      resolve={boardActiveStandupFormPromise}
-                      children={(structure) => {
-                        if (!board || !standups || !structure) {
-                          return <FormSkeleton />;
-                        }
+    <Flex direction="column" gap="5">
+      <Box>
+        <Text size="3" weight="bold">
+          Today
+        </Text>
+      </Box>
+      <Card
+        tabIndex={0}
+        size={{
+          initial: "3",
+          sm: "4",
+        }}
+        onKeyDown={handleKeyDown}
+      >
+        <Suspense fallback={<FormSkeleton />}>
+          <Await
+            resolve={boardPromise}
+            children={(board) => {
+              return (
+                <Await resolve={standupsPromise}>
+                  {(standups) => {
+                    return (
+                      <Await
+                        resolve={boardActiveStandupFormPromise}
+                        children={(structure) => {
+                          if (!board || !standups || !structure) {
+                            return <FormSkeleton />;
+                          }
 
-                        return (
-                          <Content
-                            ref={contentRef}
-                            board={board}
-                            standups={standups}
-                            structure={structure}
-                          />
-                        );
-                      }}
-                    />
-                  );
-                }}
-              </Await>
-            );
-          }}
-        />
-      </Suspense>
-    </Card>
+                          return (
+                            <Content
+                              ref={contentRef}
+                              board={board}
+                              standups={standups}
+                              structure={structure}
+                            />
+                          );
+                        }}
+                      />
+                    );
+                  }}
+                </Await>
+              );
+            }}
+          />
+        </Suspense>
+      </Card>
+    </Flex>
   );
 }
 

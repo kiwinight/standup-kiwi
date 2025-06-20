@@ -29,7 +29,6 @@ export function validateDynamicFormSchema(schema: unknown) {
 }
 
 const dynamicFormSchema = z.object({
-  title: z.string().optional(), // Form title
   description: z.string().optional(), // Form description
   fields: z
     .array(
@@ -99,7 +98,7 @@ function DynamicForm({
   loading?: boolean;
   showCancelButton?: boolean;
 }) {
-  const { title, description, fields } = schema;
+  const { description, fields } = schema;
 
   const dynamicFormSchema = z.object(
     fields.reduce((acc, field) => {
@@ -152,15 +151,12 @@ function DynamicForm({
   return (
     <form method="post" onSubmit={handleFormSubmit}>
       <Flex direction="column">
-        <Text size="4" weight="bold">
-          {title}
-        </Text>
         {description && (
           <Text size="2" mt="1">
             {description}
           </Text>
         )}
-        <Flex direction="column" mt="5" gap="5">
+        <Flex direction="column" gap="5">
           {fields.map((field) => {
             return (
               <Flex key={field.name} direction="column" gap="2">
@@ -235,10 +231,7 @@ export function FormSkeleton() {
   return (
     <form>
       <Flex direction="column">
-        <Text size="4" weight="bold">
-          <Skeleton>Today's Standup</Skeleton>
-        </Text>
-        <Box mt="5">
+        <Box>
           <Flex direction="column" gap="2">
             <label>
               <Flex>

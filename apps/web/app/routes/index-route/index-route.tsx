@@ -38,6 +38,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     currentUser.client_read_only_metadata?.lastAccessedBoardId;
 
   if (lastAccessedBoardId) {
+    // TODO: Check if this board actually exists
     const boardPath = `/boards/${lastAccessedBoardId}`;
     return redirect(boardPath, {
       headers: {
