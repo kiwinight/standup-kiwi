@@ -69,7 +69,7 @@ export class BoardsService {
 
   private async createDefaultForm(boardId: number): Promise<void> {
     const schema = {
-      title: "Today's Standup",
+      // title: "Today's Standup",
       fields: [
         {
           name: 'yesterday',

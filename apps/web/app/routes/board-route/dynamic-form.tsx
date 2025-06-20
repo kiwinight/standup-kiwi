@@ -29,7 +29,7 @@ export function validateDynamicFormSchema(schema: unknown) {
 }
 
 const dynamicFormSchema = z.object({
-  description: z.string().optional(), // Form description
+  // description: z.string().optional(), // Form description
   fields: z
     .array(
       z.object({
@@ -98,7 +98,7 @@ function DynamicForm({
   loading?: boolean;
   showCancelButton?: boolean;
 }) {
-  const { description, fields } = schema;
+  const { fields } = schema;
 
   const dynamicFormSchema = z.object(
     fields.reduce((acc, field) => {
@@ -151,11 +151,6 @@ function DynamicForm({
   return (
     <form method="post" onSubmit={handleFormSubmit}>
       <Flex direction="column">
-        {description && (
-          <Text size="2" mt="1">
-            {description}
-          </Text>
-        )}
         <Flex direction="column" gap="5">
           {fields.map((field) => {
             return (
