@@ -61,9 +61,20 @@ export class BoardsService {
   }
 
   private async associateUser(boardId: number, userId: string): Promise<void> {
+    const [existingMembers] = await this.db
+      .select({
+        count: count(),
+      })
+      .from(usersToBoards)
+      .where(eq(usersToBoards.boardId, boardId));
+
+    const doesMemberExist = existingMembers.count > 0;
+    const role = doesMemberExist ? 'member' : 'admin';
+
     await this.db.insert(usersToBoards).values({
       userId,
       boardId,
+      role,
     });
   }
 

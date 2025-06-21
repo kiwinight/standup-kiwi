@@ -51,7 +51,7 @@ export const usersToBoards = pgTable(
     boardId: integer('board_id')
       .notNull()
       .references(() => boards.id),
-    role: memberRoleEnum('role').notNull().default('member'),
+    role: memberRoleEnum('role').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
