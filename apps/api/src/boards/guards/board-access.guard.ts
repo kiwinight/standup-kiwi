@@ -11,15 +11,25 @@ export class BoardAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const userId = request.userId;
-    const boardId = request.params.boardId;
+    const boardId = request.params?.boardId;
+
+    if (!userId) {
+      throw new UnauthorizedException('User authentication required');
+    }
+
+    if (!boardId || isNaN(parseInt(boardId, 10))) {
+      throw new UnauthorizedException('Valid board ID required');
+    }
+
+    const parsedBoardId = parseInt(boardId, 10);
 
     const hasAccess = await this.boardsService.verifyUserAccess(
-      parseInt(boardId, 10),
+      parsedBoardId,
       userId,
     );
 
     if (!hasAccess) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access denied to this board');
     }
 
     return true;
