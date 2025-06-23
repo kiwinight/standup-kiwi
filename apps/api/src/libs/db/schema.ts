@@ -12,8 +12,16 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 
-// Member roles enum
-export const memberRoleEnum = pgEnum('member_role', ['admin', 'member']);
+export const collaboratorRoleEnum = pgEnum('collaborator_role', [
+  'admin',
+  'collaborator',
+]);
+
+export const invitationStatusEnum = pgEnum('invitation_status', [
+  'pending',
+  'used',
+  'revoked',
+]);
 
 export const boards = pgTable('boards', {
   id: serial('id').primaryKey(),
@@ -44,6 +52,20 @@ export const standupForms = pgTable('standup_forms', {
 export type StandupForm = typeof standupForms.$inferSelect;
 export type InsertStandupForm = typeof standupForms.$inferInsert;
 
+export const invitations = pgTable('invitations', {
+  id: serial('id').primaryKey(),
+  boardId: integer('board_id')
+    .notNull()
+    .references(() => boards.id, { onDelete: 'cascade' }),
+  inviterUserId: uuid('inviter_user_id').notNull(),
+  token: text('token').unique().notNull(),
+  role: collaboratorRoleEnum('role').notNull().default('collaborator'),
+  status: invitationStatusEnum('status').notNull().default('pending'),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 export const usersToBoards = pgTable(
   'users_to_boards',
   {
@@ -51,7 +73,7 @@ export const usersToBoards = pgTable(
     boardId: integer('board_id')
       .notNull()
       .references(() => boards.id),
-    role: memberRoleEnum('role').notNull(),
+    role: collaboratorRoleEnum('role').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -80,6 +102,7 @@ export const boardsRelations = relations(boards, ({ many, one }) => ({
   usersToBoards: many(usersToBoards),
   standups: many(standups),
   standupForms: many(standupForms),
+  invitations: many(invitations),
   activeStandupForm: one(standupForms, {
     fields: [boards.activeStandupFormId],
     references: [standupForms.id],
@@ -100,6 +123,17 @@ export const usersToBoardsRelations = relations(usersToBoards, ({ one }) => ({
   }),
 }));
 
+export const invitationsRelations = relations(invitations, ({ one }) => ({
+  board: one(boards, {
+    fields: [invitations.boardId],
+    references: [boards.id],
+  }),
+}));
+
+// Types
+export type Invitation = typeof invitations.$inferSelect;
+export type InsertInvitation = typeof invitations.$inferInsert;
+
 export const standupsRelations = relations(standups, ({ one }) => ({
   board: one(boards, {
     fields: [standups.boardId],
@@ -116,4 +150,5 @@ export type InsertStandup = typeof standups.$inferInsert;
 
 export type UsersToBoards = typeof usersToBoards.$inferSelect;
 export type InsertUsersToBoards = typeof usersToBoards.$inferInsert;
-export type MemberRole = (typeof memberRoleEnum.enumValues)[number];
+export type UsersToBoardsRole =
+  (typeof collaboratorRoleEnum.enumValues)[number];
