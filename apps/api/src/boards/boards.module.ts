@@ -1,14 +1,23 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BoardsController } from './boards.controller';
 import { BoardsService } from './boards.service';
 import { AuthModule } from '../auth/auth.module';
 import { StandupsModule } from './standups/standups.module';
 import { StandupFormsModule } from './standup-forms/standup-forms.module';
+import { InvitationsModule } from './invitations/invitations.module';
 import { DbModule } from '../db/db.module';
 import { UsersService } from 'src/auth/users/users.service';
+
 @Module({
-  imports: [AuthModule, StandupsModule, StandupFormsModule, DbModule],
+  imports: [
+    AuthModule,
+    StandupsModule,
+    StandupFormsModule,
+    forwardRef(() => InvitationsModule),
+    DbModule,
+  ],
   controllers: [BoardsController],
   providers: [BoardsService, UsersService],
+  exports: [BoardsService], // Export BoardsService for use in InvitationsModule
 })
 export class BoardsModule {}
