@@ -156,12 +156,11 @@ function SuspenseFallback() {
   return (
     <>
       {Array.from({ length: 5 }).map((_, index) => (
-        <Flex direction="column" gap="5">
+        <Flex key={index} direction="column" gap="5">
           <Text size="3" weight="bold">
             <Skeleton>Thu, Jun 19, 2025</Skeleton>
           </Text>
           <Card
-            key={index}
             variant="surface"
             size={{
               initial: "3",
