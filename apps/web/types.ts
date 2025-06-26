@@ -32,6 +32,10 @@ interface Team {
 
 export interface User {
   id: string;
+  requires_totp_mfa: boolean;
+  auth_with_email: boolean;
+  oauth_providers: string[];
+  is_anonymous: boolean;
   primary_email_verified: boolean;
   primary_email_auth_enabled: boolean;
   signed_up_at_millis: number;
@@ -40,8 +44,10 @@ export interface User {
   display_name: string | null;
   selected_team: Team | null;
   selected_team_id: string | null;
-  profile_image_url: string;
+  profile_image_url: string | null;
   client_metadata: Record<string, any> | null;
+  passkey_auth_enabled: boolean;
+  otp_auth_enabled: boolean;
   client_read_only_metadata:
     | (Record<string, any> & { lastAccessedBoardId?: number })
     | null;
@@ -61,6 +67,18 @@ export interface Standup {
   formData: unknown;
   createdAt: string;
   updatedAt: string;
+}
+
+export type UsersToBoards = {
+  boardId: number;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: "admin" | "collaborator";
+};
+
+export interface Collaborator extends UsersToBoards {
+  user: User;
 }
 
 /**

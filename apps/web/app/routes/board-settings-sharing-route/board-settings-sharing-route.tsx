@@ -1,10 +1,76 @@
 import { Button, Callout, Card, Flex, Table, Text } from "@radix-ui/themes";
-import { useParams } from "react-router";
+import { useParams, useLoaderData, data, Await } from "react-router";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import type { Route } from "./+types/board-settings-sharing-route";
 import { FEATURE_NOT_IMPLEMENTED_ALERT_MESSAGE } from "~/libs/alert";
+import type { Collaborator } from "../../../types";
+import { type ApiData, isErrorData } from "../../../types";
+import { commitSession } from "~/libs/auth-session.server";
+import requireAuthenticated from "~/libs/auth";
+import CollaboratorsSetting from "./collaborators-setting";
+import { getBoard } from "../board-route/board-route";
+import { Suspense } from "react";
+import { ApiError } from "~/root";
+
+function listCollaborators(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(
+    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
-  return null;
+  const { accessToken, session, refreshed } = await requireAuthenticated(
+    request
+  );
+
+  const { boardId } = params;
+
+  const boardDataPromise = getBoard(boardId, { accessToken });
+
+  const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
+    (data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
+      return data;
+    }
+  );
+
+  return data(
+    { boardDataPromise, collaboratorsPromise },
+    {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    }
+  );
+}
+
+function BoardExistanceGuard() {
+  const { boardDataPromise } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense>
+      <Await resolve={boardDataPromise}>
+        {(data) => {
+          if (isErrorData(data)) {
+            throw new ApiError(data.message, data.statusCode);
+          }
+          return null;
+        }}
+      </Await>
+    </Suspense>
+  );
 }
 
 export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
@@ -12,52 +78,16 @@ export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
 
   return (
     <>
-      <Callout.Root>
+      <BoardExistanceGuard />
+
+      {/* TODO: Remove this after the feature is implemented */}
+      {/* <Callout.Root>
         <Callout.Icon>
           <InfoCircledIcon />
         </Callout.Icon>
         <Callout.Text>{FEATURE_NOT_IMPLEMENTED_ALERT_MESSAGE}</Callout.Text>
-      </Callout.Root>
-      <Card
-        size={{
-          initial: "3",
-          sm: "4",
-        }}
-        className="blur-[2px] pointer-events-none select-none"
-      >
-        <Flex direction="column">
-          <Flex justify="between" align="center">
-            <Text size="4" weight="bold">
-              Collaborators
-            </Text>
-            <Button highContrast>Add collaborator</Button>
-          </Flex>
-
-          <Table.Root mt="5">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>Role</Table.ColumnHeaderCell>
-              </Table.Row>
-            </Table.Header>
-
-            <Table.Body>
-              <Table.Row>
-                <Table.RowHeaderCell>Danilo Sousa</Table.RowHeaderCell>
-                <Table.Cell>danilo@standupkiwi.com</Table.Cell>
-                <Table.Cell>Owner</Table.Cell>
-              </Table.Row>
-
-              <Table.Row>
-                <Table.RowHeaderCell>Zahra Ambessa</Table.RowHeaderCell>
-                <Table.Cell>zahra@standupkiwi.com</Table.Cell>
-                <Table.Cell>Member</Table.Cell>
-              </Table.Row>
-            </Table.Body>
-          </Table.Root>
-        </Flex>
-      </Card>
+      </Callout.Root> */}
+      <CollaboratorsSetting />
 
       {/* <Card
         // size={{

@@ -18,7 +18,10 @@ import { Suspense } from "react";
 import { Await, data, useLoaderData } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
-function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
+export function getBoard(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,

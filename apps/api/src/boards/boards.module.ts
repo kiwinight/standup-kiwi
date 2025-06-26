@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module';
 import { StandupsModule } from './standups/standups.module';
 import { StandupFormsModule } from './standup-forms/standup-forms.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { CollaboratorsModule } from './collaborators/collaborators.module';
 import { DbModule } from '../db/db.module';
 import { UsersService } from 'src/auth/users/users.service';
 
@@ -14,10 +15,11 @@ import { UsersService } from 'src/auth/users/users.service';
     StandupsModule,
     StandupFormsModule,
     forwardRef(() => InvitationsModule),
+    forwardRef(() => CollaboratorsModule),
     DbModule,
   ],
   controllers: [BoardsController],
   providers: [BoardsService, UsersService],
-  exports: [BoardsService], // Export BoardsService for use in InvitationsModule
+  exports: [BoardsService], // Export BoardsService for use in other modules
 })
 export class BoardsModule {}
