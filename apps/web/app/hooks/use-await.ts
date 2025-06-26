@@ -16,7 +16,7 @@ export function useAwait<T>(
     const awaitPromise = async () => {
       try {
         const data = await promise;
-        if (data && !isCancelled) {
+        if (data !== null && !isCancelled) {
           callbackRef.current(data);
         }
       } catch (error) {
