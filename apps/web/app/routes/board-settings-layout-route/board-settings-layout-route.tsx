@@ -21,7 +21,7 @@ function BoardSettingsLayoutRoute({}: Route.ComponentProps) {
               </Link>
             </Button>
           </Flex>
-          <Flex>
+          <Flex mt="2">
             <Text size="6" weight="bold">
               Settings
             </Text>

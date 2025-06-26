@@ -199,7 +199,7 @@ function DynamicForm({
             );
           })}
         </Flex>
-        <Flex justify="end" mt="5" gap="2">
+        <Flex justify="end" mt="5" gap="3">
           {showCancelButton && (
             <Button
               highContrast
