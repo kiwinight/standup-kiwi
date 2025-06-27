@@ -88,6 +88,7 @@ export class InvitationsController {
     try {
       const invitations = await this.invitationsService.list(boardId, {
         activeOnly: true,
+        includeExpired: false,
       });
 
       if (invitations.length === 0) {

@@ -1,7 +1,6 @@
 import { Button, Callout, Card, Flex, Table, Text } from "@radix-ui/themes";
 import { useParams, useLoaderData, data, Await } from "react-router";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import type { Route } from "./+types/board-settings-sharing-route";
 import { FEATURE_NOT_IMPLEMENTED_ALERT_MESSAGE } from "~/libs/alert";
 import type { Collaborator } from "../../../types";
 import { type ApiData, isErrorData } from "../../../types";
@@ -11,6 +10,8 @@ import CollaboratorsSetting from "./collaborators-setting";
 import { getBoard } from "../board-route/board-route";
 import { Suspense } from "react";
 import { ApiError } from "~/root";
+import InviteCollaboratorsSetting from "./invite-collaborators-setting";
+import type { Route } from "./+types/board-settings-collaborators-route";
 
 function listCollaborators(
   boardId: string,
@@ -73,6 +74,7 @@ function BoardExistanceGuard() {
   );
 }
 
+// TODO: Change the name to BoardSettingsCollaboratorsRoute
 export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
   const { boardId } = useParams();
 
@@ -80,13 +82,8 @@ export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
     <>
       <BoardExistanceGuard />
 
-      {/* TODO: Remove this after the feature is implemented */}
-      {/* <Callout.Root>
-        <Callout.Icon>
-          <InfoCircledIcon />
-        </Callout.Icon>
-        <Callout.Text>{FEATURE_NOT_IMPLEMENTED_ALERT_MESSAGE}</Callout.Text>
-      </Callout.Root> */}
+      <InviteCollaboratorsSetting />
+
       <CollaboratorsSetting />
 
       {/* <Card

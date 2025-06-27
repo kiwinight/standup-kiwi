@@ -37,10 +37,13 @@ function BoardSettingsLayoutRoute({}: Route.ComponentProps) {
               <TabNav.Link
                 asChild
                 active={
-                  locationPathname === `/boards/${boardId}/settings/sharing`
+                  locationPathname ===
+                  `/boards/${boardId}/settings/collaborators`
                 }
               >
-                <Link to={`/boards/${boardId}/settings/sharing`}>Sharing</Link>
+                <Link to={`/boards/${boardId}/settings/collaborators`}>
+                  Collaborators
+                </Link>
               </TabNav.Link>
             </TabNav.Root>
           </Box>

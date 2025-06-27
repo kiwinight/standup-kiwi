@@ -22,8 +22,8 @@ export default [
           "routes/board-settings-route/board-settings-route.tsx"
         ),
         route(
-          "/boards/:boardId/settings/sharing",
-          "routes/board-settings-sharing-route/board-settings-sharing-route.tsx"
+          "/boards/:boardId/settings/collaborators",
+          "routes/board-settings-collaborators-route/board-settings-collaborators-route.tsx"
         ),
       ]
     ),
