@@ -52,10 +52,6 @@ export default [
     "routes/regenerate-board-invitation/regenerate-board-invitation.tsx"
   ),
   route(
-    "/boards/:boardId/invitation/deactivate",
-    "routes/deactivate-board-invitation/deactivate-board-invitation.tsx"
-  ),
-  route(
     "/access-code/send",
     "routes/send-access-code-route/send-access-code-route.tsx"
   ),
