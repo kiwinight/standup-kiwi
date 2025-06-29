@@ -1,17 +1,14 @@
-import { Button, Callout, Card, Flex, Table, Text } from "@radix-ui/themes";
-import { useParams, useLoaderData, data, Await } from "react-router";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { FEATURE_NOT_IMPLEMENTED_ALERT_MESSAGE } from "~/libs/alert";
-import type { Collaborator } from "../../../types";
+import { useLoaderData, data, Await } from "react-router";
+import type { Collaborator, Invitation } from "../../../types";
 import { type ApiData, isErrorData } from "../../../types";
 import { commitSession } from "~/libs/auth-session.server";
 import requireAuthenticated from "~/libs/auth";
 import CollaboratorsSetting from "./collaborators-setting";
-import { getBoard } from "../board-route/board-route";
 import { Suspense } from "react";
 import { ApiError } from "~/root";
 import InviteCollaboratorsSetting from "./invite-collaborators-setting";
 import type { Route } from "./+types/board-settings-collaborators-route";
+import { getBoard } from "../board-route/board-route";
 
 function listCollaborators(
   boardId: string,
@@ -29,6 +26,23 @@ function listCollaborators(
   ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
 }
 
+function ensureInvitation(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(`${import.meta.env.VITE_API_URL}/boards/${boardId}/invitation`, {
+    method: "PUT",
+    body: JSON.stringify({
+      role: "collaborator",
+      expiresIn: "7d",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((response) => response.json() as Promise<ApiData<Invitation>>);
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
@@ -37,6 +51,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { boardId } = params;
 
   const boardDataPromise = getBoard(boardId, { accessToken });
+
+  const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data;
+  });
 
   const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
     (data) => {
@@ -47,8 +68,22 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
   );
 
+  const ensureInvitationPromise = ensureInvitation(boardId, {
+    accessToken,
+  }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data;
+  });
+
   return data(
-    { boardDataPromise, collaboratorsPromise },
+    {
+      boardDataPromise,
+      boardPromise,
+      collaboratorsPromise,
+      ensureInvitationPromise,
+    },
     {
       headers: {
         ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
@@ -74,10 +109,7 @@ function BoardExistanceGuard() {
   );
 }
 
-// TODO: Change the name to BoardSettingsCollaboratorsRoute
-export default function BoardSettingsSharingRoute({}: Route.ComponentProps) {
-  const { boardId } = useParams();
-
+export default function BoardSettingsCollaboratorsRoute({}: Route.ComponentProps) {
   return (
     <>
       <BoardExistanceGuard />

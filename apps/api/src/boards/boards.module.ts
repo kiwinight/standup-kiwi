@@ -4,7 +4,7 @@ import { BoardsService } from './boards.service';
 import { AuthModule } from '../auth/auth.module';
 import { StandupsModule } from './standups/standups.module';
 import { StandupFormsModule } from './standup-forms/standup-forms.module';
-import { InvitationsModule } from './invitations/invitations.module';
+import { InvitationModule } from './invitation/invitation.module';
 import { CollaboratorsModule } from './collaborators/collaborators.module';
 import { DbModule } from '../db/db.module';
 import { UsersService } from 'src/auth/users/users.service';
@@ -14,7 +14,7 @@ import { UsersService } from 'src/auth/users/users.service';
     AuthModule,
     StandupsModule,
     StandupFormsModule,
-    forwardRef(() => InvitationsModule),
+    forwardRef(() => InvitationModule),
     forwardRef(() => CollaboratorsModule),
     DbModule,
   ],

@@ -12,15 +12,12 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 
+// TODO: add owner role
+// ON board creation, the creator is the owner
+// Trnasfer ownership to another user should be done manually for now
 export const collaboratorRoleEnum = pgEnum('collaborator_role', [
   'admin',
   'collaborator',
-]);
-
-export const invitationStatusEnum = pgEnum('invitation_status', [
-  'pending',
-  'used',
-  'revoked',
 ]);
 
 export const boards = pgTable('boards', {
@@ -60,8 +57,8 @@ export const invitations = pgTable('invitations', {
   inviterUserId: uuid('inviter_user_id').notNull(),
   token: text('token').unique().notNull(),
   role: collaboratorRoleEnum('role').notNull().default('collaborator'),
-  status: invitationStatusEnum('status').notNull().default('pending'),
   expiresAt: timestamp('expires_at').notNull(),
+  deactivatedAt: timestamp('deactivated_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

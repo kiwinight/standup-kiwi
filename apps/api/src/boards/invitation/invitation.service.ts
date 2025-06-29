@@ -17,7 +17,7 @@ import { generateSecureToken } from 'src/libs/token';
 import { addDurationToNow } from 'src/libs/date';
 
 @Injectable()
-export class InvitationsService {
+export class InvitationService {
   constructor(
     @Inject(DATABASE_TOKEN)
     private readonly db: Database,
