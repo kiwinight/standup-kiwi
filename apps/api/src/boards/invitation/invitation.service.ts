@@ -27,6 +27,9 @@ import { addDurationToNow } from 'src/libs/date';
  */
 @Injectable()
 export class InvitationService {
+  // Unique namespace for invitation advisory locks to avoid collisions
+  private readonly INVITATION_NAMESPACE = 2001;
+
   constructor(
     @Inject(DATABASE_TOKEN)
     private readonly db: Database,
@@ -36,6 +39,9 @@ export class InvitationService {
    * Creates a new invitation for a board.
    * Note: Invitations are designed to be reusable until manually deactivated or expired.
    * Multiple users can use the same invitation token to join a board.
+   *
+   * Race condition handling: Uses PostgreSQL advisory locks to ensure
+   * only one active invitation per board can be created.
    */
   async create({
     boardId,
@@ -48,43 +54,14 @@ export class InvitationService {
     role: 'admin' | 'collaborator';
     expiresIn: string;
   }): Promise<Invitation> {
-    const token = generateSecureToken();
-    const expiresAt = addDurationToNow(expiresIn);
-
-    const [invitation] = await this.db
-      .insert(invitations)
-      .values({
-        boardId,
-        inviterUserId,
-        token,
-        role,
-        expiresAt,
-      })
-      .returning();
-
-    if (!invitation) {
-      throw new InternalServerErrorException('Failed to create invitation');
-    }
-
-    return invitation;
-  }
-
-  /**
-   * Ensures an active invitation exists for a board.
-   * Returns existing active invitation or creates a new one.
-   * Design note: Invitations are reusable - one active invitation per board
-   * that can be used by multiple users until manually deactivated or expired.
-   */
-  async ensure({
-    boardId,
-    inviterUserId,
-  }: {
-    boardId: number;
-    inviterUserId: string;
-  }): Promise<Invitation> {
-    // Use transaction for atomic check-and-create operation
+    // Use transaction with advisory lock for race-condition safety
     return await this.db.transaction(async (tx) => {
-      // Check if invitation exists within transaction
+      // Acquire advisory lock for this board ID to prevent concurrent invitation creation
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(${this.INVITATION_NAMESPACE}, ${boardId})`,
+      );
+
+      // Check if active invitation already exists
       const [existing] = await tx
         .select()
         .from(invitations)
@@ -98,10 +75,77 @@ export class InvitationService {
         .orderBy(desc(invitations.createdAt));
 
       if (existing) {
+        throw new BadRequestException(
+          'An active invitation already exists for this board. Use regenerate() to create a new one.',
+        );
+      }
+
+      // Create new invitation only if none exists
+      const token = generateSecureToken();
+      const expiresAt = addDurationToNow(expiresIn);
+
+      const [invitation] = await tx
+        .insert(invitations)
+        .values({
+          boardId,
+          inviterUserId,
+          token,
+          role,
+          expiresAt,
+        })
+        .returning();
+
+      if (!invitation) {
+        throw new InternalServerErrorException('Failed to create invitation');
+      }
+
+      return invitation;
+      // Advisory lock is automatically released when transaction ends
+    });
+  }
+
+  /**
+   * Ensures an active invitation exists for a board.
+   * Returns existing active invitation or creates a new one.
+   * Design note: Invitations are reusable - one active invitation per board
+   * that can be used by multiple users until manually deactivated or expired.
+   *
+   * Race condition handling: Uses PostgreSQL advisory locks to ensure
+   * atomic check-then-create operation.
+   */
+  async ensure({
+    boardId,
+    inviterUserId,
+  }: {
+    boardId: number;
+    inviterUserId: string;
+  }): Promise<Invitation> {
+    // Use transaction with advisory lock for race-condition safety
+    return await this.db.transaction(async (tx) => {
+      // Acquire advisory lock for this board ID to prevent concurrent invitation creation
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(${this.INVITATION_NAMESPACE}, ${boardId})`,
+      );
+
+      // Check if active invitation exists within the locked transaction
+      const [existing] = await tx
+        .select()
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.boardId, boardId),
+            isNull(invitations.deactivatedAt),
+            sql`${invitations.expiresAt} > NOW()`,
+          ),
+        )
+        .orderBy(desc(invitations.createdAt));
+
+      // Return existing invitation if found
+      if (existing) {
         return existing;
       }
 
-      // Create new invitation atomically
+      // Create new invitation only if none exists
       const token = generateSecureToken();
       const expiresAt = addDurationToNow('7d');
 
@@ -121,6 +165,7 @@ export class InvitationService {
       }
 
       return invitation;
+      // Advisory lock is automatically released when transaction ends
     });
   }
 
