@@ -1,19 +1,19 @@
 import { Link, Outlet } from "react-router";
 import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
-import type { Route } from "./+types/access-layout-route";
 import { meta as rootMeta } from "~/root";
+import type { Route } from "./+types/auth-layout-route";
 
 export function meta(args: Route.MetaArgs) {
   return [
     ...rootMeta(),
     {
-      title: "Access • Standup Kiwi",
+      title: "Get started  • Standup Kiwi",
     },
   ];
 }
 
-function AccessLayoutRoute({}: Route.ComponentProps) {
+function AuthLayoutRoute({}: Route.ComponentProps) {
   return (
     <div>
       <Flex
@@ -47,4 +47,4 @@ function AccessLayoutRoute({}: Route.ComponentProps) {
   );
 }
 
-export default AccessLayoutRoute;
+export default AuthLayoutRoute;

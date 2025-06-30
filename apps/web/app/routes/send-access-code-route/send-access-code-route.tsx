@@ -30,16 +30,6 @@ function checkIfUserExists(email: string) {
   ).then((response) => response.json() as Promise<ApiData<boolean>>);
 }
 
-async function determineRedirectUrl(email: string) {
-  const userExistsResponse = await checkIfUserExists(email);
-
-  if (isErrorData(userExistsResponse)) {
-    return "/access/sign-in";
-  }
-
-  return userExistsResponse ? "/access/sign-in" : "/access/sign-up";
-}
-
 export type ActionType = typeof action;
 
 export async function action({ request }: Route.ActionArgs) {
@@ -55,7 +45,20 @@ export async function action({ request }: Route.ActionArgs) {
 
   const { nonce } = responseData;
 
-  const redirectUrl = await determineRedirectUrl(email);
+  const userExistsResponse = await checkIfUserExists(email);
 
-  return redirect(redirectUrl + "?nonce=" + nonce);
+  let userExists = true; // Default to true when API error occurs - safer for existing users
+  if (!isErrorData(userExistsResponse)) {
+    userExists = userExistsResponse;
+  }
+
+  const redirectUrl = "/auth/email/sign-in";
+
+  const params = new URLSearchParams({
+    nonce: nonce,
+    email: email,
+    userExists: String(userExists),
+  });
+
+  return redirect(`${redirectUrl}?${params.toString()}`);
 }
