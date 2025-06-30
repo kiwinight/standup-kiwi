@@ -1,4 +1,8 @@
-import { Share1Icon, GearIcon } from "@radix-ui/react-icons";
+import {
+  Share1Icon,
+  GearIcon,
+  EnvelopeClosedIcon,
+} from "@radix-ui/react-icons";
 import { Flex, Skeleton, Button, Text } from "@radix-ui/themes";
 import { Suspense, use } from "react";
 import { Link, useLoaderData, useParams } from "react-router";
@@ -47,9 +51,9 @@ function Toolbar({}: Props) {
         }}
       >
         <Button asChild variant="ghost" highContrast>
-          <Link to={`/boards/${boardId}/settings/sharing`}>
-            <Share1Icon />
-            Share
+          <Link to={`/boards/${boardId}/settings/collaborators`}>
+            <EnvelopeClosedIcon />
+            Invite
           </Link>
         </Button>
 
