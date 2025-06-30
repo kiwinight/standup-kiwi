@@ -244,12 +244,23 @@ export class InvitationService {
   async accept(token: string, userId: string): Promise<void> {
     const invitation = await this.getByToken(token);
 
-    // Validate invitation state
-    if (invitation.deactivatedAt) {
-      throw new BadRequestException('This invitation has been deactivated');
-    }
+    // Validate invitation state using database-level UTC comparison
+    // This ensures consistency with other invitation validity checks in the service
+    const [validInvitation] = await this.db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.token, token),
+          isNull(invitations.deactivatedAt),
+          sql`${invitations.expiresAt} > NOW()`,
+        ),
+      );
 
-    if (new Date(invitation.expiresAt) <= new Date()) {
+    if (!validInvitation) {
+      if (invitation.deactivatedAt) {
+        throw new BadRequestException('This invitation has been deactivated');
+      }
       throw new BadRequestException('This invitation has expired');
     }
 
