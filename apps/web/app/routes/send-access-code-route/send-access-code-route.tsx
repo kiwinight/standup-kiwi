@@ -47,20 +47,17 @@ export async function action({ request }: Route.ActionArgs) {
 
   const userExistsResponse = await checkIfUserExists(email);
 
-  if (isErrorData(userExistsResponse)) {
-    return data({
-      error: userExistsResponse.message,
-    });
+  let userExists = false;
+  if (!isErrorData(userExistsResponse)) {
+    userExists = userExistsResponse;
   }
 
   const redirectUrl = "/auth/email/sign-in";
 
-  const userExists = userExistsResponse;
-
   const params = new URLSearchParams({
-    nonce: encodeURIComponent(nonce),
-    email: encodeURIComponent(email),
-    userExists: encodeURIComponent(String(userExists)),
+    nonce: nonce,
+    email: email,
+    userExists: String(userExists),
   });
 
   return redirect(`${redirectUrl}?${params.toString()}`);
