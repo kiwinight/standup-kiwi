@@ -47,7 +47,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const userExistsResponse = await checkIfUserExists(email);
 
-  let userExists = false;
+  let userExists = true; // Default to true when API error occurs - safer for existing users
   if (!isErrorData(userExistsResponse)) {
     userExists = userExistsResponse;
   }

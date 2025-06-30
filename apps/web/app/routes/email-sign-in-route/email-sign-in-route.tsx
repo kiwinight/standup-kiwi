@@ -17,9 +17,9 @@ import type { Route } from "./+types/email-sign-in-route";
 
 function EmailSignInRoute({}: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
-  const email = decodeURIComponent(searchParams.get("email") ?? "");
+  const email = searchParams.get("email") ?? "";
   const userExists = searchParams.get("userExists") === "true";
-  const nonce = decodeURIComponent(searchParams.get("nonce") ?? "");
+  const nonce = searchParams.get("nonce") ?? "";
 
   const fetcher = useFetcher<SignInWithAccessCodeActionType>();
 
