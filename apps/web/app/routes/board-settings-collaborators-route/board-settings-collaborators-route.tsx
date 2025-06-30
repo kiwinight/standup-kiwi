@@ -46,6 +46,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const { boardId } = params;
 
+  // Extract base URL from request for environment-specific invitation links
+  const url = new URL(request.url);
+  const baseUrl = `${url.protocol}//${url.host}`;
+
   const boardDataPromise = getBoard(boardId, { accessToken });
 
   const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
@@ -75,6 +79,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   return data(
     {
+      baseUrl,
       boardDataPromise,
       boardPromise,
       collaboratorsPromise,

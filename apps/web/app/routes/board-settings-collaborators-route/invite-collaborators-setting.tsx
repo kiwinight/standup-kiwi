@@ -209,7 +209,7 @@ function getDaysFromNowForForm(dateString: string, timezone: string): number {
 }
 
 function InviteCollaboratorsSetting({}: Props) {
-  const { ensureInvitationPromise, boardPromise } =
+  const { ensureInvitationPromise, boardPromise, baseUrl } =
     useLoaderData<typeof loader>();
   const { boardId } = useParams();
   const { toast } = useToast();
@@ -275,7 +275,7 @@ function InviteCollaboratorsSetting({}: Props) {
                   ) : (
                     <TextField.Root
                       className="flex-1"
-                      value={`https://app.standupkiwi.com/invitations/${invitation?.token}`}
+                      value={`${baseUrl}/invitations/${invitation?.token}`}
                       onChange={() => null}
                       onFocus={async (event) => {
                         try {
@@ -317,7 +317,7 @@ function InviteCollaboratorsSetting({}: Props) {
                     disabled={regenerateInvitationFetcher.state !== "idle"}
                     onClick={async () => {
                       try {
-                        const url = `https://app.standupkiwi.com/invitations/${invitation?.token}`;
+                        const url = `${baseUrl}/invitations/${invitation?.token}`;
                         await navigator.clipboard.writeText(url);
                         toast.success("Invitation link copied to clipboard");
                       } catch (err) {
