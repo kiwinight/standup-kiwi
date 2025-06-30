@@ -28,11 +28,16 @@ export default [
       ]
     ),
   ]),
-  layout("routes/access-layout-route/access-layout-route.tsx", [
-    route("/access", "routes/access-route/access-route.tsx"),
-    route("/access/sign-in", "routes/sign-in-route/sign-in-route.tsx"),
-    route("/access/sign-up", "routes/sign-up-route/sign-up-route.tsx"),
+
+  layout("routes/auth-layout-route/auth-layout-route.tsx", [
+    route("/auth/email", "routes/email-auth-route/email-auth-route.tsx"),
+    route(
+      "/auth/email/sign-in",
+      "routes/email-sign-in-route/email-sign-in-route.tsx"
+    ),
   ]),
+
+  route("/access", "routes/access-route/access-route.tsx"), // TODO: Remove this when access to /access is not needed
 
   // action only routes
   route(

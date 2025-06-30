@@ -27,7 +27,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 
   if (!currentUser) {
-    return redirect("/access", {
+    return redirect("/auth/email", {
       headers: {
         ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
       },

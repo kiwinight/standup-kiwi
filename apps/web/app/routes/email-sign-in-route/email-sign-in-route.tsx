@@ -1,9 +1,9 @@
 import {
   Button,
   Card,
+  Code,
   Container,
   Flex,
-  Heading,
   Text,
   TextField,
 } from "@radix-ui/themes";
@@ -12,10 +12,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { ActionType as SignInWithAccessCodeActionType } from "../sign-in-with-access-code-route/sign-in-with-access-code-route";
-import type { Route } from "./+types/sign-up-route";
+import { useEffect } from "react";
+import type { Route } from "./+types/email-sign-in-route";
 
-function SignUpRoute({}: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+function EmailSignInRoute({}: Route.ComponentProps) {
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email") ?? "";
+  const userExists = searchParams.get("userExists") === "true";
+  const nonce = searchParams.get("nonce") ?? "";
 
   const fetcher = useFetcher<SignInWithAccessCodeActionType>();
 
@@ -30,16 +34,30 @@ function SignUpRoute({}: Route.ComponentProps) {
     },
   });
 
+  useEffect(() => {
+    if (fetcher.data?.error) {
+      form.setError("otp", { message: fetcher.data.error });
+    }
+  }, [fetcher.data]);
+
   return (
     <Container py="7" maxWidth="672px" px="4">
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">
-            Complete your sign up
+            Enter the code from your email
           </Text>
           <Text size="2" color="gray">
-            We’ve sent a 6-digit access code to your email. Enter it below to
-            complete your sign up and access Standup Kiwi.
+            We've sent a one-time code to your email. Please check your inbox
+            {email && (
+              <>
+                {" at "}
+                <Text size="2" weight="bold">
+                  {email}
+                </Text>
+              </>
+            )}
+            . If you don't see it, check your spam or junk folder.
           </Text>
         </Flex>
         <Card
@@ -51,7 +69,7 @@ function SignUpRoute({}: Route.ComponentProps) {
           <form
             onSubmit={form.handleSubmit((data) => {
               fetcher.submit(
-                { otp: data.otp, nonce: searchParams.get("nonce") },
+                { otp: data.otp, nonce },
                 {
                   encType: "application/json",
                   method: "post",
@@ -62,29 +80,20 @@ function SignUpRoute({}: Route.ComponentProps) {
           >
             <Flex direction="column">
               <Text size="4" weight="bold">
-                Your access code
+                One-time code
               </Text>
 
               <Flex direction="column" mt="5" gap="5">
                 <Flex direction="column" gap="2">
-                  <label>
-                    <Flex align="center" gap="2">
-                      <Text size="2" className="font-semibold">
-                        Access code
-                      </Text>
-                      <Text size="1" color="gray">
-                        Required
-                      </Text>
-                    </Flex>
-                  </label>
                   <TextField.Root
                     type="text"
-                    placeholder="A1B2C3"
+                    placeholder="Enter code"
                     variant="soft"
                     {...form.register("otp")}
                   />
                   <Text size="2" color="gray">
-                    Enter the 6-digit access code we sent to your email.
+                    A six-digit one-time code we sent you. e.g.{" "}
+                    <Code>C1B2A3</Code>
                   </Text>
                   {form.formState.errors.otp && (
                     <Text size="2" color="red">
@@ -100,15 +109,20 @@ function SignUpRoute({}: Route.ComponentProps) {
                   type="submit"
                   loading={fetcher.state === "submitting"}
                 >
-                  Sign up
+                  Continue
                 </Button>
               </Flex>
             </Flex>
           </form>
         </Card>
+        {!userExists && (
+          <Text size="2" color="gray" align="center">
+            By continuing, you'll create a new account with this email address.
+          </Text>
+        )}
       </Flex>
     </Container>
   );
 }
 
-export default SignUpRoute;
+export default EmailSignInRoute;

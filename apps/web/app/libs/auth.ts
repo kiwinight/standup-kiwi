@@ -103,7 +103,8 @@ export default async function requireAuthenticated(request: Request) {
   } = await verifyAndRefreshAccessToken(session);
 
   if (!isValid) {
-    throw redirect("/access");
+    // throw redirect("/access");
+    throw redirect("/auth/email");
   }
 
   return {
