@@ -16,6 +16,15 @@ import { eq, and, sql, desc, isNull } from 'drizzle-orm';
 import { generateSecureToken } from 'src/libs/token';
 import { addDurationToNow } from 'src/libs/date';
 
+/**
+ * Service for managing board invitations.
+ *
+ * DESIGN NOTE: Invitations in this system are designed to be REUSABLE.
+ * - Each board can have one active invitation at a time
+ * - Multiple users can use the same invitation token to join a board
+ * - Invitations remain active until manually deactivated or expired
+ * - This is intentional behavior to simplify invitation management
+ */
 @Injectable()
 export class InvitationService {
   constructor(
@@ -23,6 +32,11 @@ export class InvitationService {
     private readonly db: Database,
   ) {}
 
+  /**
+   * Creates a new invitation for a board.
+   * Note: Invitations are designed to be reusable until manually deactivated or expired.
+   * Multiple users can use the same invitation token to join a board.
+   */
   async create({
     boardId,
     inviterUserId,
@@ -55,6 +69,12 @@ export class InvitationService {
     return invitation;
   }
 
+  /**
+   * Ensures an active invitation exists for a board.
+   * Returns existing active invitation or creates a new one.
+   * Design note: Invitations are reusable - one active invitation per board
+   * that can be used by multiple users until manually deactivated or expired.
+   */
   async ensure({
     boardId,
     inviterUserId,
@@ -115,21 +135,43 @@ export class InvitationService {
     role: 'admin' | 'collaborator';
     expiresIn: string;
   }): Promise<Invitation> {
-    // TODO: Consider wrapping deactivate + create in a database transaction
-    // to ensure atomicity (both operations succeed or both fail)
-    try {
-      await this.deactivate(boardId);
-    } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        throw error;
-      }
-    }
+    // Use transaction to ensure atomic deactivate-and-create operation
+    return await this.db.transaction(async (tx) => {
+      // Deactivate existing invitations
+      await tx
+        .update(invitations)
+        .set({
+          deactivatedAt: sql`NOW()`,
+          updatedAt: sql`NOW()`,
+        })
+        .where(
+          and(
+            eq(invitations.boardId, boardId),
+            isNull(invitations.deactivatedAt),
+            sql`${invitations.expiresAt} > NOW()`,
+          ),
+        );
 
-    return await this.create({
-      boardId,
-      inviterUserId,
-      role,
-      expiresIn,
+      // Create new invitation atomically
+      const token = generateSecureToken();
+      const expiresAt = addDurationToNow(expiresIn);
+
+      const [invitation] = await tx
+        .insert(invitations)
+        .values({
+          boardId,
+          inviterUserId,
+          token,
+          role,
+          expiresAt,
+        })
+        .returning();
+
+      if (!invitation) {
+        throw new InternalServerErrorException('Failed to create invitation');
+      }
+
+      return invitation;
     });
   }
 
@@ -191,6 +233,14 @@ export class InvitationService {
     return invitation;
   }
 
+  /**
+   * Accepts an invitation and adds the user as a collaborator to the board.
+   *
+   * IMPORTANT: This method intentionally does NOT deactivate the invitation after use.
+   * Invitations are designed to be reusable - multiple users can use the same
+   * invitation token to join a board until it expires or is manually deactivated.
+   * This is the intended behavior, not a security vulnerability.
+   */
   async accept(token: string, userId: string): Promise<void> {
     const invitation = await this.getByToken(token);
 

@@ -7,7 +7,7 @@ import { commitSession } from "~/libs/auth-session.server";
 
 export interface RegenerateInvitationRequestBody {
   role: "admin" | "collaborator";
-  expiresIn?: string;
+  expiresIn: string;
 }
 
 function regenerateInvitation(
