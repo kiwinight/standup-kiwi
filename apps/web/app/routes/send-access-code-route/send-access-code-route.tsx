@@ -47,6 +47,12 @@ export async function action({ request }: Route.ActionArgs) {
 
   const userExistsResponse = await checkIfUserExists(email);
 
+  if (isErrorData(userExistsResponse)) {
+    return data({
+      error: userExistsResponse.message,
+    });
+  }
+
   const redirectUrl = "/auth/email/sign-in";
 
   const userExists = userExistsResponse;
