@@ -22,8 +22,8 @@ export default [
           "routes/board-settings-route/board-settings-route.tsx"
         ),
         route(
-          "/boards/:boardId/settings/sharing",
-          "routes/board-settings-sharing-route/board-settings-sharing-route.tsx"
+          "/boards/:boardId/settings/collaborators",
+          "routes/board-settings-collaborators-route/board-settings-collaborators-route.tsx"
         ),
       ]
     ),
@@ -42,6 +42,14 @@ export default [
   route(
     "/boards/:boardId/standups/:standupId/update",
     "routes/update-board-standup/update-board-standup.tsx"
+  ),
+  route(
+    "/boards/:boardId/invitation/ensure",
+    "routes/ensure-board-invitation/ensure-board-invitation.tsx"
+  ),
+  route(
+    "/boards/:boardId/invitation/regenerate",
+    "routes/regenerate-board-invitation/regenerate-board-invitation.tsx"
   ),
   route(
     "/access-code/send",

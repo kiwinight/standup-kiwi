@@ -10,7 +10,7 @@ import {
   AlertDialog,
 } from "@radix-ui/themes";
 import { Await, useLoaderData } from "react-router";
-import type { loader } from "./board-settings-sharing-route";
+import type { loader } from "./board-settings-collaborators-route";
 import { Suspense, useMemo, useState, useCallback, useRef } from "react";
 import type { Collaborator } from "types";
 import { useAwait } from "~/hooks/use-await";

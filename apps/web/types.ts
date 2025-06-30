@@ -81,6 +81,18 @@ export interface Collaborator extends UsersToBoards {
   user: User;
 }
 
+export type Invitation = {
+  id: number;
+  boardId: number;
+  inviterUserId: string;
+  token: string;
+  role: "admin" | "collaborator";
+  expiresAt: string;
+  deactivatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 /**
  * API
  */
