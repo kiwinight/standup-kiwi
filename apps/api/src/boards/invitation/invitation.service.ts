@@ -58,26 +58,49 @@ export class InvitationService {
   async ensure({
     boardId,
     inviterUserId,
-    role,
-    expiresIn,
   }: {
     boardId: number;
     inviterUserId: string;
-    role: 'admin' | 'collaborator';
-    expiresIn: string;
   }): Promise<Invitation> {
-    // TODO: Handle race condition - if two requests call ensure() simultaneously,
-    // both might try to create invitation. Consider try-catch with unique_violation handling.
-    const existing = await this.get(boardId);
-    if (existing) {
-      return existing;
-    }
+    // Use transaction for atomic check-and-create operation
+    return await this.db.transaction(async (tx) => {
+      // Check if invitation exists within transaction
+      const [existing] = await tx
+        .select()
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.boardId, boardId),
+            isNull(invitations.deactivatedAt),
+            sql`${invitations.expiresAt} > NOW()`,
+          ),
+        )
+        .orderBy(desc(invitations.createdAt));
 
-    return await this.create({
-      boardId,
-      inviterUserId,
-      role,
-      expiresIn,
+      if (existing) {
+        return existing;
+      }
+
+      // Create new invitation atomically
+      const token = generateSecureToken();
+      const expiresAt = addDurationToNow('7d');
+
+      const [invitation] = await tx
+        .insert(invitations)
+        .values({
+          boardId,
+          inviterUserId,
+          token,
+          role: 'collaborator',
+          expiresAt,
+        })
+        .returning();
+
+      if (!invitation) {
+        throw new InternalServerErrorException('Failed to create invitation');
+      }
+
+      return invitation;
     });
   }
 

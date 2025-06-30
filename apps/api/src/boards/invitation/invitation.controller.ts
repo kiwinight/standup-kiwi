@@ -16,7 +16,7 @@ import { AuthGuard, AuthenticatedRequest } from '../../auth/guards/auth.guard';
 import { BoardAccessGuard } from '../guards/board-access.guard';
 import { AdminRoleGuard } from '../guards/admin-role.guard';
 import { InvitationService } from './invitation.service';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
+import { RegenerateInvitationDto } from './dto/regenerate-invitation.dto';
 
 // Singleton invitation resource controller
 @Controller('boards/:boardId/invitation')
@@ -29,13 +29,11 @@ export class InvitationController {
   async ensure(
     @Req() req: AuthenticatedRequest,
     @Param('boardId', ParseIntPipe) boardId: number,
-    @Body() createInvitationDto: CreateInvitationDto,
   ) {
     try {
       const invitation = await this.invitationService.ensure({
         boardId,
         inviterUserId: req.userId,
-        ...createInvitationDto,
       });
 
       return {
@@ -62,13 +60,13 @@ export class InvitationController {
   async regenerate(
     @Req() req: AuthenticatedRequest,
     @Param('boardId', ParseIntPipe) boardId: number,
-    @Body() createInvitationDto: CreateInvitationDto,
+    @Body() regenerateInvitationDto: RegenerateInvitationDto,
   ) {
     try {
       const invitation = await this.invitationService.regenerate({
         boardId,
         inviterUserId: req.userId,
-        ...createInvitationDto,
+        ...regenerateInvitationDto,
       });
 
       return {

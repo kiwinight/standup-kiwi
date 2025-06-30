@@ -5,19 +5,12 @@ import type { ApiData, Invitation } from "types";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
-export interface CreateInvitationRequestBody {
-  role: "admin" | "collaborator";
-  expiresIn?: string;
-}
-
 function ensureInvitation(
   boardId: string,
-  { role, expiresIn }: CreateInvitationRequestBody,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/invitation`, {
     method: "PUT",
-    body: JSON.stringify({ role, expiresIn }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -32,18 +25,11 @@ export async function action({ request, params }: Route.ActionArgs) {
     request
   );
 
-  const { role, expiresIn } =
-    (await request.json()) as CreateInvitationRequestBody;
-
   const boardId = params.boardId;
 
-  const invitationData = await ensureInvitation(
-    boardId,
-    { role, expiresIn },
-    {
-      accessToken,
-    }
-  );
+  const invitationData = await ensureInvitation(boardId, {
+    accessToken,
+  });
 
   return data(
     {

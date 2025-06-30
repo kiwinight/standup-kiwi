@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
 
-export class CreateInvitationDto {
+export class RegenerateInvitationDto {
   @IsEnum(['admin', 'collaborator'])
   role!: 'admin' | 'collaborator';
 

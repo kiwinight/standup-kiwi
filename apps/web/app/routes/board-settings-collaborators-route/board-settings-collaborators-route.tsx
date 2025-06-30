@@ -32,10 +32,6 @@ function ensureInvitation(
 ) {
   return fetch(`${import.meta.env.VITE_API_URL}/boards/${boardId}/invitation`, {
     method: "PUT",
-    body: JSON.stringify({
-      role: "collaborator",
-      expiresIn: "7d",
-    }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
