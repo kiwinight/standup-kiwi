@@ -13,8 +13,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ActionType as SendAccessCodeActionType } from "../send-access-code-route/send-access-code-route";
 import { useEffect } from "react";
 import type { Route } from "./+types/email-auth-route";
+import { useSearchParams } from "react-router";
 
 function EmailAuthRoute({}: Route.ComponentProps) {
+  const [searchParams] = useSearchParams();
+  const invitation = searchParams.get("invitation") ?? "";
   const fetcher = useFetcher<SendAccessCodeActionType>();
 
   const formSchema = z.object({
@@ -39,11 +42,15 @@ function EmailAuthRoute({}: Route.ComponentProps) {
       <Flex direction="column" gap="7">
         <Flex direction="column" gap="2">
           <Text size="6" weight="bold">
-            Get started with your email
+            {/* {invitation
+              ? "Continue with your email"
+              : "Get started with your email"} */}
+            Continue with email
           </Text>
           <Text size="2" color="gray">
-            We'll send you a one-time code so you can access your personalized
-            workspace.
+            {invitation
+              ? "We'll send you a one-time code to sign in and accept the invitation."
+              : "We'll send you a one-time code to sign in and access your personalized workspace."}
           </Text>
         </Flex>
 
@@ -56,6 +63,9 @@ function EmailAuthRoute({}: Route.ComponentProps) {
           <form
             method="post"
             onSubmit={form.handleSubmit((data) => {
+              const actionUrl = invitation
+                ? `/access-code/send?invitation=${invitation}`
+                : "/access-code/send";
               fetcher.submit(
                 {
                   email: data.email,
@@ -63,7 +73,7 @@ function EmailAuthRoute({}: Route.ComponentProps) {
                 {
                   encType: "application/json",
                   method: "post",
-                  action: "/access-code/send",
+                  action: actionUrl,
                 }
               );
             })}
