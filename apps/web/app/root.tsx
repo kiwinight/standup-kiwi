@@ -227,7 +227,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         </Heading>
         <Text>{description}</Text>
         <Button variant="outline" asChild>
-          <Link to="/">Go to Main</Link>
+          <Link to="/">Go to main</Link>
         </Button>
       </Flex>
     </Theme>

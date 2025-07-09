@@ -8,7 +8,7 @@ export function meta(args: Route.MetaArgs) {
   return [
     ...rootMeta(),
     {
-      title: "Get started  • Standup Kiwi",
+      title: "Continue with email • Standup Kiwi",
     },
   ];
 }

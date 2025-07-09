@@ -52,13 +52,19 @@ export async function action({ request }: Route.ActionArgs) {
     userExists = userExistsResponse;
   }
 
-  const redirectUrl = "/auth/email/sign-in";
+  const redirectUrl = "/auth/email/continue";
 
   const params = new URLSearchParams({
     nonce: nonce,
     email: email,
     userExists: String(userExists),
   });
+
+  const url = new URL(request.url);
+  const invitationToken = url.searchParams.get("invitation");
+  if (invitationToken) {
+    params.set("invitation", invitationToken);
+  }
 
   return redirect(`${redirectUrl}?${params.toString()}`);
 }

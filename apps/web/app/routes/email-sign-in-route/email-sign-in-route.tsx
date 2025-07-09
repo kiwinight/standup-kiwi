@@ -20,6 +20,7 @@ function EmailSignInRoute({}: Route.ComponentProps) {
   const email = searchParams.get("email") ?? "";
   const userExists = searchParams.get("userExists") === "true";
   const nonce = searchParams.get("nonce") ?? "";
+  const invitation = searchParams.get("invitation") ?? "";
 
   const fetcher = useFetcher<SignInWithAccessCodeActionType>();
 
@@ -57,7 +58,10 @@ function EmailSignInRoute({}: Route.ComponentProps) {
                 </Text>
               </>
             )}
-            . If you don't see it, check your spam or junk folder.
+            .
+            <br />
+            Enter the code below to {userExists ? "sign in" : "sign up"}. If you
+            don't see it, check your spam or junk folder.
           </Text>
         </Flex>
         <Card
@@ -68,12 +72,15 @@ function EmailSignInRoute({}: Route.ComponentProps) {
         >
           <form
             onSubmit={form.handleSubmit((data) => {
+              const actionUrl = invitation
+                ? `/access-code/sign-in?invitation=${invitation}`
+                : "/access-code/sign-in";
               fetcher.submit(
                 { otp: data.otp, nonce },
                 {
                   encType: "application/json",
                   method: "post",
-                  action: "/access-code/sign-in",
+                  action: actionUrl,
                 }
               );
             })}

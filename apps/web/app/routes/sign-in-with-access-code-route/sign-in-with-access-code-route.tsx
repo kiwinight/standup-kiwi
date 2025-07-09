@@ -47,7 +47,12 @@ export async function action({ request }: Route.ActionArgs) {
   session.set("access_token", responseData.access_token);
   session.set("refresh_token", responseData.refresh_token);
 
-  return redirect("/", {
+  const url = new URL(request.url);
+  const invitationToken = url.searchParams.get("invitation");
+
+  const redirectUrl = invitationToken ? `/invitations/${invitationToken}` : "/";
+
+  return redirect(redirectUrl, {
     headers: { "Set-Cookie": await commitSession(session) },
   });
 }

@@ -253,29 +253,32 @@ export class InvitationService {
   }
 
   async getByToken(token: string) {
-    const [invitation] = await this.db
+    const [result] = await this.db
       .select({
-        id: invitations.id,
-        boardId: invitations.boardId,
-        inviterUserId: invitations.inviterUserId,
-        token: invitations.token,
-        role: invitations.role,
-        expiresAt: invitations.expiresAt,
-        deactivatedAt: invitations.deactivatedAt,
-        createdAt: invitations.createdAt,
+        invitation: invitations,
         board: {
+          id: boards.id,
           name: boards.name,
         },
       })
       .from(invitations)
-      .innerJoin(boards, eq(invitations.boardId, boards.id))
-      .where(eq(invitations.token, token));
+      .leftJoin(boards, eq(invitations.boardId, boards.id))
+      .where(
+        and(
+          eq(invitations.token, token),
+          isNull(invitations.deactivatedAt),
+          sql`${invitations.expiresAt} > NOW()`,
+        ),
+      );
 
-    if (!invitation) {
-      throw new NotFoundException('Invitation not found');
+    if (!result || !result.invitation || !result.board) {
+      throw new NotFoundException('Invitation not found or has expired');
     }
 
-    return invitation;
+    return {
+      ...result.invitation,
+      board: result.board,
+    };
   }
 
   /**

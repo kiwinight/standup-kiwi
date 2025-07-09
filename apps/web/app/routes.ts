@@ -32,12 +32,13 @@ export default [
   layout("routes/auth-layout-route/auth-layout-route.tsx", [
     route("/auth/email", "routes/email-auth-route/email-auth-route.tsx"),
     route(
-      "/auth/email/sign-in",
+      "/auth/email/continue",
       "routes/email-sign-in-route/email-sign-in-route.tsx"
     ),
   ]),
 
   route("/access", "routes/access-route/access-route.tsx"), // TODO: Remove this when access to /access is not needed
+  route("/invitations/:token", "routes/invitation-route/invitation-route.tsx"),
 
   // action only routes
   route(
@@ -67,6 +68,10 @@ export default [
   route(
     "/boards/:boardId/update",
     "routes/update-board-route/update-board-route.tsx"
+  ),
+  route(
+    "/accept-invitation",
+    "routes/accept-invitation-route/accept-invitation-route.tsx"
   ),
   // TODO: Add delete session route - logout
   // route(
