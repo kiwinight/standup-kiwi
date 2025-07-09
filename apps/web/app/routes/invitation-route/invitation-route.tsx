@@ -177,11 +177,11 @@ function InvitationRoute() {
                         </Button>
                       ) : (
                         <Button highContrast asChild>
-                          <a
-                            href={`/auth/email?invitation=${invitation.token}`}
+                          <Link
+                            to={`/auth/email?invitation=${invitation.token}`}
                           >
                             Continue with email
-                          </a>
+                          </Link>
                         </Button>
                       )}
                     </Flex>
