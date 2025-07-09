@@ -18,7 +18,9 @@ import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
 
 function NavBar() {
-  const { currentUserPromise } = useRouteLoaderData<typeof rootLoader>("root")!;
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   const { currentUserBoardsPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
