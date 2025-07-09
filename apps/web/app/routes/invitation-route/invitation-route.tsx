@@ -116,19 +116,18 @@ function InvitationRoute() {
                   return (
                     <Flex direction="column" gap="7">
                       <Flex direction="column" gap="2" align="center">
-                        <Text size="6" weight="bold" align="center" color="red">
-                          Invitation Not Found
+                        <Text size="6" weight="bold" align="center">
+                          Invitation not found
                         </Text>
                         <Text size="2" color="gray" align="center">
-                          This invitation may have expired, been revoked, or does not exist.
+                          This invitation may have expired, been deactivated, or
+                          does not exist. <br />
                           Please check the invitation link and try again.
                         </Text>
                       </Flex>
                       <Flex justify="center">
                         <Button highContrast asChild>
-                          <Link to="/">
-                            Return to Home
-                          </Link>
+                          <Link to="/">Back to main</Link>
                         </Button>
                       </Flex>
                     </Flex>
@@ -144,15 +143,15 @@ function InvitationRoute() {
                       </Text>
                       <Text size="2" color="gray" align="center">
                         {user ? (
-                          <span>
+                          <>
                             You are signed in as{" "}
                             <strong>{user.primary_email}</strong>.
-                          </span>
+                          </>
                         ) : (
-                          <span>
-                            To accept this invitation, you need to sign in first.
-                            Continue with your email to get started.
-                          </span>
+                          <>
+                            To accept this invitation, you need to sign in
+                            first. Continue with your email to get started.
+                          </>
                         )}
                       </Text>
                     </Flex>
@@ -178,7 +177,9 @@ function InvitationRoute() {
                         </Button>
                       ) : (
                         <Button highContrast asChild>
-                          <a href={`/auth/email?invitation=${invitation.token}`}>
+                          <a
+                            href={`/auth/email?invitation=${invitation.token}`}
+                          >
                             Continue with email
                           </a>
                         </Button>
