@@ -28,9 +28,16 @@ type InvitationWithBoard = Invitation & {
 function getInvitation(token: string) {
   return fetch(import.meta.env.VITE_API_URL + `/invitations/${token}`, {
     method: "GET",
-  }).then(
-    (response) => response.json() as Promise<ApiData<InvitationWithBoard>>
-  );
+  }).then(async (response) => {
+    const data = await response.json() as ApiData<InvitationWithBoard>;
+    
+    if (!response.ok) {
+      // If response is not ok, throw the error data to reject the promise
+      throw data;
+    }
+    
+    return data;
+  });
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -107,62 +114,80 @@ function InvitationRoute() {
             <Await
               resolve={Promise.all([invitationPromise, currentUserPromise])}
             >
-              {([invitation, user]) => (
-                <Flex direction="column" gap="7">
-                  <Flex direction="column" gap="2" align="center">
-                    <Text size="6" weight="bold" align="center">
-                      You are invited to collaborate on "{invitation.board.name}
-                      "
-                    </Text>
-                    <Text size="2" color="gray" align="center">
-                      {user ? (
-                        <>
-                          You are signed in as{" "}
-                          <strong>{user.primary_email}</strong>.
-                        </>
-                      ) : (
-                        <>
-                          To accept this invitation, you need to sign in first.
-                          Continue with your email to get started.
-                        </>
-                      )}
-                    </Text>
-                  </Flex>
+              {([invitation, user]) => {
+                // Check if invitation is error data before accessing properties
+                if (isErrorData(invitation)) {
+                  return (
+                    <Flex direction="column" gap="7">
+                      <Flex direction="column" gap="2" align="center">
+                        <Text size="6" weight="bold" align="center" color="red">
+                          Invitation Error
+                        </Text>
+                        <Text size="2" color="gray" align="center">
+                          {invitation.message}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  );
+                }
 
-                  <Flex justify="center">
-                    {user ? (
-                      <Button
-                        highContrast
-                        onClick={() => {
-                          fetcher.submit(
-                            { token: invitation.token },
-                            {
-                              method: "post",
-                              action: "/accept-invitation",
-                              encType: "application/json",
-                            }
-                          );
-                        }}
-                        disabled={isSubmitting}
-                        loading={isSubmitting}
-                      >
-                        Accept invitation
-                      </Button>
-                    ) : (
-                      <Button highContrast asChild>
-                        <a href={`/auth/email?invitation=${invitation.token}`}>
-                          Continue with email
-                        </a>
-                      </Button>
+                return (
+                  <Flex direction="column" gap="7">
+                    <Flex direction="column" gap="2" align="center">
+                      <Text size="6" weight="bold" align="center">
+                        You are invited to collaborate on "{invitation.board.name}
+                        "
+                      </Text>
+                      <Text size="2" color="gray" align="center">
+                        {user ? (
+                          <>
+                            You are signed in as{" "}
+                            <strong>{user.primary_email}</strong>.
+                          </>
+                        ) : (
+                          <>
+                            To accept this invitation, you need to sign in first.
+                            Continue with your email to get started.
+                          </>
+                        )}
+                      </Text>
+                    </Flex>
+
+                    <Flex justify="center">
+                      {user ? (
+                        <Button
+                          highContrast
+                          onClick={() => {
+                            fetcher.submit(
+                              { token: invitation.token },
+                              {
+                                method: "post",
+                                action: "/accept-invitation",
+                                encType: "application/json",
+                              }
+                            );
+                          }}
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                        >
+                          Accept invitation
+                        </Button>
+                      ) : (
+                        <Button highContrast asChild>
+                          <a href={`/auth/email?invitation=${invitation.token}`}>
+                            Continue with email
+                          </a>
+                        </Button>
+                      )}
+                    </Flex>
+                    {fetcher.data?.error && (
+                      <Text size="2" color="red">
+                        {fetcher.data.error}
+                      </Text>
                     )}
                   </Flex>
-                  {fetcher.data?.error && (
-                    <Text size="2" color="red">
-                      {fetcher.data.error}
-                    </Text>
-                  )}
-                </Flex>
-              )}
+                );
+              }}
             </Await>
           </Suspense>
         </Container>
