@@ -19,7 +19,8 @@ import type { loader as rootLoader } from "~/root";
 
 function NavBar() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
-  const currentUserPromise = rootData?.currentUserPromise ?? null;
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   const { currentUserBoardsPromise } =
     useLoaderData<Route.ComponentProps["loaderData"]>();
