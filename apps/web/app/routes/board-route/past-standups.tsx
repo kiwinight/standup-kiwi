@@ -53,29 +53,37 @@ function Standups() {
 
   if (pastStandups.length === 0) {
     return (
-      <Card
-        size={{
-          initial: "3",
-          sm: "4",
-        }}
-      >
-        <Flex
-          direction="column"
-          justify="center"
-          align="center"
-          gap="2"
-          py="128px"
-          maxWidth="360px"
-          mx="auto"
+      <Flex direction="column" gap="5">
+        <Box>
+          <Text size="3" weight="bold">
+            Past Standups
+          </Text>
+        </Box>
+        <Card
+          size={{
+            initial: "3",
+            sm: "4",
+          }}
         >
-          <Text weight="medium" size="2">
-            No past standups
-          </Text>
-          <Text size="2" align="center">
-            Standups submitted before today will appear here.
-          </Text>
-        </Flex>
-      </Card>
+          <Flex
+            direction="column"
+            justify="center"
+            align="center"
+            gap="2"
+            py="128px"
+            maxWidth="360px"
+            mx="auto"
+          >
+            <Text weight="medium" size="2">
+              No past standups
+            </Text>
+            <Text size="2" align="center">
+              Standups from all previous days will appear here once you start
+              submitting updates.
+            </Text>
+          </Flex>
+        </Card>
+      </Flex>
     );
   }
 
