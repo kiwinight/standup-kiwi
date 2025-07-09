@@ -19,11 +19,32 @@ import { addDurationToNow } from 'src/libs/date';
 /**
  * Service for managing board invitations.
  *
- * DESIGN NOTE: Invitations in this system are designed to be REUSABLE.
- * - Each board can have one active invitation at a time
+ * DESIGN NOTE: This service treats ACTIVE INVITATIONS as a SINGLETON pattern.
+ * 
+ * Active Invitation Singleton Pattern:
+ * - Each board can have ONLY ONE active invitation at any given time
+ * - An "active" invitation is defined as: NOT deactivated AND NOT expired
+ * - All methods in this service work with this singleton assumption
+ * 
+ * Key behaviors:
+ * - `create()` - Throws error if active invitation already exists
+ * - `ensure()` - Returns existing active invitation OR creates new one
+ * - `regenerate()` - Deactivates existing active invitation, then creates new one
+ * - `get()` - Returns the single active invitation for a board (or null)
+ * - `getByToken()` - Returns active invitation by token (or throws NotFoundException)
+ * - `deactivate()` - Deactivates the active invitation
+ * - `accept()` - Uses active invitation to add user to board
+ * 
+ * Invitation Reusability:
+ * - The single active invitation is REUSABLE by multiple users
  * - Multiple users can use the same invitation token to join a board
  * - Invitations remain active until manually deactivated or expired
  * - This is intentional behavior to simplify invitation management
+ * 
+ * Error Handling Philosophy:
+ * - Deactivated invitations are treated as if they don't exist
+ * - Expired invitations are treated as if they don't exist
+ * - Only "not found" errors are exposed to users for invalid invitations
  */
 @Injectable()
 export class InvitationService {
@@ -252,7 +273,7 @@ export class InvitationService {
       );
   }
 
-  async getByToken(token: string) {
+  private async getInvitationByToken(token: string) {
     const [result] = await this.db
       .select({
         invitation: invitations,
@@ -272,13 +293,23 @@ export class InvitationService {
       );
 
     if (!result || !result.invitation || !result.board) {
-      throw new NotFoundException('Invitation not found or has expired');
+      return null;
     }
 
     return {
       ...result.invitation,
       board: result.board,
     };
+  }
+
+  async getByToken(token: string) {
+    const invitation = await this.getInvitationByToken(token);
+    
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found or has expired');
+    }
+
+    return invitation;
   }
 
   /**
@@ -290,26 +321,10 @@ export class InvitationService {
    * This is the intended behavior, not a security vulnerability.
    */
   async accept(token: string, userId: string): Promise<void> {
-    const invitation = await this.getByToken(token);
-
-    // Validate invitation state using database-level UTC comparison
-    // This ensures consistency with other invitation validity checks in the service
-    const [validInvitation] = await this.db
-      .select({ id: invitations.id })
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.token, token),
-          isNull(invitations.deactivatedAt),
-          sql`${invitations.expiresAt} > NOW()`,
-        ),
-      );
-
-    if (!validInvitation) {
-      if (invitation.deactivatedAt) {
-        throw new BadRequestException('This invitation has been deactivated');
-      }
-      throw new BadRequestException('This invitation has expired');
+    const invitation = await this.getInvitationByToken(token);
+    
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
     }
 
     const [existingCollaborator] = await this.db
