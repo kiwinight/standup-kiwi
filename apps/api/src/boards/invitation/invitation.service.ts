@@ -263,10 +263,16 @@ export class InvitationService {
       })
       .from(invitations)
       .leftJoin(boards, eq(invitations.boardId, boards.id))
-      .where(eq(invitations.token, token));
+      .where(
+        and(
+          eq(invitations.token, token),
+          isNull(invitations.deactivatedAt),
+          sql`${invitations.expiresAt} > NOW()`,
+        ),
+      );
 
     if (!result || !result.invitation || !result.board) {
-      throw new NotFoundException('Invitation not found');
+      throw new NotFoundException('Invitation not found or has expired');
     }
 
     return {
@@ -284,14 +290,34 @@ export class InvitationService {
    * This is the intended behavior, not a security vulnerability.
    */
   async accept(token: string, userId: string): Promise<void> {
-    const invitation = await this.getByToken(token);
+    // First, check if any invitation exists with this token (regardless of active status)
+    const [invitationRecord] = await this.db
+      .select({
+        invitation: invitations,
+        board: {
+          id: boards.id,
+          name: boards.name,
+        },
+      })
+      .from(invitations)
+      .leftJoin(boards, eq(invitations.boardId, boards.id))
+      .where(eq(invitations.token, token));
 
-    // Validate invitation state - check if it's deactivated
+    if (!invitationRecord || !invitationRecord.invitation || !invitationRecord.board) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    const invitation = {
+      ...invitationRecord.invitation,
+      board: invitationRecord.board,
+    };
+
+    // Check if invitation is deactivated
     if (invitation.deactivatedAt) {
       throw new BadRequestException('This invitation has been deactivated');
     }
 
-    // Validate invitation state - check if it's expired using database-level UTC comparison
+    // Check if invitation is expired using database-level UTC comparison
     const [validInvitation] = await this.db
       .select({ id: invitations.id })
       .from(invitations)
