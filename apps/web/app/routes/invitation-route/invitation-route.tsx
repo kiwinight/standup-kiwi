@@ -4,7 +4,6 @@ import {
   Container,
   Flex,
   Text,
-  Heading,
   Box,
   Skeleton,
 } from "@radix-ui/themes";
@@ -36,8 +35,12 @@ function getInvitation(token: string) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { token } = params;
 
-  // note this is NOT awaited
-  const invitationPromise = getInvitation(token);
+  const invitationPromise = getInvitation(token).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data;
+  });
 
   return {
     invitationPromise,
@@ -47,7 +50,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 export type LoaderType = typeof loader;
 
 function InvitationRoute() {
-  const { invitationPromise } = useLoaderData<any>();
+  const { invitationPromise } = useLoaderData<typeof loader>();
   const { currentUserPromise } = useRouteLoaderData<typeof rootLoader>("root")!;
   const fetcher = useFetcher<{ error?: string }>();
 
@@ -111,8 +114,8 @@ function InvitationRoute() {
                 <Flex direction="column" gap="7">
                   <Flex direction="column" gap="2" align="center">
                     <Text size="6" weight="bold" align="center">
-                      You are invited to collaborate on "{invitation.board.name}
-                      "
+                      You are invited to collaborate on "
+                      {invitation?.board.name}"
                     </Text>
                     <Text size="2" color="gray" align="center">
                       {user ? (
@@ -135,7 +138,7 @@ function InvitationRoute() {
                         highContrast
                         onClick={() => {
                           fetcher.submit(
-                            { token: invitation.token },
+                            { token: invitation?.token ?? "" },
                             {
                               method: "post",
                               action: "/accept-invitation",
@@ -150,7 +153,7 @@ function InvitationRoute() {
                       </Button>
                     ) : (
                       <Button highContrast asChild>
-                        <a href={`/auth/email?invitation=${invitation.token}`}>
+                        <a href={`/auth/email?invitation=${invitation?.token}`}>
                           Continue with email
                         </a>
                       </Button>
