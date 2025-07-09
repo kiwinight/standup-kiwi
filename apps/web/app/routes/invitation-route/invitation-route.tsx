@@ -51,7 +51,8 @@ export type LoaderType = typeof loader;
 
 function InvitationRoute() {
   const { invitationPromise } = useLoaderData<typeof loader>();
-  const { currentUserPromise } = useRouteLoaderData<typeof rootLoader>("root")!;
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise = rootData?.currentUserPromise ?? null;
   const fetcher = useFetcher<{ error?: string }>();
 
   const isSubmitting = fetcher.state === "submitting";
