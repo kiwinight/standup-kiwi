@@ -20,12 +20,12 @@ import { addDurationToNow } from 'src/libs/date';
  * Service for managing board invitations.
  *
  * DESIGN NOTE: This service treats ACTIVE INVITATIONS as a SINGLETON pattern.
- * 
+ *
  * Active Invitation Singleton Pattern:
  * - Each board can have ONLY ONE active invitation at any given time
  * - An "active" invitation is defined as: NOT deactivated AND NOT expired
  * - All methods in this service work with this singleton assumption
- * 
+ *
  * Key behaviors:
  * - `create()` - Throws error if active invitation already exists
  * - `ensure()` - Returns existing active invitation OR creates new one
@@ -34,13 +34,13 @@ import { addDurationToNow } from 'src/libs/date';
  * - `getByToken()` - Returns active invitation by token (or throws NotFoundException)
  * - `deactivate()` - Deactivates the active invitation
  * - `accept()` - Uses active invitation to add user to board
- * 
+ *
  * Invitation Reusability:
  * - The single active invitation is REUSABLE by multiple users
  * - Multiple users can use the same invitation token to join a board
  * - Invitations remain active until manually deactivated or expired
  * - This is intentional behavior to simplify invitation management
- * 
+ *
  * Error Handling Philosophy:
  * - Deactivated invitations are treated as if they don't exist
  * - Expired invitations are treated as if they don't exist
@@ -292,7 +292,7 @@ export class InvitationService {
         ),
       );
 
-    if (!result || !result.invitation || !result.board) {
+    if (!result || !result.board || !result.board.id) {
       return null;
     }
 
@@ -304,7 +304,7 @@ export class InvitationService {
 
   async getByToken(token: string) {
     const invitation = await this.getInvitationByToken(token);
-    
+
     if (!invitation) {
       throw new NotFoundException('Invitation not found or has expired');
     }
@@ -322,7 +322,7 @@ export class InvitationService {
    */
   async accept(token: string, userId: string): Promise<void> {
     const invitation = await this.getInvitationByToken(token);
-    
+
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
     }
