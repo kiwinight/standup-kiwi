@@ -252,7 +252,7 @@ export class InvitationService {
       );
   }
 
-  async getByToken(token: string) {
+  private async getInvitationByToken(token: string) {
     const [result] = await this.db
       .select({
         invitation: invitations,
@@ -263,22 +263,41 @@ export class InvitationService {
       })
       .from(invitations)
       .leftJoin(boards, eq(invitations.boardId, boards.id))
-      .where(
-        and(
-          eq(invitations.token, token),
-          isNull(invitations.deactivatedAt),
-          sql`${invitations.expiresAt} > NOW()`,
-        ),
-      );
+      .where(eq(invitations.token, token));
 
     if (!result || !result.invitation || !result.board) {
-      throw new NotFoundException('Invitation not found or has expired');
+      return null;
     }
 
     return {
       ...result.invitation,
       board: result.board,
     };
+  }
+
+  async getByToken(token: string) {
+    const invitation = await this.getInvitationByToken(token);
+    
+    if (!invitation || invitation.deactivatedAt) {
+      throw new NotFoundException('Invitation not found or has expired');
+    }
+
+    // Check if invitation is expired using database-level UTC comparison for consistency
+    const [validInvitation] = await this.db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.token, token),
+          sql`${invitations.expiresAt} > NOW()`,
+        ),
+      );
+
+    if (!validInvitation) {
+      throw new NotFoundException('Invitation not found or has expired');
+    }
+
+    return invitation;
   }
 
   /**
@@ -290,29 +309,24 @@ export class InvitationService {
    * This is the intended behavior, not a security vulnerability.
    */
   async accept(token: string, userId: string): Promise<void> {
-    let invitation;
+    const invitation = await this.getInvitationByToken(token);
     
-    try {
-      // Try to get active invitation using the existing method
-      invitation = await this.getByToken(token);
-    } catch (error) {
-      // If getByToken fails, check if it's because the invitation is expired (but not deactivated)
-      const [expiredInvitation] = await this.db
-        .select({ id: invitations.id })
-        .from(invitations)
-        .where(
-          and(
-            eq(invitations.token, token),
-            isNull(invitations.deactivatedAt),
-            sql`${invitations.expiresAt} <= NOW()`,
-          ),
-        );
+    if (!invitation || invitation.deactivatedAt) {
+      throw new NotFoundException('Invitation not found');
+    }
 
-      if (expiredInvitation) {
-        throw new BadRequestException('This invitation has expired');
-      }
-      
-      // If not expired, it's either deactivated or doesn't exist - treat as not found
+    // Check if invitation is expired using database-level UTC comparison for consistency
+    const [validInvitation] = await this.db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.token, token),
+          sql`${invitations.expiresAt} > NOW()`,
+        ),
+      );
+
+    if (!validInvitation) {
       throw new NotFoundException('Invitation not found');
     }
 
