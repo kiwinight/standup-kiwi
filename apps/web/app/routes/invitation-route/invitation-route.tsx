@@ -110,62 +110,88 @@ function InvitationRoute() {
             <Await
               resolve={Promise.all([invitationPromise, currentUserPromise])}
             >
-              {([invitation, user]) => (
-                <Flex direction="column" gap="7">
-                  <Flex direction="column" gap="2" align="center">
-                    <Text size="6" weight="bold" align="center">
-                      You are invited to collaborate on "
-                      {invitation?.board.name}"
-                    </Text>
-                    <Text size="2" color="gray" align="center">
-                      {user ? (
-                        <>
-                          You are signed in as{" "}
-                          <strong>{user.primary_email}</strong>.
-                        </>
-                      ) : (
-                        <>
-                          To accept this invitation, you need to sign in first.
-                          Continue with your email to get started.
-                        </>
-                      )}
-                    </Text>
-                  </Flex>
+              {([invitation, user]) => {
+                // Handle null invitation data (not found, expired, or API failure)
+                if (!invitation) {
+                  return (
+                    <Flex direction="column" gap="7">
+                      <Flex direction="column" gap="2" align="center">
+                        <Text size="6" weight="bold" align="center" color="red">
+                          Invitation Not Found
+                        </Text>
+                        <Text size="2" color="gray" align="center">
+                          This invitation may have expired, been revoked, or does not exist.
+                          Please check the invitation link and try again.
+                        </Text>
+                      </Flex>
+                      <Flex justify="center">
+                        <Button highContrast asChild>
+                          <Link to="/">
+                            Return to Home
+                          </Link>
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  );
+                }
 
-                  <Flex justify="center">
-                    {user ? (
-                      <Button
-                        highContrast
-                        onClick={() => {
-                          fetcher.submit(
-                            { token: invitation?.token ?? "" },
-                            {
-                              method: "post",
-                              action: "/accept-invitation",
-                              encType: "application/json",
-                            }
-                          );
-                        }}
-                        disabled={isSubmitting}
-                        loading={isSubmitting}
-                      >
-                        Accept invitation
-                      </Button>
-                    ) : (
-                      <Button highContrast asChild>
-                        <a href={`/auth/email?invitation=${invitation?.token}`}>
-                          Continue with email
-                        </a>
-                      </Button>
+                return (
+                  <Flex direction="column" gap="7">
+                    <Flex direction="column" gap="2" align="center">
+                      <Text size="6" weight="bold" align="center">
+                        You are invited to collaborate on "
+                        {invitation.board.name}"
+                      </Text>
+                      <Text size="2" color="gray" align="center">
+                        {user ? (
+                          <span>
+                            You are signed in as{" "}
+                            <strong>{user.primary_email}</strong>.
+                          </span>
+                        ) : (
+                          <span>
+                            To accept this invitation, you need to sign in first.
+                            Continue with your email to get started.
+                          </span>
+                        )}
+                      </Text>
+                    </Flex>
+
+                    <Flex justify="center">
+                      {user ? (
+                        <Button
+                          highContrast
+                          onClick={() => {
+                            fetcher.submit(
+                              { token: invitation.token },
+                              {
+                                method: "post",
+                                action: "/accept-invitation",
+                                encType: "application/json",
+                              }
+                            );
+                          }}
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                        >
+                          Accept invitation
+                        </Button>
+                      ) : (
+                        <Button highContrast asChild>
+                          <a href={`/auth/email?invitation=${invitation.token}`}>
+                            Continue with email
+                          </a>
+                        </Button>
+                      )}
+                    </Flex>
+                    {fetcher.data?.error && (
+                      <Text size="2" color="red">
+                        {fetcher.data.error}
+                      </Text>
                     )}
                   </Flex>
-                  {fetcher.data?.error && (
-                    <Text size="2" color="red">
-                      {fetcher.data.error}
-                    </Text>
-                  )}
-                </Flex>
-              )}
+                );
+              }}
             </Await>
           </Suspense>
         </Container>
