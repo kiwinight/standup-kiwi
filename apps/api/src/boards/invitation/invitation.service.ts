@@ -290,7 +290,7 @@ export class InvitationService {
    * This is the intended behavior, not a security vulnerability.
    */
   async accept(token: string, userId: string): Promise<void> {
-    // First, check if any invitation exists with this token (regardless of active status)
+    // First, check if any invitation exists with this token (not deactivated, but could be expired)
     const [invitationRecord] = await this.db
       .select({
         invitation: invitations,
@@ -301,7 +301,12 @@ export class InvitationService {
       })
       .from(invitations)
       .leftJoin(boards, eq(invitations.boardId, boards.id))
-      .where(eq(invitations.token, token));
+      .where(
+        and(
+          eq(invitations.token, token),
+          isNull(invitations.deactivatedAt), // Only consider non-deactivated invitations
+        ),
+      );
 
     if (!invitationRecord || !invitationRecord.invitation || !invitationRecord.board) {
       throw new NotFoundException('Invitation not found');
@@ -311,11 +316,6 @@ export class InvitationService {
       ...invitationRecord.invitation,
       board: invitationRecord.board,
     };
-
-    // Check if invitation is deactivated
-    if (invitation.deactivatedAt) {
-      throw new BadRequestException('This invitation has been deactivated');
-    }
 
     // Check if invitation is expired using database-level UTC comparison
     const [validInvitation] = await this.db
