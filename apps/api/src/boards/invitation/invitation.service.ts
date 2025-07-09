@@ -290,46 +290,30 @@ export class InvitationService {
    * This is the intended behavior, not a security vulnerability.
    */
   async accept(token: string, userId: string): Promise<void> {
-    // First, check if any invitation exists with this token (not deactivated, but could be expired)
-    const [invitationRecord] = await this.db
-      .select({
-        invitation: invitations,
-        board: {
-          id: boards.id,
-          name: boards.name,
-        },
-      })
-      .from(invitations)
-      .leftJoin(boards, eq(invitations.boardId, boards.id))
-      .where(
-        and(
-          eq(invitations.token, token),
-          isNull(invitations.deactivatedAt), // Only consider non-deactivated invitations
-        ),
-      );
+    let invitation;
+    
+    try {
+      // Try to get active invitation using the existing method
+      invitation = await this.getByToken(token);
+    } catch (error) {
+      // If getByToken fails, check if it's because the invitation is expired (but not deactivated)
+      const [expiredInvitation] = await this.db
+        .select({ id: invitations.id })
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.token, token),
+            isNull(invitations.deactivatedAt),
+            sql`${invitations.expiresAt} <= NOW()`,
+          ),
+        );
 
-    if (!invitationRecord || !invitationRecord.invitation || !invitationRecord.board) {
+      if (expiredInvitation) {
+        throw new BadRequestException('This invitation has expired');
+      }
+      
+      // If not expired, it's either deactivated or doesn't exist - treat as not found
       throw new NotFoundException('Invitation not found');
-    }
-
-    const invitation = {
-      ...invitationRecord.invitation,
-      board: invitationRecord.board,
-    };
-
-    // Check if invitation is expired using database-level UTC comparison
-    const [validInvitation] = await this.db
-      .select({ id: invitations.id })
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.token, token),
-          sql`${invitations.expiresAt} > NOW()`,
-        ),
-      );
-
-    if (!validInvitation) {
-      throw new BadRequestException('This invitation has expired');
     }
 
     const [existingCollaborator] = await this.db
