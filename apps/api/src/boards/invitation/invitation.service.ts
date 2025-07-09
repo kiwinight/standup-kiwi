@@ -263,16 +263,10 @@ export class InvitationService {
       })
       .from(invitations)
       .leftJoin(boards, eq(invitations.boardId, boards.id))
-      .where(
-        and(
-          eq(invitations.token, token),
-          isNull(invitations.deactivatedAt),
-          sql`${invitations.expiresAt} > NOW()`,
-        ),
-      );
+      .where(eq(invitations.token, token));
 
     if (!result || !result.invitation || !result.board) {
-      throw new NotFoundException('Invitation not found or has expired');
+      throw new NotFoundException('Invitation not found');
     }
 
     return {
@@ -292,23 +286,23 @@ export class InvitationService {
   async accept(token: string, userId: string): Promise<void> {
     const invitation = await this.getByToken(token);
 
-    // Validate invitation state using database-level UTC comparison
-    // This ensures consistency with other invitation validity checks in the service
+    // Validate invitation state - check if it's deactivated
+    if (invitation.deactivatedAt) {
+      throw new BadRequestException('This invitation has been deactivated');
+    }
+
+    // Validate invitation state - check if it's expired using database-level UTC comparison
     const [validInvitation] = await this.db
       .select({ id: invitations.id })
       .from(invitations)
       .where(
         and(
           eq(invitations.token, token),
-          isNull(invitations.deactivatedAt),
           sql`${invitations.expiresAt} > NOW()`,
         ),
       );
 
     if (!validInvitation) {
-      if (invitation.deactivatedAt) {
-        throw new BadRequestException('This invitation has been deactivated');
-      }
       throw new BadRequestException('This invitation has expired');
     }
 
