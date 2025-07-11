@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Delete,
+  Put,
   Param,
   Body,
   UseGuards,
@@ -15,7 +16,9 @@ import {
 } from '@nestjs/common';
 import { CollaboratorsService } from './collaborators.service';
 import { BoardAccessGuard } from '../guards/board-access.guard';
+import { AdminRoleGuard } from '../guards/admin-role.guard';
 import { UpdateCollaboratorDto } from './dto/update-collaborator.dto';
+import { BulkUpdateCollaboratorsDto } from './dto/bulk-update-collaborators.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Collaborator } from './collaborators.types';
 import { ErrorHandler } from 'src/libs/error-handler';
@@ -82,6 +85,28 @@ export class CollaboratorsController {
         this.logger,
         `Failed to delete collaborator for boardId: ${boardId}, userId: ${userId}`,
         'Failed to delete collaborator',
+      );
+    }
+  }
+
+  // PUT /boards/:boardId/collaborators
+  @Put()
+  @UseGuards(AdminRoleGuard)
+  async bulkUpdate(
+    @Param('boardId', ParseIntPipe) boardId: number,
+    @Body() bulkUpdateDto: BulkUpdateCollaboratorsDto,
+  ): Promise<Collaborator[]> {
+    try {
+      return await this.collaboratorsService.bulkUpdate(
+        boardId,
+        bulkUpdateDto.collaborators,
+      );
+    } catch (error) {
+      ErrorHandler.handle(
+        error,
+        this.logger,
+        `Failed to bulk update collaborators for boardId: ${boardId}`,
+        'Failed to update collaborators',
       );
     }
   }

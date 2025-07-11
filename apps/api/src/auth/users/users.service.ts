@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { boards, usersToBoards, Board } from 'src/libs/db/schema';
+import { boards, usersToBoards, Board } from '../../libs/db/schema';
 import { count, eq } from 'drizzle-orm';
-import { ListUser, User } from 'src/auth/auth-service.types';
-import { Database, DATABASE_TOKEN } from 'src/db/db.module';
+import { ListUser, User } from '../auth-service.types';
+import { Database, DATABASE_TOKEN } from '../../db/db.module';
 
 @Injectable()
 export class UsersService {

@@ -22,6 +22,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.1.1
         version: 11.1.1(@nestjs/common@11.1.1(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.1)
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
@@ -9624,8 +9627,7 @@ snapshots:
 
   cjs-module-lexer@1.4.3: {}
 
-  class-transformer@0.5.1:
-    optional: true
+  class-transformer@0.5.1: {}
 
   class-validator@0.14.2:
     dependencies:
