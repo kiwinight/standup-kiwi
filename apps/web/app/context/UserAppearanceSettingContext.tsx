@@ -17,6 +17,9 @@ function useLoadAppearanceSetting(
   setAppearance: (appearance: Appearance) => void
 ) {
   useEffect(() => {
+    // Ensure we're on the client side before accessing localStorage
+    if (typeof window === "undefined") return;
+    
     const userAppearanceSetting =
       localStorage.getItem("user-appearance-setting") || "inherit";
 
@@ -33,7 +36,7 @@ function useLoadAppearanceSetting(
       setAppearance("dark");
       return;
     }
-  }, []);
+  }, [setAppearance]);
 }
 
 const UserAppearanceSettingContext =
@@ -50,7 +53,10 @@ export const UserAppearanceSettingProvider: React.FC<{
 
   function handleAppearanceChange(value: Appearance) {
     setAppearance(value);
-    localStorage.setItem("user-appearance-setting", value);
+    // Ensure we're on the client side before accessing localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user-appearance-setting", value);
+    }
   }
 
   return (
