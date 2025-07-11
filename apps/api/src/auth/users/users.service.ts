@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { boards, usersToBoards, Board } from '../../libs/db/schema';
-import { count, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { ListUser, User } from '../auth-service.types';
 import { Database, DATABASE_TOKEN } from '../../db/db.module';
 
@@ -127,7 +127,6 @@ export class UsersService {
       })
       .from(boards)
       .innerJoin(usersToBoards, eq(boards.id, usersToBoards.boardId))
-      .where(eq(usersToBoards.userId, userId))
-      .groupBy(boards.id);
+      .where(eq(usersToBoards.userId, userId));
   }
 }
