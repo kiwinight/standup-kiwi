@@ -120,10 +120,7 @@ export class UsersService {
         activeStandupFormId: boards.activeStandupFormId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
-        collaboratorsCount: this.db.$count(
-          usersToBoards,
-          eq(usersToBoards.boardId, boards.id),
-        ),
+        collaboratorsCount: count(usersToBoards.boardId),
       })
       .from(boards)
       .innerJoin(usersToBoards, eq(boards.id, usersToBoards.boardId))
