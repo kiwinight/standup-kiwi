@@ -14,13 +14,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard, AuthenticatedRequest } from '../../auth/guards/auth.guard';
 import { BoardAccessGuard } from '../guards/board-access.guard';
-import { AdminRoleGuard } from '../guards/admin-role.guard';
 import { InvitationService } from './invitation.service';
 import { RegenerateInvitationDto } from './dto/regenerate-invitation.dto';
 
 // Singleton invitation resource controller
 @Controller('boards/:boardId/invitation')
-@UseGuards(AuthGuard, BoardAccessGuard, AdminRoleGuard)
+@UseGuards(AuthGuard, BoardAccessGuard)
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 

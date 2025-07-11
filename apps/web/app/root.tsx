@@ -7,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useRouteLoaderData,
   type ErrorResponse,
 } from "react-router";
 
@@ -145,7 +146,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { currentUserPromise } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof loader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   useEffect(() => {
     if (currentUserPromise) {

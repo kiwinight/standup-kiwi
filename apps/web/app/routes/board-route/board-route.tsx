@@ -8,6 +8,7 @@ import {
   type Board,
   type Standup,
   type StandupForm,
+  type Collaborator,
 } from "types";
 import requireAuthenticated from "~/libs/auth";
 
@@ -53,6 +54,22 @@ function listStandups(
       Authorization: `Bearer ${accessToken}`,
     },
   }).then((response) => response.json() as Promise<ApiData<Standup[]>>);
+}
+
+function listCollaborators(
+  boardId: string,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(
+    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -129,6 +146,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     });
   });
 
+  const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
+    (data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
+      return data;
+    }
+  );
+
   return data(
     {
       boardDataPromise,
@@ -136,6 +162,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       standupsPromise,
       boardActiveStandupFormPromise,
       standupFormsPromise,
+      collaboratorsPromise,
     },
     {
       headers: {
