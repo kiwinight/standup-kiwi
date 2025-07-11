@@ -276,22 +276,8 @@ function InviteCollaboratorsSetting({}: Props) {
                     <TextField.Root
                       className="flex-1"
                       value={`${baseUrl}/invitations/${invitation?.token}`}
-                      onChange={() => null}
-                      onFocus={async (event) => {
-                        try {
-                          const target = event.target as HTMLInputElement;
-                          const url = target.value;
-
-                          // Select all text in the input
-                          target.select();
-
-                          await navigator.clipboard.writeText(url);
-                          toast.success("Invitation link copied to clipboard");
-                        } catch (err) {
-                          console.error("Failed to copy to clipboard:", err);
-                          toast.error("Failed to copy invitation link");
-                        }
-                      }}
+                      readOnly
+                      // onChange={() => null}
                     >
                       <TextField.Slot>
                         <Link2Icon />

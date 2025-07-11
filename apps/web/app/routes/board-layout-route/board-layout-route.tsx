@@ -25,7 +25,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   )
     .then(
       (response) =>
-        response.json() as Promise<ApiData<(Board & { usersCount: number })[]>>
+        response.json() as Promise<
+          ApiData<(Board & { collaboratorsCount: number })[]>
+        >
     )
     .then((data) => {
       if (isErrorData(data)) {

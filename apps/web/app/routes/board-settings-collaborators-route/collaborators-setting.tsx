@@ -5,20 +5,25 @@ import {
   Card,
   Flex,
   Skeleton,
-  Box,
   DropdownMenu,
   AlertDialog,
+  Tooltip,
 } from "@radix-ui/themes";
-import { Await, useLoaderData } from "react-router";
+import { Await, useLoaderData, useRouteLoaderData } from "react-router";
 import type { loader } from "./board-settings-collaborators-route";
 import { Suspense, useMemo, useState, useCallback, useRef } from "react";
 import type { Collaborator } from "types";
 import { useAwait } from "~/hooks/use-await";
+import type { loader as rootLoader } from "~/root";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 type Props = {};
 
 function CollaboratorsSetting({}: Props) {
   const { collaboratorsPromise } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   const collaboratorsRef = useRef<Collaborator[]>([]);
   const [draftCollaborators, setDraftCollaborators] = useState<Collaborator[]>(
@@ -105,19 +110,71 @@ function CollaboratorsSetting({}: Props) {
                 Email
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell width="110px">
-                Role
+                <Tooltip
+                  content={
+                    <Flex direction="column" gap="1" align="start">
+                      <Text size="2">
+                        Collaborators can view and submit standups, and invite
+                        others.
+                      </Text>
+                      <br />
+                      <Text size="2">
+                        Admins can do everything collaborators can do, plus
+                        manage board settings and remove users from the board.
+                      </Text>
+                    </Flex>
+                  }
+                  side="top"
+                  align="center"
+                >
+                  <Flex align="center" gap="1">
+                    Role
+                    <InfoCircledIcon />
+                  </Flex>
+                </Tooltip>
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
+              <Suspense fallback={null}>
+                <Await
+                  resolve={Promise.all([
+                    currentUserPromise,
+                    collaboratorsPromise,
+                  ])}
+                >
+                  {([currentUser, loadedCollaborators]) => {
+                    const currentUserRole = currentUser
+                      ? loadedCollaborators?.find(
+                          (c) => c.userId === currentUser.id
+                        )?.role
+                      : null;
+
+                    return currentUserRole === "admin" ? (
+                      <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
+                    ) : null;
+                  }}
+                </Await>
+              </Suspense>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
             <Suspense fallback={<SuspenseFallback />}>
-              <Await resolve={collaboratorsPromise}>
-                {(loadedCollaborators) => {
+              <Await
+                resolve={Promise.all([
+                  currentUserPromise,
+                  collaboratorsPromise,
+                ])}
+              >
+                {([currentUser, loadedCollaborators]) => {
                   if (!loadedCollaborators) {
                     return <SuspenseFallback />;
                   }
+
+                  // Get current user's role on this board
+                  const currentUserRole = currentUser
+                    ? loadedCollaborators.find(
+                        (c) => c.userId === currentUser.id
+                      )?.role
+                    : null;
 
                   return loadedCollaborators.map((collaborator) => {
                     const hasRemoved = !draftCollaborators.find(
@@ -130,10 +187,9 @@ function CollaboratorsSetting({}: Props) {
 
                     const role = draftCollaborator?.role || collaborator.role;
 
-                    const isOnlyActiveAdmin =
-                      role === "admin" &&
-                      draftCollaborators.filter((c) => c.role === "admin")
-                        .length === 1;
+                    const isCurrentUser: boolean =
+                      (currentUser && collaborator.userId === currentUser.id) ??
+                      false;
 
                     return (
                       <Table.Row key={collaborator.userId}>
@@ -145,6 +201,7 @@ function CollaboratorsSetting({}: Props) {
                           {collaborator.user.display_name ||
                             collaborator.user.primary_email?.split("@")[0] ||
                             collaborator.user.primary_email}
+                          {isCurrentUser && " (You)"}
                         </Table.RowHeaderCell>
                         <Table.Cell
                           className={`align-middle! ${
@@ -160,56 +217,53 @@ function CollaboratorsSetting({}: Props) {
                         >
                           {role}
                         </Table.Cell>
-                        <Table.Cell className="align-middle!">
-                          <DropdownMenu.Root>
-                            <DropdownMenu.Trigger>
-                              <Button variant="soft">
-                                Actions
-                                <DropdownMenu.TriggerIcon />
-                              </Button>
-                            </DropdownMenu.Trigger>
-                            <DropdownMenu.Content>
-                              <DropdownMenu.Group>
-                                <DropdownMenu.Label>
-                                  Select roles
-                                </DropdownMenu.Label>
-                                <DropdownMenu.CheckboxItem
-                                  checked={role === "admin" && !hasRemoved}
-                                  onCheckedChange={() =>
-                                    changeRole(collaborator, "admin")
-                                  }
-                                >
-                                  Admin
-                                </DropdownMenu.CheckboxItem>
-                                <DropdownMenu.CheckboxItem
-                                  disabled={
-                                    hasRemoved ? false : isOnlyActiveAdmin
-                                  }
-                                  checked={
-                                    role === "collaborator" && !hasRemoved
-                                  }
-                                  onCheckedChange={() =>
-                                    changeRole(collaborator, "collaborator")
-                                  }
-                                >
-                                  Collaborator
-                                </DropdownMenu.CheckboxItem>
-                              </DropdownMenu.Group>
-                              <DropdownMenu.Separator />
+                        {currentUserRole === "admin" && (
+                          <Table.Cell className="align-middle!">
+                            <DropdownMenu.Root>
+                              <DropdownMenu.Trigger>
+                                <Button variant="soft" highContrast>
+                                  Edit
+                                  <DropdownMenu.TriggerIcon />
+                                </Button>
+                              </DropdownMenu.Trigger>
+                              <DropdownMenu.Content>
+                                <DropdownMenu.Group>
+                                  <DropdownMenu.Label>
+                                    Select roles
+                                  </DropdownMenu.Label>
+                                  <DropdownMenu.CheckboxItem
+                                    checked={role === "admin" && !hasRemoved}
+                                    onCheckedChange={() =>
+                                      changeRole(collaborator, "admin")
+                                    }
+                                  >
+                                    Admin
+                                  </DropdownMenu.CheckboxItem>
+                                  <DropdownMenu.CheckboxItem
+                                    checked={
+                                      role === "collaborator" && !hasRemoved
+                                    }
+                                    onCheckedChange={() =>
+                                      changeRole(collaborator, "collaborator")
+                                    }
+                                  >
+                                    Collaborator
+                                  </DropdownMenu.CheckboxItem>
+                                </DropdownMenu.Group>
+                                <DropdownMenu.Separator />
 
-                              <DropdownMenu.Item
-                                onSelect={() => {
-                                  removeCollaborator(collaborator);
-                                }}
-                                disabled={
-                                  hasRemoved ? false : isOnlyActiveAdmin
-                                }
-                              >
-                                Remove access
-                              </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                          </DropdownMenu.Root>
-                        </Table.Cell>
+                                <DropdownMenu.Item
+                                  onSelect={() => {
+                                    removeCollaborator(collaborator);
+                                  }}
+                                  disabled={isCurrentUser}
+                                >
+                                  Remove access
+                                </DropdownMenu.Item>
+                              </DropdownMenu.Content>
+                            </DropdownMenu.Root>
+                          </Table.Cell>
+                        )}
                       </Table.Row>
                     );
                   });
@@ -219,55 +273,82 @@ function CollaboratorsSetting({}: Props) {
           </Table.Body>
         </Table.Root>
         <Flex justify="end" mt="5" gap="3" align="center">
-          {hasChanged && (
-            <>
-              <Text size="2" color="gray" className="italic">
-                Pending changes
-              </Text>
-              <Button
-                variant="outline"
-                size="2"
-                onClick={() => setDraftCollaborators(collaboratorsRef.current)}
-              >
-                Cancel
-              </Button>
-            </>
-          )}
+          <Suspense>
+            <Await
+              resolve={Promise.all([currentUserPromise, collaboratorsPromise])}
+            >
+              {([currentUser, loadedCollaborators]) => {
+                const currentUserRole = currentUser
+                  ? loadedCollaborators?.find(
+                      (c) => c.userId === currentUser.id
+                    )?.role
+                  : null;
 
-          <AlertDialog.Root>
-            <AlertDialog.Trigger>
-              <Button highContrast size="2" disabled={!hasChanged}>
-                Save
-              </Button>
-            </AlertDialog.Trigger>
-            <AlertDialog.Content maxWidth="450px">
-              <AlertDialog.Title>Save changes?</AlertDialog.Title>
-              <AlertDialog.Description size="2">
-                You're about to update collaborator roles and access
-                permissions. These changes will take effect immediately and may
-                affect who can manage this board.
-              </AlertDialog.Description>
+                if (currentUserRole === "admin") {
+                  return (
+                    <>
+                      {hasChanged && (
+                        <>
+                          <Text size="2" color="gray" className="italic">
+                            Pending changes
+                          </Text>
+                          <Button
+                            variant="outline"
+                            size="2"
+                            onClick={() =>
+                              setDraftCollaborators(collaboratorsRef.current)
+                            }
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      )}
 
-              <Flex gap="3" mt="4" justify="end">
-                <AlertDialog.Cancel>
-                  <Button variant="soft" color="gray">
-                    Cancel
-                  </Button>
-                </AlertDialog.Cancel>
-                <AlertDialog.Action>
-                  <Button
-                    variant="solid"
-                    highContrast
-                    onClick={() => {
-                      // TODO: call actions
-                    }}
-                  >
-                    Save
-                  </Button>
-                </AlertDialog.Action>
-              </Flex>
-            </AlertDialog.Content>
-          </AlertDialog.Root>
+                      <AlertDialog.Root>
+                        <AlertDialog.Trigger>
+                          <Button highContrast size="2" disabled={!hasChanged}>
+                            Save
+                          </Button>
+                        </AlertDialog.Trigger>
+                        <AlertDialog.Content maxWidth="450px">
+                          <AlertDialog.Title>Save changes?</AlertDialog.Title>
+                          <AlertDialog.Description size="2">
+                            You're about to update collaborator roles and access
+                            permissions. These changes will take effect
+                            immediately and may affect who can manage this
+                            board.
+                            {/* TODO: warn user when they lose admin role */}
+                            {/* TODO: Warn user when they remove other collaborators */}
+                          </AlertDialog.Description>
+
+                          <Flex gap="3" mt="4" justify="end">
+                            <AlertDialog.Cancel>
+                              <Button variant="soft" color="gray">
+                                Cancel
+                              </Button>
+                            </AlertDialog.Cancel>
+                            <AlertDialog.Action>
+                              <Button
+                                variant="solid"
+                                highContrast
+                                onClick={() => {
+                                  // TODO: call actions
+                                }}
+                              >
+                                Save
+                              </Button>
+                            </AlertDialog.Action>
+                          </Flex>
+                        </AlertDialog.Content>
+                      </AlertDialog.Root>
+                    </>
+                  );
+                }
+
+                return null;
+              }}
+            </Await>
+          </Suspense>
         </Flex>
       </Flex>
     </Card>
@@ -287,13 +368,6 @@ function SuspenseFallback() {
           </Table.Cell>
           <Table.Cell className="align-middle!">
             <Skeleton width="100%">Collaborator</Skeleton>
-          </Table.Cell>
-          <Table.Cell className="align-middle!">
-            <Skeleton width="100%">
-              <Box width="91px" height="32px">
-                Actions
-              </Box>
-            </Skeleton>
           </Table.Cell>
         </Table.Row>
       ))}

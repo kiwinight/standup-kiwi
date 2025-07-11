@@ -111,7 +111,7 @@ export class UsersService {
 
   async getBoardsOfUser(
     userId: string,
-  ): Promise<(Board & { usersCount: number })[]> {
+  ): Promise<(Board & { collaboratorsCount: number })[]> {
     return await this.db
       .select({
         id: boards.id,
@@ -120,7 +120,10 @@ export class UsersService {
         activeStandupFormId: boards.activeStandupFormId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
-        usersCount: count(usersToBoards.userId),
+        collaboratorsCount: this.db.$count(
+          usersToBoards,
+          eq(usersToBoards.boardId, boards.id),
+        ),
       })
       .from(boards)
       .innerJoin(usersToBoards, eq(boards.id, usersToBoards.boardId))
