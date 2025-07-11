@@ -25,7 +25,7 @@ import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 type Props = {};
 
-function Renderer({
+function CollaboratorsTable({
   collaborators,
   currentUser,
 }: {
@@ -313,28 +313,32 @@ function Renderer({
   );
 }
 
-function Resolver() {
+function CollaboratorsTableRenderer() {
   const { collaboratorsPromise } = useLoaderData<typeof loader>();
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
 
   return (
-    <Await resolve={Promise.all([collaboratorsPromise, currentUserPromise])}>
-      {([collaborators, currentUser]) => {
-        if (!collaborators) {
-          return <SuspenseFallback />;
-        }
+    <Suspense fallback={<SuspenseFallback />}>
+      <Await resolve={Promise.all([collaboratorsPromise, currentUserPromise])}>
+        {([collaborators, currentUser]) => {
+          if (!collaborators || !currentUser) {
+            return <SuspenseFallback />;
+          }
 
-        return (
-          <Renderer collaborators={collaborators} currentUser={currentUser} />
-        );
-      }}
-    </Await>
+          return (
+            <CollaboratorsTable
+              collaborators={collaborators}
+              currentUser={currentUser}
+            />
+          );
+        }}
+      </Await>
+    </Suspense>
   );
 }
 
-// Main component that wraps everything in Suspense
 function CollaboratorsSetting({}: Props) {
   return (
     <Card
@@ -350,9 +354,7 @@ function CollaboratorsSetting({}: Props) {
           </Text>
         </Flex>
 
-        <Suspense fallback={<SuspenseFallback />}>
-          <Resolver />
-        </Suspense>
+        <CollaboratorsTableRenderer />
       </Flex>
     </Card>
   );
