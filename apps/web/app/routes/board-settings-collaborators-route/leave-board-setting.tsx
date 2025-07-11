@@ -1,0 +1,93 @@
+import { Button, Card, Flex, Text, AlertDialog } from "@radix-ui/themes";
+import { useFetcher, useLoaderData, useRouteLoaderData } from "react-router";
+import { useToast } from "~/hooks/use-toast";
+import type { loader as rootLoader } from "~/root";
+import { Suspense } from "react";
+import { Await } from "react-router";
+
+type Props = {};
+
+function LeaveBoardSetting({}: Props) {
+  const { toast } = useToast();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
+
+  // TODO: Add fetcher for leave board action
+  const leaveBoardFetcher = useFetcher();
+
+  const handleLeaveBoard = () => {
+    // TODO: Implement leave board action
+    console.log("Leave board action");
+    toast.info("Leave board functionality is not yet implemented");
+  };
+
+  return (
+    <Card
+      size={{
+        initial: "2",
+        sm: "4",
+      }}
+    >
+      <Flex direction="column">
+        <Text size="4" weight="bold">
+          Leave board
+        </Text>
+
+        <Flex direction="column" mt="5" gap="5">
+          <Text color="gray" size="2">
+            Remove yourself from this board if you no longer want to access it.
+            Once you leave this board, you'll lose access to this board.
+          </Text>
+        </Flex>
+
+        <Flex justify="end" mt="5" gap="2">
+          <Suspense fallback={null}>
+            <Await resolve={currentUserPromise}>
+              {(currentUser) => (
+                <AlertDialog.Root>
+                  <AlertDialog.Trigger>
+                    <Button
+                      color="red"
+                      variant="solid"
+                      size="2"
+                      disabled={!currentUser}
+                    >
+                      Leave board
+                    </Button>
+                  </AlertDialog.Trigger>
+                  <AlertDialog.Content maxWidth="450px">
+                    <AlertDialog.Title>Leave this board?</AlertDialog.Title>
+                    <AlertDialog.Description size="2" color="gray">
+                      You'll lose access to this board. To rejoin, you'll need
+                      to be invited again.
+                    </AlertDialog.Description>
+
+                    <Flex gap="3" mt="4" justify="end">
+                      <AlertDialog.Cancel>
+                        <Button variant="soft" color="gray">
+                          Cancel
+                        </Button>
+                      </AlertDialog.Cancel>
+                      <AlertDialog.Action>
+                        <Button
+                          color="red"
+                          variant="solid"
+                          onClick={handleLeaveBoard}
+                        >
+                          Leave board
+                        </Button>
+                      </AlertDialog.Action>
+                    </Flex>
+                  </AlertDialog.Content>
+                </AlertDialog.Root>
+              )}
+            </Await>
+          </Suspense>
+        </Flex>
+      </Flex>
+    </Card>
+  );
+}
+
+export default LeaveBoardSetting;

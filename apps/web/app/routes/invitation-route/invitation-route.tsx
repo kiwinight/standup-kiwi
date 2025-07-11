@@ -110,6 +110,7 @@ function InvitationRoute() {
             }
           >
             <Await
+              // TODO: Split into two Await components. Promise.all here could trigger rerendering issues.
               resolve={Promise.all([invitationPromise, currentUserPromise])}
             >
               {([invitation, user]) => {

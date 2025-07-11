@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { boards, usersToBoards, Board } from 'src/libs/db/schema';
-import { count, eq } from 'drizzle-orm';
-import { ListUser, User } from 'src/auth/auth-service.types';
-import { Database, DATABASE_TOKEN } from 'src/db/db.module';
+import { boards, usersToBoards, Board } from '../../libs/db/schema';
+import { eq } from 'drizzle-orm';
+import { ListUser, User } from '../auth-service.types';
+import { Database, DATABASE_TOKEN } from '../../db/db.module';
 
 @Injectable()
 export class UsersService {
@@ -111,7 +111,7 @@ export class UsersService {
 
   async getBoardsOfUser(
     userId: string,
-  ): Promise<(Board & { usersCount: number })[]> {
+  ): Promise<(Board & { collaboratorsCount: number })[]> {
     return await this.db
       .select({
         id: boards.id,
@@ -120,11 +120,13 @@ export class UsersService {
         activeStandupFormId: boards.activeStandupFormId,
         createdAt: boards.createdAt,
         updatedAt: boards.updatedAt,
-        usersCount: count(usersToBoards.userId),
+        collaboratorsCount: this.db.$count(
+          usersToBoards,
+          eq(usersToBoards.boardId, boards.id),
+        ),
       })
       .from(boards)
       .innerJoin(usersToBoards, eq(boards.id, usersToBoards.boardId))
-      .where(eq(usersToBoards.userId, userId))
-      .groupBy(boards.id);
+      .where(eq(usersToBoards.userId, userId));
   }
 }

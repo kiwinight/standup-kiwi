@@ -70,6 +70,10 @@ export default [
     "routes/update-board-route/update-board-route.tsx"
   ),
   route(
+    "/boards/:boardId/collaborators/update",
+    "routes/update-board-collaborators/update-board-collaborators.tsx"
+  ),
+  route(
     "/accept-invitation",
     "routes/accept-invitation-route/accept-invitation-route.tsx"
   ),

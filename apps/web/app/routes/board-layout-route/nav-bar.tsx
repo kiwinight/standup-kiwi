@@ -2,7 +2,12 @@ import { Suspense, useContext } from "react";
 import type { Route } from "./+types/board-layout-route";
 import { Await, Link, useLoaderData, useRouteLoaderData } from "react-router";
 import { useParams } from "react-router";
-import { ListBulletIcon, PlusIcon, PersonIcon } from "@radix-ui/react-icons";
+import {
+  ListBulletIcon,
+  PlusIcon,
+  PersonIcon,
+  DashboardIcon,
+} from "@radix-ui/react-icons";
 import {
   Flex,
   DropdownMenu,
@@ -11,11 +16,13 @@ import {
   Text,
   Badge,
   Tooltip,
+  IconButton,
 } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
+import { Layers2Icon, Palette, SquarePlus } from "lucide-react";
 
 function NavBar() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
@@ -40,57 +47,54 @@ function NavBar() {
       <Flex gap="3" align="center">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            <Button
-              variant="surface"
-              size="2"
-              // radius="medium"
-              radius="large"
-              className="pl-[8px]! pr-[8px]!"
-            >
+            <IconButton variant="surface" size="2" radius="large">
               <ListBulletIcon fontSize={24} width={16} height={16} />
-            </Button>
+            </IconButton>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
             <DropdownMenu.Item asChild>
               <Link to="/boards/create">
-                <PlusIcon /> Create a new board
+                <SquarePlus size={15} strokeWidth={1.5} />
+                Create a new board
               </Link>
             </DropdownMenu.Item>
-
+            {/* TODO: Make a board list page instead of using this dropdown menu */}
+            {/* <DropdownMenu.Item>
+              <Layers2Icon size={15} strokeWidth={1.5} />
+              Boards
+            </DropdownMenu.Item> */}
             <Suspense
               fallback={
                 <>
                   <DropdownMenu.Separator />
-                  <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                  <DropdownMenu.Item>
-                    <Text>
-                      <Skeleton>Example</Skeleton>
-                    </Text>
-                  </DropdownMenu.Item>
+                  <DropdownMenu.Group>
+                    <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                    <DropdownMenu.CheckboxItem checked={false}>
+                      <Skeleton>
+                        {/* TODO: The skeleton height covers the full checkbox item. It should only cover the text height*/}
+                        <span>Example board name</span>
+                      </Skeleton>
+                    </DropdownMenu.CheckboxItem>
+                    <DropdownMenu.CheckboxItem checked={false}>
+                      <Skeleton>
+                        <span>Example board name</span>
+                      </Skeleton>
+                    </DropdownMenu.CheckboxItem>
+                  </DropdownMenu.Group>
                 </>
               }
             >
               <Await resolve={currentUserBoardsPromise}>
-                {(data) => {
-                  if (!data) {
-                    return (
-                      <>
-                        <DropdownMenu.Separator />
-                        <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                        <DropdownMenu.Item>
-                          <Text>
-                            <Skeleton>Example</Skeleton>
-                          </Text>
-                        </DropdownMenu.Item>
-                      </>
-                    );
+                {(currenctUserBoards) => {
+                  if (!currenctUserBoards) {
+                    return null;
                   }
 
-                  const sharedBoards = data.filter(
-                    (board) => board.usersCount > 1
+                  const sharedBoards = currenctUserBoards.filter(
+                    (board) => board.collaboratorsCount > 1
                   );
-                  const personalBoards = data.filter(
-                    (board) => board.usersCount === 1
+                  const personalBoards = currenctUserBoards.filter(
+                    (board) => board.collaboratorsCount === 1
                   );
 
                   return (
@@ -98,58 +102,45 @@ function NavBar() {
                       {personalBoards.length > 0 && (
                         <>
                           <DropdownMenu.Separator />
-                          <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                          {personalBoards.map((board) => {
-                            const isActive = boardId
-                              ? parseInt(boardId, 10) === board.id
-                              : false;
-                            return (
-                              <Link key={board.id} to={`/boards/${board.id}`}>
-                                <DropdownMenu.Item
-                                  className={isActive ? "bg-(--accent-a3)" : ""}
-                                >
-                                  <Text
-                                  // weight={isActive ? "medium" : "regular"}
-                                  >
+                          <DropdownMenu.Group>
+                            <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                            {personalBoards.map((board) => {
+                              const isActive = boardId
+                                ? parseInt(boardId, 10) === board.id
+                                : false;
+                              return (
+                                <Link key={board.id} to={`/boards/${board.id}`}>
+                                  <DropdownMenu.CheckboxItem checked={isActive}>
                                     {board.name}
-                                  </Text>
-                                </DropdownMenu.Item>
-                              </Link>
-                            );
-                          })}
-                          {sharedBoards.length > 0 && (
-                            <>
-                              <DropdownMenu.Separator />
+                                  </DropdownMenu.CheckboxItem>
+                                </Link>
+                              );
+                            })}
+                          </DropdownMenu.Group>
+                        </>
+                      )}
+                      {sharedBoards.length > 0 && (
+                        <>
+                          <DropdownMenu.Separator />
 
-                              <DropdownMenu.Label>
-                                Shared boards
-                              </DropdownMenu.Label>
+                          <DropdownMenu.Group>
+                            <DropdownMenu.Label>
+                              Shared boards
+                            </DropdownMenu.Label>
 
-                              {sharedBoards.map((board) => {
-                                const isActive = boardId
-                                  ? parseInt(boardId, 10) === board.id
-                                  : false;
-                                return (
-                                  <Link
-                                    key={board.id}
-                                    to={`/boards/${board.id}`}
-                                  >
-                                    <DropdownMenu.Item
-                                      className={
-                                        isActive ? "bg-(--accent-a3)!" : ""
-                                      }
-                                    >
-                                      <Text
-                                      // weight={isActive ? "medium" : "regular"}
-                                      >
-                                        {board.name}
-                                      </Text>
-                                    </DropdownMenu.Item>
-                                  </Link>
-                                );
-                              })}
-                            </>
-                          )}
+                            {sharedBoards.map((board) => {
+                              const isActive = boardId
+                                ? parseInt(boardId, 10) === board.id
+                                : false;
+                              return (
+                                <Link key={board.id} to={`/boards/${board.id}`}>
+                                  <DropdownMenu.CheckboxItem checked={isActive}>
+                                    {board.name}
+                                  </DropdownMenu.CheckboxItem>
+                                </Link>
+                              );
+                            })}
+                          </DropdownMenu.Group>
                         </>
                       )}
                     </>
@@ -160,32 +151,35 @@ function NavBar() {
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
-              <DropdownMenu.SubTrigger>Appearance</DropdownMenu.SubTrigger>
+              <DropdownMenu.SubTrigger>
+                <Palette size={15} strokeWidth={1.5} />
+                Appearance
+              </DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
-                <DropdownMenu.Item
-                  className={appearance === "light" ? "bg-(--accent-a3)" : ""}
-                  onClick={() => {
+                <DropdownMenu.CheckboxItem
+                  checked={appearance === "light"}
+                  onCheckedChange={() => {
                     setAppearance("light");
                   }}
                 >
                   Light
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className={appearance === "dark" ? "bg-(--accent-a3)" : ""}
-                  onClick={() => {
+                </DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem
+                  checked={appearance === "dark"}
+                  onCheckedChange={() => {
                     setAppearance("dark");
                   }}
                 >
                   Dark
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className={appearance === "inherit" ? "bg-(--accent-a3)" : ""}
-                  onClick={() => {
+                </DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem
+                  checked={appearance === "inherit"}
+                  onCheckedChange={() => {
                     setAppearance("inherit");
                   }}
                 >
                   System
-                </DropdownMenu.Item>
+                </DropdownMenu.CheckboxItem>
               </DropdownMenu.SubContent>
             </DropdownMenu.Sub>
             <DropdownMenu.Sub>

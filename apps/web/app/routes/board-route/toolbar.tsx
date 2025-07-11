@@ -1,8 +1,4 @@
-import {
-  Share1Icon,
-  GearIcon,
-  EnvelopeClosedIcon,
-} from "@radix-ui/react-icons";
+import { GearIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import { Flex, Skeleton, Button, Text } from "@radix-ui/themes";
 import { Suspense, use } from "react";
 import { Link, useLoaderData, useParams } from "react-router";
