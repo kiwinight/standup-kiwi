@@ -19,7 +19,7 @@ function LeaveSetting({}: Props) {
   const handleLeaveBoard = () => {
     // TODO: Implement leave board action
     console.log("Leave board action");
-    toast.success("You have left the board");
+    toast.info("Leave board functionality is not yet implemented");
   };
 
   return (
