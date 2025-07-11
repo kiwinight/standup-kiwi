@@ -7,7 +7,7 @@ import { Await } from "react-router";
 
 type Props = {};
 
-function LeaveSetting({}: Props) {
+function LeaveBoardSetting({}: Props) {
   const { toast } = useToast();
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
   const currentUserPromise =
@@ -36,9 +36,8 @@ function LeaveSetting({}: Props) {
 
         <Flex direction="column" mt="5" gap="5">
           <Text color="gray" size="2">
-            Once you leave this board, you'll lose access to all standups and
-            won't receive any notifications. You'll need to be re-invited to
-            rejoin.
+            Remove yourself from this board if you no longer want to access it.
+            Once you leave this board, you'll lose access to this board.
           </Text>
         </Flex>
 
@@ -59,9 +58,9 @@ function LeaveSetting({}: Props) {
                   </AlertDialog.Trigger>
                   <AlertDialog.Content maxWidth="450px">
                     <AlertDialog.Title>Leave this board?</AlertDialog.Title>
-                    <AlertDialog.Description size="2">
-                      You'll lose access to all standups and board content. To
-                      rejoin, you'll need to be invited again by an admin.
+                    <AlertDialog.Description size="2" color="gray">
+                      You'll lose access to this board. To rejoin, you'll need
+                      to be invited again.
                     </AlertDialog.Description>
 
                     <Flex gap="3" mt="4" justify="end">
@@ -91,4 +90,4 @@ function LeaveSetting({}: Props) {
   );
 }
 
-export default LeaveSetting;
+export default LeaveBoardSetting;

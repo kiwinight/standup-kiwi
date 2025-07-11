@@ -158,7 +158,6 @@ function InvitationDialogContent({
           </Button>
         </Dialog.Close>
         <Button
-          variant="soft"
           highContrast
           disabled={!isValid || watchedExpirationDays === currentExpirationDays}
           onClick={handleSubmit((data) => {
@@ -176,7 +175,7 @@ function InvitationDialogContent({
             );
           })}
         >
-          Generate New Link
+          Generate new link
         </Button>
       </Flex>
     </>

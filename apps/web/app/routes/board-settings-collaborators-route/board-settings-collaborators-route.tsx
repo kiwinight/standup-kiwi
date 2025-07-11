@@ -9,7 +9,7 @@ import { ApiError } from "~/root";
 import InviteCollaboratorsSetting from "./invite-collaborators-setting";
 import type { Route } from "./+types/board-settings-collaborators-route";
 import { getBoard } from "../board-route/board-route";
-import LeaveSetting from "./leave-setting";
+import LeaveBoardSetting from "./leave-board-setting";
 
 function listCollaborators(
   boardId: string,
@@ -120,7 +120,7 @@ export default function BoardSettingsCollaboratorsRoute({}: Route.ComponentProps
 
       <CollaboratorsSetting />
 
-      <LeaveSetting />
+      <LeaveBoardSetting />
 
       {/* <Card
         // size={{

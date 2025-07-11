@@ -8,8 +8,15 @@ import {
   DropdownMenu,
   AlertDialog,
   Tooltip,
+  useThemeContext,
 } from "@radix-ui/themes";
-import { Await, useLoaderData, useRouteLoaderData } from "react-router";
+import {
+  Await,
+  useLoaderData,
+  useRouteLoaderData,
+  useFetcher,
+  useParams,
+} from "react-router";
 import type { loader } from "./board-settings-collaborators-route";
 import {
   Suspense,
@@ -22,8 +29,46 @@ import {
 import type { Collaborator, User } from "types";
 import type { loader as rootLoader } from "~/root";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { useToast } from "~/hooks/use-toast";
+import type { ActionType as UpdateBoardCollaboratorsActionType } from "../update-board-collaborators/update-board-collaborators";
 
 type Props = {};
+
+function CollaboratorsTableSuspense() {
+  const { collaboratorsPromise } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
+
+  return (
+    <Suspense fallback={<SuspenseFallback />}>
+      <Await resolve={collaboratorsPromise}>
+        {(collaborators) => {
+          if (!collaborators) {
+            return <SuspenseFallback />;
+          }
+
+          return (
+            <Await resolve={currentUserPromise}>
+              {(currentUser) => {
+                if (!currentUser) {
+                  return <SuspenseFallback />;
+                }
+
+                return (
+                  <CollaboratorsTable
+                    collaborators={collaborators}
+                    currentUser={currentUser}
+                  />
+                );
+              }}
+            </Await>
+          );
+        }}
+      </Await>
+    </Suspense>
+  );
+}
 
 function CollaboratorsTable({
   collaborators,
@@ -32,10 +77,17 @@ function CollaboratorsTable({
   collaborators: Collaborator[];
   currentUser: User | null;
 }) {
+  const { boardId } = useParams();
+  const { toast } = useToast();
+  const updateCollaboratorsFetcher =
+    useFetcher<UpdateBoardCollaboratorsActionType>();
+
   const collaboratorsRef = useRef<Collaborator[]>([]);
   const [draftCollaborators, setDraftCollaborators] = useState<Collaborator[]>(
     []
   );
+
+  const { appearance } = useThemeContext();
 
   // Move state initialization into useEffect
   useEffect(() => {
@@ -44,6 +96,25 @@ function CollaboratorsTable({
       setDraftCollaborators(collaborators);
     }
   }, [collaborators]);
+
+  // Handle fetcher response and toast notifications
+  useEffect(() => {
+    if (updateCollaboratorsFetcher.data) {
+      const error = updateCollaboratorsFetcher.data.error;
+      if (error) {
+        toast.error(error);
+        console.error(error);
+      } else {
+        toast.success("Collaborator settings updated");
+        // Update the collaborators ref and reset draft state on success
+        if (updateCollaboratorsFetcher.data.collaborators) {
+          collaboratorsRef.current =
+            updateCollaboratorsFetcher.data.collaborators;
+          setDraftCollaborators(updateCollaboratorsFetcher.data.collaborators);
+        }
+      }
+    }
+  }, [updateCollaboratorsFetcher.data]);
 
   const hasChanged = useMemo(() => {
     const hasRemovals =
@@ -95,6 +166,89 @@ function CollaboratorsTable({
     },
     [setDraftCollaborators]
   );
+
+  const isSubmitting = updateCollaboratorsFetcher.state !== "idle";
+
+  // Determine warnings based on changes
+  const warnings = useMemo(() => {
+    const warningMessages: string[] = [];
+
+    // Check if current user is losing admin access
+    if (currentUser) {
+      const currentUserInOriginal = collaboratorsRef.current.find(
+        (c) => c.userId === currentUser.id
+      );
+      const currentUserInDraft = draftCollaborators.find(
+        (c) => c.userId === currentUser.id
+      );
+
+      if (
+        currentUserInOriginal?.role === "admin" &&
+        currentUserInDraft?.role === "collaborator"
+      ) {
+        warningMessages.push(
+          "You will lose admin privileges and won't be able to manage board settings or collaborators."
+        );
+      }
+    }
+
+    // Check for removed collaborators
+    const removedCollaborators = collaboratorsRef.current.filter(
+      (original) =>
+        !draftCollaborators.find((draft) => draft.userId === original.userId)
+    );
+
+    if (removedCollaborators.length > 0) {
+      const names = removedCollaborators.map(
+        (c) =>
+          c.user.display_name ||
+          c.user.primary_email?.split("@")[0] ||
+          c.user.primary_email
+      );
+      if (removedCollaborators.length === 1) {
+        warningMessages.push(`${names[0]} will lose access to this board.`);
+      } else {
+        warningMessages.push(
+          `${names.length} collaborators will lose access to this board.`
+        );
+      }
+    }
+
+    // Check for role changes (excluding current user losing admin, which we already covered)
+    const roleChanges = draftCollaborators.filter((draft) => {
+      const original = collaboratorsRef.current.find(
+        (c) => c.userId === draft.userId
+      );
+      return (
+        original &&
+        original.role !== draft.role &&
+        draft.userId !== currentUser?.id
+      );
+    });
+
+    if (roleChanges.length > 0) {
+      const roleChangeNames = roleChanges.map((c) => {
+        const original = collaboratorsRef.current.find(
+          (orig) => orig.userId === c.userId
+        );
+        const name =
+          c.user.display_name ||
+          c.user.primary_email?.split("@")[0] ||
+          c.user.primary_email;
+        return `${name} (${original?.role} → ${c.role})`;
+      });
+
+      if (roleChanges.length === 1) {
+        warningMessages.push(`${roleChangeNames[0]} role will be updated.`);
+      } else {
+        warningMessages.push(
+          `${roleChanges.length} collaborators will have their roles updated.`
+        );
+      }
+    }
+
+    return warningMessages;
+  }, [draftCollaborators, currentUser]);
 
   return (
     <>
@@ -239,103 +393,102 @@ function CollaboratorsTable({
         </Table.Body>
       </Table.Root>
       <Flex justify="end" mt="5" gap="3" align="center">
-        {(() => {
-          const currentUserRole = currentUser
-            ? collaborators.find(
-                (c: Collaborator) => c.userId === currentUser.id
-              )?.role
-            : null;
+        {currentUser &&
+          collaborators.find((c: Collaborator) => c.userId === currentUser.id)
+            ?.role === "admin" && (
+            <>
+              {hasChanged && (
+                <>
+                  <Text size="2" color="gray" className="italic">
+                    Pending changes
+                  </Text>
+                  <Button
+                    variant="outline"
+                    size="2"
+                    onClick={() =>
+                      setDraftCollaborators(collaboratorsRef.current)
+                    }
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
 
-          if (currentUserRole === "admin") {
-            return (
-              <>
-                {hasChanged && (
-                  <>
-                    <Text size="2" color="gray" className="italic">
-                      Pending changes
-                    </Text>
-                    <Button
-                      variant="outline"
-                      size="2"
-                      onClick={() =>
-                        setDraftCollaborators(collaboratorsRef.current)
-                      }
+              <AlertDialog.Root>
+                <AlertDialog.Trigger>
+                  <Button
+                    highContrast
+                    size="2"
+                    loading={isSubmitting}
+                    disabled={!hasChanged || isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </AlertDialog.Trigger>
+                <AlertDialog.Content maxWidth="450px">
+                  <AlertDialog.Title>Save changes?</AlertDialog.Title>
+                  <AlertDialog.Description size="2">
+                    <Text>Are you sure you want to save these changes?</Text>
+                    <br />
+                    <br />
+                    {warnings.length > 0 && (
+                      <div
+                        className={`prose prose-sm ${
+                          appearance === "dark" ? "prose-invert" : ""
+                        }`}
+                      >
+                        <ul style={{ marginTop: "0", paddingLeft: "16px" }}>
+                          {warnings.map((warning, index) => (
+                            <li key={index} style={{ marginBottom: "4px" }}>
+                              <Text size="2">{warning}</Text>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <br />
+                  </AlertDialog.Description>
+
+                  <Flex gap="3" mt="4" justify="end">
+                    <AlertDialog.Cancel>
+                      <Button variant="soft" color="gray">
+                        Cancel
+                      </Button>
+                    </AlertDialog.Cancel>
+                    <AlertDialog.Action
+                      onClick={() => {
+                        if (!boardId) return;
+
+                        updateCollaboratorsFetcher.submit(
+                          {
+                            collaborators: draftCollaborators.map((c) => ({
+                              userId: c.userId,
+                              role: c.role,
+                            })),
+                          },
+                          {
+                            encType: "application/json",
+                            method: "POST",
+                            action: `/boards/${boardId}/collaborators/update`,
+                          }
+                        );
+                      }}
                     >
-                      Cancel
-                    </Button>
-                  </>
-                )}
-
-                <AlertDialog.Root>
-                  <AlertDialog.Trigger>
-                    <Button highContrast size="2" disabled={!hasChanged}>
-                      Save
-                    </Button>
-                  </AlertDialog.Trigger>
-                  <AlertDialog.Content maxWidth="450px">
-                    <AlertDialog.Title>Save changes?</AlertDialog.Title>
-                    <AlertDialog.Description size="2">
-                      You're about to update collaborator roles and access
-                      permissions. These changes will take effect immediately
-                      and may affect who can manage this board.
-                      {/* TODO: warn user when they lose admin role */}
-                      {/* TODO: Warn user when they remove other collaborators */}
-                    </AlertDialog.Description>
-
-                    <Flex gap="3" mt="4" justify="end">
-                      <AlertDialog.Cancel>
-                        <Button variant="soft" color="gray">
-                          Cancel
-                        </Button>
-                      </AlertDialog.Cancel>
-                      <AlertDialog.Action>
-                        <Button
-                          variant="solid"
-                          highContrast
-                          onClick={() => {
-                            // TODO: call actions
-                          }}
-                        >
-                          Save
-                        </Button>
-                      </AlertDialog.Action>
-                    </Flex>
-                  </AlertDialog.Content>
-                </AlertDialog.Root>
-              </>
-            );
-          }
-
-          return null;
-        })()}
+                      <Button
+                        variant="solid"
+                        highContrast
+                        loading={isSubmitting}
+                      >
+                        Save
+                      </Button>
+                    </AlertDialog.Action>
+                  </Flex>
+                </AlertDialog.Content>
+              </AlertDialog.Root>
+            </>
+          )}
       </Flex>
     </>
-  );
-}
-
-function CollaboratorsTableRenderer() {
-  const { collaboratorsPromise } = useLoaderData<typeof loader>();
-  const rootData = useRouteLoaderData<typeof rootLoader>("root");
-  const currentUserPromise =
-    rootData?.currentUserPromise ?? Promise.resolve(null);
-
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <Await resolve={Promise.all([collaboratorsPromise, currentUserPromise])}>
-        {([collaborators, currentUser]) => {
-          if (!collaborators || !currentUser) {
-            return <SuspenseFallback />;
-          }
-
-          return (
-            <CollaboratorsTable
-              collaborators={collaborators}
-              currentUser={currentUser}
-            />
-          );
-        }}
-      </Await>
-    </Suspense>
   );
 }
 
@@ -354,7 +507,7 @@ function CollaboratorsSetting({}: Props) {
           </Text>
         </Flex>
 
-        <CollaboratorsTableRenderer />
+        <CollaboratorsTableSuspense />
       </Flex>
     </Card>
   );
