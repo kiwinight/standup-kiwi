@@ -11,7 +11,14 @@ import {
 } from "@radix-ui/themes";
 import { Await, useLoaderData, useRouteLoaderData } from "react-router";
 import type { loader } from "./board-settings-collaborators-route";
-import { Suspense, useMemo, useState, useCallback, useRef } from "react";
+import {
+  Suspense,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import type { Collaborator, User } from "types";
 import type { loader as rootLoader } from "~/root";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
@@ -30,11 +37,13 @@ function Renderer({
     []
   );
 
-  // Initialize state when collaborators data is available
-  if (collaboratorsRef.current.length === 0) {
-    collaboratorsRef.current = collaborators;
-    setDraftCollaborators(collaborators);
-  }
+  // Move state initialization into useEffect
+  useEffect(() => {
+    if (collaboratorsRef.current.length === 0) {
+      collaboratorsRef.current = collaborators;
+      setDraftCollaborators(collaborators);
+    }
+  }, [collaborators]);
 
   const hasChanged = useMemo(() => {
     const hasRemovals =
