@@ -21,6 +21,9 @@ const ColorSchemeContext = createContext<ColorSchemeContext>(defaultValue);
  */
 function useCleanupFlickerPrevention(colorScheme: ColorScheme | null) {
   useEffect(() => {
+    // Ensure we're on the client side before accessing document
+    if (typeof window === "undefined") return;
+    
     if (colorScheme) {
       document.documentElement.removeAttribute("class");
     }
@@ -35,6 +38,9 @@ function useDetermineColorScheme(
   setColorScheme: (colorScheme: ColorScheme | null) => void
 ) {
   useEffect(() => {
+    // Ensure we're on the client side before accessing window
+    if (typeof window === "undefined") return;
+    
     if (appearance === "inherit") {
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
@@ -44,7 +50,7 @@ function useDetermineColorScheme(
     }
 
     setColorScheme(appearance);
-  }, [appearance]);
+  }, [appearance, setColorScheme]);
 }
 
 /**
@@ -55,6 +61,9 @@ function useHandleSystemColorSchemeChange(
   setColorScheme: (colorScheme: ColorScheme | null) => void
 ) {
   useEffect(() => {
+    // Ensure we're on the client side before accessing window
+    if (typeof window === "undefined") return;
+    
     if (appearance === "inherit") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -68,7 +77,7 @@ function useHandleSystemColorSchemeChange(
         mediaQuery.removeEventListener("change", handleSystemColorSchemeChange);
       };
     }
-  }, [appearance]);
+  }, [appearance, setColorScheme]);
 }
 
 export const ColorSchemeProvider: React.FC<{
