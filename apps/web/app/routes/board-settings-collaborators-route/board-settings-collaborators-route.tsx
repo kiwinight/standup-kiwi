@@ -47,6 +47,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const boardId = parseInt(params.boardId, 10);
 
+  if (isNaN(boardId) || boardId <= 0) {
+    throw new ApiError("Invalid board ID", 400);
+  }
+
   const url = new URL(request.url);
   const baseUrl = `${url.protocol}//${url.host}`;
 
