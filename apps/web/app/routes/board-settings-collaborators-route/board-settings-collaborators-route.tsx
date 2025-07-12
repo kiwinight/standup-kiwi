@@ -100,7 +100,6 @@ function BoardExistanceGuard() {
     <Suspense>
       <Await resolve={boardDataPromise}>
         {(data) => {
-          console.log("BoardExistanceGuard data", data);
           if (isErrorData(data)) {
             throw new ApiError(data.message, data.statusCode);
           }
