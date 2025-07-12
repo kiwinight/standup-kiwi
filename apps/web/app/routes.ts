@@ -74,6 +74,10 @@ export default [
     "routes/update-board-collaborators/update-board-collaborators.tsx"
   ),
   route(
+    "/boards/:boardId/collaborators/delete",
+    "routes/delete-board-collaborator/delete-board-collaborator.tsx"
+  ),
+  route(
     "/accept-invitation",
     "routes/accept-invitation-route/accept-invitation-route.tsx"
   ),

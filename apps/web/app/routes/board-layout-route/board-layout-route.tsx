@@ -10,32 +10,35 @@ import AutoRevalidator from "~/components/auto-revalidator";
 import { ToastsProvider } from "~/context/ToastContext";
 import { ToastsRenderer } from "~/components/toasts-renderer";
 
+export function listCurrentUserBoards({
+  accessToken,
+}: {
+  accessToken: string;
+}) {
+  return fetch(import.meta.env.VITE_API_URL + "/auth/users/me/boards", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  }).then(
+    (response) =>
+      response.json() as Promise<
+        ApiData<(Board & { collaboratorsCount: number })[]>
+      >
+  );
+}
+
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
   );
 
-  const currentUserBoardsPromise = fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me/boards",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  )
-    .then(
-      (response) =>
-        response.json() as Promise<
-          ApiData<(Board & { collaboratorsCount: number })[]>
-        >
-    )
-    .then((data) => {
+  const currentUserBoardsPromise = listCurrentUserBoards({ accessToken }).then(
+    (data) => {
       if (isErrorData(data)) {
         return null;
       }
 
       return data;
-    });
+    }
+  );
 
   return data(
     {

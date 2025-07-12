@@ -79,63 +79,75 @@ function CollaboratorsTable({
 }) {
   const { boardId } = useParams();
   const { toast } = useToast();
-  const updateCollaboratorsFetcher =
-    useFetcher<UpdateBoardCollaboratorsActionType>();
+  const fetcher = useFetcher<UpdateBoardCollaboratorsActionType>();
 
-  const collaboratorsRef = useRef<Collaborator[]>([]);
-  const [draftCollaborators, setDraftCollaborators] = useState<Collaborator[]>(
-    []
-  );
+  // Baseline for comparison - tracks what the user started editing from
+  // Used to determine if user has made changes and for warnings/cancel functionality
+  const collaboratorsRef = useRef<Collaborator[]>(collaborators);
+  const [draftCollaborators, setDraftCollaborators] =
+    useState<Collaborator[]>(collaborators);
 
   const { appearance } = useThemeContext();
 
-  // Move state initialization into useEffect
-  useEffect(() => {
-    if (collaboratorsRef.current.length === 0) {
-      collaboratorsRef.current = collaborators;
-      setDraftCollaborators(collaborators);
-    }
-  }, [collaborators]);
+  // Determine if the table is editable (current user is admin)
+  const isEditable = useMemo(() => {
+    return (
+      currentUser &&
+      collaborators.find((c: Collaborator) => c.userId === currentUser.id)
+        ?.role === "admin"
+    );
+  }, [currentUser, collaborators]);
 
   // Handle fetcher response and toast notifications
   useEffect(() => {
-    if (updateCollaboratorsFetcher.data) {
-      const error = updateCollaboratorsFetcher.data.error;
+    if (fetcher.data) {
+      const error = fetcher.data.error;
       if (error) {
         toast.error(error);
         console.error(error);
       } else {
         toast.success("Collaborator settings updated");
-        // Update the collaborators ref and reset draft state on success
-        if (updateCollaboratorsFetcher.data.collaborators) {
-          collaboratorsRef.current =
-            updateCollaboratorsFetcher.data.collaborators;
-          setDraftCollaborators(updateCollaboratorsFetcher.data.collaborators);
+        // Reset draft state on success (server data will update automatically)
+        if (fetcher.data.collaborators) {
+          collaboratorsRef.current = fetcher.data.collaborators;
+          setDraftCollaborators(fetcher.data.collaborators);
         }
       }
     }
-  }, [updateCollaboratorsFetcher.data]);
+  }, [fetcher.data]);
 
-  const hasChanged = useMemo(() => {
+  const hasEdited = useMemo(() => {
     const hasRemovals =
       draftCollaborators.length !== collaboratorsRef.current.length;
 
     const hasRoleChanges = draftCollaborators.some(
       (c) =>
         c.role !==
-        collaboratorsRef.current.find((collab) => collab.userId === c.userId)
-          ?.role
+        collaboratorsRef.current.find(
+          (collab: Collaborator) => collab.userId === c.userId
+        )?.role
     );
 
     return hasRemovals || hasRoleChanges;
   }, [draftCollaborators]);
+
+  useEffect(() => {
+    // Only update draft state when safe to do so:
+    // - If table is not editable (user can't make changes anyway)
+    // - If table is editable but user has no pending changes
+    // Note: When isEditable && hasEdited, we preserve user's draft changes
+    if (!isEditable || !hasEdited) {
+      collaboratorsRef.current = collaborators;
+      setDraftCollaborators(collaborators);
+    }
+  }, [collaborators, isEditable, hasEdited]);
 
   const changeRole = useCallback(
     (collaborator: Collaborator, newRole: "admin" | "collaborator") => {
       setDraftCollaborators((prev) => {
         if (!prev.find((c) => c.userId === collaborator.userId)) {
           const originalIndex = collaboratorsRef.current.findIndex(
-            (c) => c.userId === collaborator.userId
+            (c: Collaborator) => c.userId === collaborator.userId
           );
 
           // Insert at original position
@@ -155,19 +167,16 @@ function CollaboratorsTable({
         });
       });
     },
-    [setDraftCollaborators]
+    []
   );
 
-  const removeCollaborator = useCallback(
-    (collaborator: Collaborator) => {
-      setDraftCollaborators((prev) =>
-        prev.filter((c) => c.userId !== collaborator.userId)
-      );
-    },
-    [setDraftCollaborators]
-  );
+  const removeCollaborator = useCallback((collaborator: Collaborator) => {
+    setDraftCollaborators((prev) =>
+      prev.filter((c) => c.userId !== collaborator.userId)
+    );
+  }, []);
 
-  const isSubmitting = updateCollaboratorsFetcher.state !== "idle";
+  const isSubmitting = fetcher.state !== "idle";
 
   // Determine warnings based on changes
   const warnings = useMemo(() => {
@@ -176,7 +185,7 @@ function CollaboratorsTable({
     // Check if current user is losing admin access
     if (currentUser) {
       const currentUserInOriginal = collaboratorsRef.current.find(
-        (c) => c.userId === currentUser.id
+        (c: Collaborator) => c.userId === currentUser.id
       );
       const currentUserInDraft = draftCollaborators.find(
         (c) => c.userId === currentUser.id
@@ -194,7 +203,7 @@ function CollaboratorsTable({
 
     // Check for removed collaborators
     const removedCollaborators = collaboratorsRef.current.filter(
-      (original) =>
+      (original: Collaborator) =>
         !draftCollaborators.find((draft) => draft.userId === original.userId)
     );
 
@@ -217,7 +226,7 @@ function CollaboratorsTable({
     // Check for role changes (excluding current user losing admin, which we already covered)
     const roleChanges = draftCollaborators.filter((draft) => {
       const original = collaboratorsRef.current.find(
-        (c) => c.userId === draft.userId
+        (c: Collaborator) => c.userId === draft.userId
       );
       return (
         original &&
@@ -229,7 +238,7 @@ function CollaboratorsTable({
     if (roleChanges.length > 0) {
       const roleChangeNames = roleChanges.map((c) => {
         const original = collaboratorsRef.current.find(
-          (orig) => orig.userId === c.userId
+          (orig: Collaborator) => orig.userId === c.userId
         );
         const name =
           c.user.display_name ||
@@ -281,212 +290,207 @@ function CollaboratorsTable({
                 </Flex>
               </Tooltip>
             </Table.ColumnHeaderCell>
-            {currentUser &&
-              collaborators.find(
-                (c: Collaborator) => c.userId === currentUser.id
-              )?.role === "admin" && (
-                <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
-              )}
+            {isEditable && (
+              <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
+            )}
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {collaborators.map((collaborator: Collaborator) => {
-            const hasRemoved = !draftCollaborators.find(
-              (c) => c.userId === collaborator.userId
-            );
+          {collaborators
+            .sort((a, b) => {
+              return a.user.primary_email.localeCompare(b.user.primary_email);
+            })
+            .map((collaborator: Collaborator) => {
+              const hasRemoved = !draftCollaborators.find(
+                (c) => c.userId === collaborator.userId
+              );
 
-            const draftCollaborator = draftCollaborators.find(
-              (c) => c.userId === collaborator.userId
-            );
+              const draftCollaborator = draftCollaborators.find(
+                (c) => c.userId === collaborator.userId
+              );
 
-            const role = draftCollaborator?.role || collaborator.role;
+              const role = draftCollaborator?.role || collaborator.role;
 
-            const isCurrentUser: boolean =
-              (currentUser && collaborator.userId === currentUser.id) ?? false;
+              const isCurrentUser: boolean =
+                (currentUser && collaborator.userId === currentUser.id) ??
+                false;
 
-            // Check if this is the only active admin
-            const isOnlyActiveAdmin =
-              role === "admin" &&
-              draftCollaborators.filter((c) => c.role === "admin").length === 1;
+              // Check if this is the only active admin
+              const isOnlyActiveAdmin =
+                role === "admin" &&
+                draftCollaborators.filter((c) => c.role === "admin").length ===
+                  1;
 
-            // Get current user's role on this board
-            const currentUserRole = currentUser
-              ? collaborators.find(
-                  (c: Collaborator) => c.userId === currentUser.id
-                )?.role
-              : null;
+              // Get current user's role on this board (for reference, actual editability is determined by isEditable)
 
-            return (
-              <Table.Row key={collaborator.userId}>
-                <Table.RowHeaderCell
-                  className={`align-middle! ${
-                    hasRemoved ? "line-through" : ""
-                  }`}
-                >
-                  {collaborator.user.display_name ||
-                    collaborator.user.primary_email?.split("@")[0] ||
-                    collaborator.user.primary_email}
-                  {isCurrentUser && " (You)"}
-                </Table.RowHeaderCell>
-                <Table.Cell
-                  className={`align-middle! ${
-                    hasRemoved ? "line-through" : ""
-                  }`}
-                >
-                  {collaborator.user.primary_email}
-                </Table.Cell>
-                <Table.Cell
-                  className={`capitalize align-middle! ${
-                    hasRemoved ? "line-through" : ""
-                  }`}
-                >
-                  {role}
-                </Table.Cell>
-                {currentUserRole === "admin" && (
-                  <Table.Cell className="align-middle!">
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger>
-                        <Button variant="soft" highContrast>
-                          Edit
-                          <DropdownMenu.TriggerIcon />
-                        </Button>
-                      </DropdownMenu.Trigger>
-                      <DropdownMenu.Content>
-                        <DropdownMenu.Group>
-                          <DropdownMenu.Label>Select roles</DropdownMenu.Label>
-                          <DropdownMenu.CheckboxItem
-                            checked={role === "admin" && !hasRemoved}
-                            onCheckedChange={() =>
-                              changeRole(collaborator, "admin")
-                            }
-                          >
-                            Admin
-                          </DropdownMenu.CheckboxItem>
-                          <DropdownMenu.CheckboxItem
-                            checked={role === "collaborator" && !hasRemoved}
-                            onCheckedChange={() =>
-                              changeRole(collaborator, "collaborator")
-                            }
-                            disabled={isOnlyActiveAdmin}
-                          >
-                            Collaborator
-                          </DropdownMenu.CheckboxItem>
-                        </DropdownMenu.Group>
-                        <DropdownMenu.Separator />
-
-                        <DropdownMenu.Item
-                          onSelect={() => {
-                            removeCollaborator(collaborator);
-                          }}
-                          disabled={isCurrentUser || isOnlyActiveAdmin}
-                        >
-                          Remove access
-                        </DropdownMenu.Item>
-                      </DropdownMenu.Content>
-                    </DropdownMenu.Root>
+              return (
+                <Table.Row key={collaborator.userId}>
+                  <Table.RowHeaderCell
+                    className={`align-middle! ${
+                      hasRemoved ? "line-through" : ""
+                    }`}
+                  >
+                    {collaborator.user.display_name ||
+                      collaborator.user.primary_email?.split("@")[0] ||
+                      collaborator.user.primary_email}
+                    {isCurrentUser && " (You)"}
+                  </Table.RowHeaderCell>
+                  <Table.Cell
+                    className={`align-middle! ${
+                      hasRemoved ? "line-through" : ""
+                    }`}
+                  >
+                    {collaborator.user.primary_email}
                   </Table.Cell>
-                )}
-              </Table.Row>
-            );
-          })}
+                  <Table.Cell
+                    className={`capitalize align-middle! ${
+                      hasRemoved ? "line-through" : ""
+                    }`}
+                  >
+                    {role}
+                  </Table.Cell>
+                  {isEditable && (
+                    <Table.Cell className="align-middle!">
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger>
+                          <Button variant="soft" highContrast>
+                            Edit
+                            <DropdownMenu.TriggerIcon />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                          <DropdownMenu.Group>
+                            <DropdownMenu.Label>
+                              Select roles
+                            </DropdownMenu.Label>
+                            <DropdownMenu.CheckboxItem
+                              checked={role === "admin" && !hasRemoved}
+                              onCheckedChange={() =>
+                                changeRole(collaborator, "admin")
+                              }
+                            >
+                              Admin
+                            </DropdownMenu.CheckboxItem>
+                            <DropdownMenu.CheckboxItem
+                              checked={role === "collaborator" && !hasRemoved}
+                              onCheckedChange={() =>
+                                changeRole(collaborator, "collaborator")
+                              }
+                              disabled={isOnlyActiveAdmin}
+                            >
+                              Collaborator
+                            </DropdownMenu.CheckboxItem>
+                          </DropdownMenu.Group>
+                          <DropdownMenu.Separator />
+
+                          <DropdownMenu.Item
+                            onSelect={() => {
+                              removeCollaborator(collaborator);
+                            }}
+                            disabled={isCurrentUser || isOnlyActiveAdmin}
+                          >
+                            Remove access
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Root>
+                    </Table.Cell>
+                  )}
+                </Table.Row>
+              );
+            })}
         </Table.Body>
       </Table.Root>
       <Flex justify="end" mt="5" gap="3" align="center">
-        {currentUser &&
-          collaborators.find((c: Collaborator) => c.userId === currentUser.id)
-            ?.role === "admin" && (
-            <>
-              {hasChanged && (
-                <>
-                  <Text size="2" color="gray" className="italic">
-                    Pending changes
-                  </Text>
-                  <Button
-                    variant="outline"
-                    size="2"
-                    onClick={() =>
-                      setDraftCollaborators(collaboratorsRef.current)
-                    }
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
+        {isEditable && (
+          <>
+            {hasEdited && (
+              <>
+                <Text size="2" color="gray" className="italic">
+                  Pending changes
+                </Text>
+                <Button
+                  variant="outline"
+                  size="2"
+                  onClick={() => {
+                    collaboratorsRef.current = collaborators;
+                    setDraftCollaborators(collaborators);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            )}
 
-              <AlertDialog.Root>
-                <AlertDialog.Trigger>
-                  <Button
-                    highContrast
-                    size="2"
-                    loading={isSubmitting}
-                    disabled={!hasChanged || isSubmitting}
-                  >
-                    Save
-                  </Button>
-                </AlertDialog.Trigger>
-                <AlertDialog.Content maxWidth="450px">
-                  <AlertDialog.Title>Save changes?</AlertDialog.Title>
-                  <AlertDialog.Description size="2">
-                    <Text>Are you sure you want to save these changes?</Text>
-                    <br />
-                    <br />
-                    {warnings.length > 0 && (
-                      <div
-                        className={`prose prose-sm ${
-                          appearance === "dark" ? "prose-invert" : ""
-                        }`}
-                      >
-                        <ul style={{ marginTop: "0", paddingLeft: "16px" }}>
-                          {warnings.map((warning, index) => (
-                            <li key={index} style={{ marginBottom: "4px" }}>
-                              <Text size="2">{warning}</Text>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <br />
-                  </AlertDialog.Description>
-
-                  <Flex gap="3" mt="4" justify="end">
-                    <AlertDialog.Cancel>
-                      <Button variant="soft" color="gray">
-                        Cancel
-                      </Button>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action
-                      onClick={() => {
-                        if (!boardId) return;
-
-                        updateCollaboratorsFetcher.submit(
-                          {
-                            collaborators: draftCollaborators.map((c) => ({
-                              userId: c.userId,
-                              role: c.role,
-                            })),
-                          },
-                          {
-                            encType: "application/json",
-                            method: "POST",
-                            action: `/boards/${boardId}/collaborators/update`,
-                          }
-                        );
-                      }}
+            <AlertDialog.Root>
+              <AlertDialog.Trigger>
+                <Button
+                  highContrast
+                  size="2"
+                  loading={isSubmitting}
+                  disabled={!hasEdited || isSubmitting}
+                >
+                  Save
+                </Button>
+              </AlertDialog.Trigger>
+              <AlertDialog.Content maxWidth="450px">
+                <AlertDialog.Title>Save changes?</AlertDialog.Title>
+                <AlertDialog.Description size="2">
+                  <Text>Are you sure you want to save these changes?</Text>
+                  <br />
+                  <br />
+                  {warnings.length > 0 && (
+                    <div
+                      className={`prose prose-sm ${
+                        appearance === "dark" ? "prose-invert" : ""
+                      }`}
                     >
-                      <Button
-                        variant="solid"
-                        highContrast
-                        loading={isSubmitting}
-                      >
-                        Save
-                      </Button>
-                    </AlertDialog.Action>
-                  </Flex>
-                </AlertDialog.Content>
-              </AlertDialog.Root>
-            </>
-          )}
+                      <ul style={{ marginTop: "0", paddingLeft: "16px" }}>
+                        {warnings.map((warning, index) => (
+                          <li key={index} style={{ marginBottom: "4px" }}>
+                            <Text size="2">{warning}</Text>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <br />
+                </AlertDialog.Description>
+
+                <Flex gap="3" mt="4" justify="end">
+                  <AlertDialog.Cancel>
+                    <Button variant="soft" color="gray">
+                      Cancel
+                    </Button>
+                  </AlertDialog.Cancel>
+                  <AlertDialog.Action
+                    onClick={() => {
+                      if (!boardId) return;
+
+                      fetcher.submit(
+                        {
+                          collaborators: draftCollaborators.map((c) => ({
+                            userId: c.userId,
+                            role: c.role,
+                          })),
+                        },
+                        {
+                          encType: "application/json",
+                          method: "POST",
+                          action: `/boards/${boardId}/collaborators/update`,
+                        }
+                      );
+                    }}
+                  >
+                    <Button variant="solid" highContrast loading={isSubmitting}>
+                      Save
+                    </Button>
+                  </AlertDialog.Action>
+                </Flex>
+              </AlertDialog.Content>
+            </AlertDialog.Root>
+          </>
+        )}
       </Flex>
     </>
   );
