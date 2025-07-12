@@ -103,7 +103,7 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-function getCurrentUser(accessToken: string) {
+export function getCurrentUser(accessToken: string) {
   return fetch(import.meta.env.VITE_API_URL + "/auth/users/me", {
     headers: {
       Authorization: `Bearer ${accessToken}`,
