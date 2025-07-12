@@ -299,10 +299,15 @@ function CollaboratorsTable({
         <Table.Body>
           {collaborators
             .sort((a, b) => {
-              return (
-                (a.user.primary_email?.localeCompare(b.user.primary_email) ??
-                  0) * -1
-              );
+              const emailA = a.user.primary_email;
+              const emailB = b.user.primary_email;
+              
+              // Handle null/undefined values consistently
+              if (emailA == null && emailB == null) return 0;
+              if (emailA == null) return 1;
+              if (emailB == null) return -1;
+              
+              return emailA.localeCompare(emailB) * -1;
             })
             .map((collaborator: Collaborator) => {
               const hasRemoved = !draftCollaborators.find(
