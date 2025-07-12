@@ -299,10 +299,7 @@ function CollaboratorsTable({
         <Table.Body>
           {collaborators
             .sort((a, b) => {
-              return (
-                (a.user.primary_email?.localeCompare(b.user.primary_email) ??
-                  0) * -1
-              );
+              return a.user.primary_email.localeCompare(b.user.primary_email);
             })
             .map((collaborator: Collaborator) => {
               const hasRemoved = !draftCollaborators.find(
