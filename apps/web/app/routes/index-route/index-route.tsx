@@ -3,27 +3,36 @@ import type { Route } from "./+types/index-route";
 import { isErrorData, type ApiData, type Board, type User } from "types";
 import { redirect } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
+import { listCurrentUserBoards } from "../board-layout-route/board-layout-route";
+import { getCurrentUser } from "~/root";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
   );
 
-  const currentUser = await fetch(
-    import.meta.env.VITE_API_URL + "/auth/users/me",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+  const currentUserBoards = await listCurrentUserBoards({ accessToken }).then(
+    (data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
+      return data;
     }
-  ).then(async (response) => {
-    const userData = (await response.json()) as ApiData<User>;
+  );
 
-    if (isErrorData(userData)) {
+  if (!currentUserBoards || currentUserBoards.length === 0) {
+    return redirect("/boards/create", {
+      headers: {
+        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    });
+  }
+
+  const currentUser = await getCurrentUser(accessToken).then((data) => {
+    if (isErrorData(data)) {
       return null;
     }
-
-    return userData;
+    return data;
   });
 
   if (!currentUser) {
@@ -34,20 +43,30 @@ export async function loader({ request }: Route.LoaderArgs) {
     });
   }
 
-  const lastAccessedBoardId =
-    currentUser.client_read_only_metadata?.lastAccessedBoardId;
+  const lastAccessedBoard = currentUserBoards.find(
+    (board) =>
+      board.id === currentUser.client_read_only_metadata?.lastAccessedBoardId
+  );
 
-  if (lastAccessedBoardId) {
-    // TODO: Check if this board actually exists
-    const boardPath = `/boards/${lastAccessedBoardId}`;
-    return redirect(boardPath, {
+  if (!lastAccessedBoard) {
+    const [firstBoard] = currentUserBoards;
+
+    if (!firstBoard) {
+      return redirect("/boards/create", {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      });
+    }
+
+    return redirect(`/boards/${firstBoard.id}`, {
       headers: {
         ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
       },
     });
   }
 
-  return redirect("/boards/create", {
+  return redirect(`/boards/${lastAccessedBoard.id}`, {
     headers: {
       ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
     },

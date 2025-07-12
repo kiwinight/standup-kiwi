@@ -79,8 +79,7 @@ function CollaboratorsTable({
 }) {
   const { boardId } = useParams();
   const { toast } = useToast();
-  const updateCollaboratorsFetcher =
-    useFetcher<UpdateBoardCollaboratorsActionType>();
+  const fetcher = useFetcher<UpdateBoardCollaboratorsActionType>();
 
   const collaboratorsRef = useRef<Collaborator[]>([]);
   const [draftCollaborators, setDraftCollaborators] = useState<Collaborator[]>(
@@ -89,32 +88,23 @@ function CollaboratorsTable({
 
   const { appearance } = useThemeContext();
 
-  // Move state initialization into useEffect
-  useEffect(() => {
-    if (collaboratorsRef.current.length === 0) {
-      collaboratorsRef.current = collaborators;
-      setDraftCollaborators(collaborators);
-    }
-  }, [collaborators]);
-
   // Handle fetcher response and toast notifications
   useEffect(() => {
-    if (updateCollaboratorsFetcher.data) {
-      const error = updateCollaboratorsFetcher.data.error;
+    if (fetcher.data) {
+      const error = fetcher.data.error;
       if (error) {
         toast.error(error);
         console.error(error);
       } else {
         toast.success("Collaborator settings updated");
         // Update the collaborators ref and reset draft state on success
-        if (updateCollaboratorsFetcher.data.collaborators) {
-          collaboratorsRef.current =
-            updateCollaboratorsFetcher.data.collaborators;
-          setDraftCollaborators(updateCollaboratorsFetcher.data.collaborators);
+        if (fetcher.data.collaborators) {
+          collaboratorsRef.current = fetcher.data.collaborators;
+          setDraftCollaborators(fetcher.data.collaborators);
         }
       }
     }
-  }, [updateCollaboratorsFetcher.data]);
+  }, [fetcher.data]);
 
   const hasChanged = useMemo(() => {
     const hasRemovals =
@@ -129,6 +119,15 @@ function CollaboratorsTable({
 
     return hasRemovals || hasRoleChanges;
   }, [draftCollaborators]);
+
+  // Move state initialization into useEffect
+  useEffect(() => {
+    // if (collaboratorsRef.current.length === 0 || !hasChanged) {
+    //   setDraftCollaborators(collaborators);
+    // }
+    setDraftCollaborators(collaborators);
+    collaboratorsRef.current = collaborators;
+  }, [collaborators]);
 
   const changeRole = useCallback(
     (collaborator: Collaborator, newRole: "admin" | "collaborator") => {
@@ -167,7 +166,7 @@ function CollaboratorsTable({
     [setDraftCollaborators]
   );
 
-  const isSubmitting = updateCollaboratorsFetcher.state !== "idle";
+  const isSubmitting = fetcher.state !== "idle";
 
   // Determine warnings based on changes
   const warnings = useMemo(() => {
@@ -459,7 +458,7 @@ function CollaboratorsTable({
                       onClick={() => {
                         if (!boardId) return;
 
-                        updateCollaboratorsFetcher.submit(
+                        fetcher.submit(
                           {
                             collaborators: draftCollaborators.map((c) => ({
                               userId: c.userId,

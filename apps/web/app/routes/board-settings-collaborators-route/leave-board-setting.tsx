@@ -1,26 +1,69 @@
-import { Button, Card, Flex, Text, AlertDialog } from "@radix-ui/themes";
-import { useFetcher, useLoaderData, useRouteLoaderData } from "react-router";
+import {
+  Button,
+  Card,
+  Flex,
+  Text,
+  AlertDialog,
+  Tooltip,
+} from "@radix-ui/themes";
+import {
+  useFetcher,
+  useRouteLoaderData,
+  useParams,
+  useNavigate,
+  useLoaderData,
+} from "react-router";
 import { useToast } from "~/hooks/use-toast";
 import type { loader as rootLoader } from "~/root";
-import { Suspense } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { Await } from "react-router";
+import type { ActionType as DeleteBoardCollaboratorActionType } from "../delete-board-collaborator/delete-board-collaborator";
+import type { loader } from "./board-settings-collaborators-route";
+import type { Collaborator, User } from "types";
 
 type Props = {};
 
 function LeaveBoardSetting({}: Props) {
   const { toast } = useToast();
+  const { boardId } = useParams();
+  const { collaboratorsPromise } = useLoaderData<typeof loader>();
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
 
-  // TODO: Add fetcher for leave board action
-  const leaveBoardFetcher = useFetcher();
+  const fetcher = useFetcher<DeleteBoardCollaboratorActionType>();
+  const navigate = useNavigate();
 
-  const handleLeaveBoard = () => {
-    // TODO: Implement leave board action
-    console.log("Leave board action");
-    toast.info("Leave board functionality is not yet implemented");
-  };
+  // Handle fetcher response and toast notifications
+  useEffect(() => {
+    if (fetcher.data) {
+      const { success, error } = fetcher.data;
+      if (error) {
+        toast.error(error);
+        console.error(error);
+      } else if (success) {
+        toast.success("You have successfully left the board");
+      }
+    }
+  }, [fetcher.data]);
+
+  function handleLeaveBoard(currentUserId: string) {
+    if (!boardId) {
+      toast.error("Board ID not found");
+      return;
+    }
+
+    fetcher.submit(
+      { userId: currentUserId },
+      {
+        encType: "application/json",
+        method: "POST",
+        action: `/boards/${boardId}/collaborators/delete`,
+      }
+    );
+  }
+
+  const isSubmitting = fetcher.state !== "idle";
 
   return (
     <Card
@@ -45,42 +88,84 @@ function LeaveBoardSetting({}: Props) {
           <Suspense fallback={null}>
             <Await resolve={currentUserPromise}>
               {(currentUser) => (
-                <AlertDialog.Root>
-                  <AlertDialog.Trigger>
-                    <Button
-                      color="red"
-                      variant="solid"
-                      size="2"
-                      disabled={!currentUser}
-                    >
-                      Leave board
-                    </Button>
-                  </AlertDialog.Trigger>
-                  <AlertDialog.Content maxWidth="450px">
-                    <AlertDialog.Title>Leave this board?</AlertDialog.Title>
-                    <AlertDialog.Description size="2" color="gray">
-                      You'll lose access to this board. To rejoin, you'll need
-                      to be invited again.
-                    </AlertDialog.Description>
+                <Await resolve={collaboratorsPromise}>
+                  {(collaborators) => {
+                    if (!currentUser || !collaborators) return null;
 
-                    <Flex gap="3" mt="4" justify="end">
-                      <AlertDialog.Cancel>
-                        <Button variant="soft" color="gray">
-                          Cancel
-                        </Button>
-                      </AlertDialog.Cancel>
-                      <AlertDialog.Action>
-                        <Button
-                          color="red"
-                          variant="solid"
-                          onClick={handleLeaveBoard}
-                        >
-                          Leave board
-                        </Button>
-                      </AlertDialog.Action>
-                    </Flex>
-                  </AlertDialog.Content>
-                </AlertDialog.Root>
+                    const currentUserCollaborator = collaborators.find(
+                      (c: Collaborator) => c.userId === currentUser.id
+                    );
+
+                    const isCurrentUserSoleAdmin =
+                      currentUserCollaborator?.role === "admin" &&
+                      collaborators.filter(
+                        (c: Collaborator) => c.role === "admin"
+                      ).length === 1;
+
+                    const buttonContent = (
+                      <Button
+                        color="red"
+                        variant="solid"
+                        size="2"
+                        disabled={
+                          !currentUser || isSubmitting || isCurrentUserSoleAdmin
+                        }
+                        loading={isSubmitting}
+                      >
+                        Leave board
+                      </Button>
+                    );
+
+                    const triggerButton = isCurrentUserSoleAdmin ? (
+                      <Tooltip
+                        content="You cannot leave the board as the sole admin. Transfer admin rights to another collaborator first."
+                        side="top"
+                      >
+                        {buttonContent}
+                      </Tooltip>
+                    ) : (
+                      buttonContent
+                    );
+
+                    return (
+                      <AlertDialog.Root>
+                        <AlertDialog.Trigger>
+                          {triggerButton}
+                        </AlertDialog.Trigger>
+                        <AlertDialog.Content maxWidth="450px">
+                          <AlertDialog.Title>
+                            Leave this board?
+                          </AlertDialog.Title>
+                          <AlertDialog.Description size="2" color="gray">
+                            Are you sure you want to leave this board?
+                          </AlertDialog.Description>
+
+                          <Flex gap="3" mt="4" justify="end">
+                            <AlertDialog.Cancel>
+                              <Button variant="soft" color="gray">
+                                Cancel
+                              </Button>
+                            </AlertDialog.Cancel>
+                            <AlertDialog.Action>
+                              <Button
+                                color="red"
+                                variant="solid"
+                                loading={isSubmitting}
+                                onClick={() => {
+                                  if (currentUser?.id) {
+                                    handleLeaveBoard(currentUser.id);
+                                  }
+                                }}
+                              >
+                                Leave board
+                              </Button>
+                            </AlertDialog.Action>
+                          </Flex>
+                        </AlertDialog.Content>
+                      </AlertDialog.Root>
+                    );
+                  }}
+                </Await>
               )}
             </Await>
           </Suspense>

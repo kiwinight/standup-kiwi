@@ -12,7 +12,7 @@ import { getBoard } from "../board-route/board-route";
 import LeaveBoardSetting from "./leave-board-setting";
 
 function listCollaborators(
-  boardId: string,
+  boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
@@ -28,7 +28,7 @@ function listCollaborators(
 }
 
 function ensureInvitation(
-  boardId: string,
+  boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(`${import.meta.env.VITE_API_URL}/boards/${boardId}/invitation`, {
@@ -45,9 +45,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     request
   );
 
-  const { boardId } = params;
+  const boardId = parseInt(params.boardId, 10);
 
-  // Extract base URL from request for environment-specific invitation links
   const url = new URL(request.url);
   const baseUrl = `${url.protocol}//${url.host}`;
 
@@ -101,6 +100,7 @@ function BoardExistanceGuard() {
     <Suspense>
       <Await resolve={boardDataPromise}>
         {(data) => {
+          console.log("BoardExistanceGuard data", data);
           if (isErrorData(data)) {
             throw new ApiError(data.message, data.statusCode);
           }

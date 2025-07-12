@@ -20,7 +20,7 @@ import { Await, data, useLoaderData } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 
 export function getBoard(
-  boardId: string,
+  boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -46,7 +46,7 @@ function getStandupForm(
 }
 
 function listStandups(
-  boardId: string,
+  boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/standups`, {
@@ -57,7 +57,7 @@ function listStandups(
 }
 
 function listCollaborators(
-  boardId: string,
+  boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
@@ -77,7 +77,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     request
   );
 
-  const boardId = params.boardId;
+  const boardId = parseInt(params.boardId, 10);
 
   const boardDataPromise = getBoard(boardId, { accessToken });
 
