@@ -15,8 +15,14 @@ import {
   useImperativeHandle,
   type Ref,
 } from "react";
-import { Await, useFetcher, useLoaderData } from "react-router";
+import {
+  Await,
+  useFetcher,
+  useLoaderData,
+  useRouteLoaderData,
+} from "react-router";
 import type { loader } from "./board-route";
+import type { loader as rootLoader } from "~/root";
 import { DateTime } from "luxon";
 import DynamicForm, {
   FormSkeleton,
@@ -30,7 +36,7 @@ import {
 } from "../create-board-standup/create-board-standup";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 
-import type { Board, Standup, StandupForm } from "types";
+import type { Board, Standup, StandupForm, User } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
@@ -46,11 +52,13 @@ function Content({
   board,
   standups,
   structure,
+  currentUser,
 }: {
   ref: Ref<ContentRef>;
   board: Board;
   standups: Standup[];
   structure: StandupForm;
+  currentUser: User | null;
 }) {
   const { appearance } = useThemeContext();
   const { toast } = useToast();
@@ -58,6 +66,11 @@ function Content({
 
   if (!schema) {
     return null;
+  }
+
+  // Guard clause: don't show standup if no current user
+  if (!currentUser) {
+    return <FormSkeleton />;
   }
 
   const dynamicFormRef = useRef<DynamicFormRef>(null);
@@ -88,21 +101,25 @@ function Content({
     key: "update-standup",
   });
 
-  let todayStandup: Standup | undefined = standups.find((standup) => {
-    // Convert createdAt to the board's timezone
-    const standupDate = DateTime.fromISO(standup.createdAt, {
-      zone: "utc",
-    })
-      .setZone(boardTimezone)
-      .startOf("day"); // 2025-01-13T00:00:00.000Z
+  let currentUserTodayStandup: Standup | undefined = standups.find(
+    (standup) => {
+      // Convert createdAt to the board's timezone
+      const standupDate = DateTime.fromISO(standup.createdAt, {
+        zone: "utc",
+      })
+        .setZone(boardTimezone)
+        .startOf("day"); // 2025-01-13T00:00:00.000Z
 
-    return standupDate.equals(boardToday);
-  });
+      return (
+        standupDate.equals(boardToday) && standup.userId === currentUser?.id
+      );
+    }
+  );
 
   if (createStandupFetcher.data) {
     const standup = createStandupFetcher.data?.standup;
     if (standup) {
-      todayStandup = standup;
+      currentUserTodayStandup = standup;
     }
   }
 
@@ -110,10 +127,10 @@ function Content({
     const { formData, formId } =
       (createStandupFetcher.json as unknown as CreateStandupRequestBody) || {};
 
-    todayStandup = {
+    currentUserTodayStandup = {
       id: 0,
       boardId: board.id,
-      userId: "",
+      userId: currentUser?.id || "",
       formId: formId,
       formData: formData,
       createdAt: "",
@@ -137,7 +154,7 @@ function Content({
   if (updateStandupFetcher.data) {
     const standup = updateStandupFetcher.data?.standup;
     if (standup) {
-      todayStandup = standup;
+      currentUserTodayStandup = standup;
     }
   }
 
@@ -147,9 +164,9 @@ function Content({
         formData: Standup["formData"];
       }) || {};
 
-    if (todayStandup) {
-      todayStandup = {
-        ...todayStandup,
+    if (currentUserTodayStandup) {
+      currentUserTodayStandup = {
+        ...currentUserTodayStandup,
         formData: formData as Standup["formData"],
       };
     }
@@ -168,7 +185,7 @@ function Content({
     }
   }, [updateStandupFetcher.data]);
 
-  const [isEditing, setIsEditing] = useState(!Boolean(todayStandup));
+  const [isEditing, setIsEditing] = useState(!Boolean(currentUserTodayStandup));
 
   function handleDynamicFormCancel() {
     setIsEditing(false);
@@ -185,15 +202,15 @@ function Content({
           ref={dynamicFormRef}
           schema={schema}
           defaultValues={
-            todayStandup
-              ? (todayStandup.formData as DynamicFormValues)
+            currentUserTodayStandup
+              ? (currentUserTodayStandup.formData as DynamicFormValues)
               : undefined
           }
           showCancelButton={Boolean(
-            todayStandup && createStandupFetcher.state === "idle"
+            currentUserTodayStandup && createStandupFetcher.state === "idle"
           )}
           onSubmit={async (data) => {
-            if (!todayStandup) {
+            if (!currentUserTodayStandup) {
               createStandupFetcher.submit(
                 {
                   formData: data,
@@ -208,7 +225,7 @@ function Content({
               setIsEditing(false);
             }
 
-            if (todayStandup && isEditing) {
+            if (currentUserTodayStandup && isEditing) {
               updateStandupFetcher.submit(
                 {
                   formData: data,
@@ -216,14 +233,16 @@ function Content({
                 {
                   encType: "application/json",
                   method: "POST",
-                  action: `/boards/${board.id}/standups/${todayStandup?.id}/update`,
+                  action: `/boards/${board.id}/standups/${currentUserTodayStandup?.id}/update`,
                 }
               );
               setIsEditing(false);
             }
           }}
           onCancel={
-            todayStandup && isEditing ? handleDynamicFormCancel : undefined
+            currentUserTodayStandup && isEditing
+              ? handleDynamicFormCancel
+              : undefined
           }
         />
       )}
@@ -232,9 +251,9 @@ function Content({
         <Flex direction="column" gap="5">
           <Flex direction="column" gap="5">
             {schema.fields.map((field) => {
-              const value = (todayStandup?.formData as DynamicFormValues)[
-                field.name
-              ];
+              const value = (
+                currentUserTodayStandup?.formData as DynamicFormValues
+              )[field.name];
               if (!value) {
                 return null;
               }
@@ -278,6 +297,10 @@ function TodayStandup() {
   const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
     useLoaderData<typeof loader>();
 
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
+
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
       contentRef.current?.save();
@@ -308,16 +331,14 @@ function TodayStandup() {
         onKeyDown={handleKeyDown}
       >
         <Suspense fallback={<FormSkeleton />}>
-          <Await
-            resolve={boardPromise}
-            children={(board) => {
-              return (
-                <Await resolve={standupsPromise}>
-                  {(standups) => {
-                    return (
-                      <Await
-                        resolve={boardActiveStandupFormPromise}
-                        children={(structure) => {
+          <Await resolve={currentUserPromise}>
+            {(currentUser) => (
+              <Await resolve={boardPromise}>
+                {(board) => (
+                  <Await resolve={standupsPromise}>
+                    {(standups) => (
+                      <Await resolve={boardActiveStandupFormPromise}>
+                        {(structure) => {
                           if (!board || !standups || !structure) {
                             return <FormSkeleton />;
                           }
@@ -328,16 +349,17 @@ function TodayStandup() {
                               board={board}
                               standups={standups}
                               structure={structure}
+                              currentUser={currentUser}
                             />
                           );
                         }}
-                      />
-                    );
-                  }}
-                </Await>
-              );
-            }}
-          />
+                      </Await>
+                    )}
+                  </Await>
+                )}
+              </Await>
+            )}
+          </Await>
         </Suspense>
       </Card>
     </Flex>
