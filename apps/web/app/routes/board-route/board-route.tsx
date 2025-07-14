@@ -13,11 +13,12 @@ import {
 import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
-import TodayStandup from "./today-standup";
-import PastStandups from "./past-standups";
 import { Suspense } from "react";
 import { Await, data, useLoaderData } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
+import PastStandupsNew from "./past-standups-new";
+import TodayStandups from "./today-standups";
+import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
 
 export function getBoard(
   boardId: number,
@@ -54,22 +55,6 @@ function listStandups(
       Authorization: `Bearer ${accessToken}`,
     },
   }).then((response) => response.json() as Promise<ApiData<Standup[]>>);
-}
-
-function listCollaborators(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -201,8 +186,8 @@ export default function BoardRoute({}: Route.ComponentProps) {
       <Container py="7" maxWidth="672px" px="4">
         <Flex direction="column" gap="7">
           <Toolbar />
-          <TodayStandup />
-          <PastStandups />
+          <TodayStandups />
+          <PastStandupsNew />
         </Flex>
       </Container>
     </>
