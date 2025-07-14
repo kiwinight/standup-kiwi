@@ -16,8 +16,7 @@ import Toolbar from "./toolbar";
 import { Suspense } from "react";
 import { Await, data, useLoaderData } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-import PastStandupsNew from "./past-standups-new";
-import TodayStandups from "./today-standups";
+import Standups, { USER_SETTINGS, getContainerMaxWidth } from "./standups";
 import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
 
 export function getBoard(
@@ -183,11 +182,14 @@ export default function BoardRoute({}: Route.ComponentProps) {
     <>
       <BoardExistanceGuard />
 
-      <Container py="7" maxWidth="672px" px="4">
+      <Container
+        py="7"
+        maxWidth="672px" // 100%? numbers that are modular to 8px?
+        px="4"
+      >
         <Flex direction="column" gap="7">
           <Toolbar />
-          <TodayStandups />
-          <PastStandupsNew />
+          <Standups />
         </Flex>
       </Container>
     </>
