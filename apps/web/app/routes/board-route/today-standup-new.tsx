@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Flex,
+  Skeleton,
   Text,
   Tooltip,
   useThemeContext,
@@ -15,6 +16,7 @@ import {
   useRef,
   useImperativeHandle,
   type Ref,
+  useMemo,
 } from "react";
 import {
   Await,
@@ -26,7 +28,7 @@ import type { loader } from "./board-route";
 import type { loader as rootLoader } from "~/root";
 import { DateTime } from "luxon";
 import DynamicForm, {
-  FormSkeleton,
+  DynamicFormSkeleton,
   type DynamicFormRef,
   validateDynamicFormSchema,
   type DynamicFormValues,
@@ -41,6 +43,17 @@ import type { Board, Standup, StandupForm, User } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
+
+export function ContentSkeleton() {
+  return (
+    <Flex direction="column" gap="5">
+      <Text size="4" weight="bold">
+        <Skeleton>username</Skeleton>
+      </Text>
+      <DynamicFormSkeleton />
+    </Flex>
+  );
+}
 
 interface ContentRef {
   edit: () => void;
@@ -71,7 +84,7 @@ function Content({
 
   // Guard clause: don't show standup if no current user
   if (!currentUser) {
-    return <FormSkeleton />;
+    return <DynamicFormSkeleton />;
   }
 
   const dynamicFormRef = useRef<DynamicFormRef>(null);
@@ -198,6 +211,7 @@ function Content({
 
   return (
     <Flex direction="column" gap="5">
+      {/* TODO: hide user name if there's only one collaborator */}
       <Tooltip
         content={
           <Flex direction="column" gap="1">
@@ -231,7 +245,6 @@ function Content({
             currentUserTodayStandup && createStandupFetcher.state === "idle"
           )}
           onSubmit={async (data) => {
-            alert("submit");
             if (!currentUserTodayStandup) {
               createStandupFetcher.submit(
                 {
@@ -310,116 +323,66 @@ function Content({
       )}
     </Flex>
   );
+}
+
+function ContentResolver({ ref }: { ref: Ref<ContentRef> }) {
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
+
+  const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
+    useLoaderData<typeof loader>();
 
   return (
-    <>
-      {isEditing && (
-        <DynamicForm
-          ref={dynamicFormRef}
-          schema={schema}
-          defaultValues={
-            currentUserTodayStandup
-              ? (currentUserTodayStandup.formData as DynamicFormValues)
-              : undefined
+    <Suspense fallback={<ContentSkeleton />}>
+      <Await
+        resolve={useMemo(() => {
+          return Promise.all([
+            currentUserPromise,
+            boardPromise,
+            standupsPromise,
+            boardActiveStandupFormPromise,
+          ]);
+        }, [boardPromise, standupsPromise, boardActiveStandupFormPromise])}
+      >
+        {(data) => {
+          const [currentUser, board, standups, structure] = data;
+
+          if (!board || !standups || !structure) {
+            return <ContentSkeleton />;
           }
-          showCancelButton={Boolean(
-            currentUserTodayStandup && createStandupFetcher.state === "idle"
-          )}
-          onSubmit={async (data) => {
-            alert("submit");
-            if (!currentUserTodayStandup) {
-              createStandupFetcher.submit(
-                {
-                  formData: data,
-                  formId: structure.id,
-                },
-                {
-                  encType: "application/json",
-                  method: "POST",
-                  action: `/boards/${board.id}/standups/create`,
-                }
-              );
-              setIsEditing(false);
-            }
 
-            if (currentUserTodayStandup && isEditing) {
-              updateStandupFetcher.submit(
-                {
-                  formData: data,
-                },
-                {
-                  encType: "application/json",
-                  method: "POST",
-                  action: `/boards/${board.id}/standups/${currentUserTodayStandup?.id}/update`,
-                }
-              );
-              setIsEditing(false);
-            }
-          }}
-          onCancel={
-            currentUserTodayStandup && isEditing
-              ? handleDynamicFormCancel
-              : undefined
-          }
-        />
-      )}
+          return (
+            <Content
+              ref={ref}
+              currentUser={currentUser}
+              board={board}
+              standups={standups}
+              structure={structure}
+            />
+          );
+        }}
+      </Await>
+    </Suspense>
+  );
+}
 
-      {!isEditing && (
-        <Flex direction="column" gap="5">
-          <Text size="4" weight="bold">
-            {currentUser?.primary_email.split("@")[0]}
-          </Text>
-          <Flex direction="column" gap="5">
-            {schema.fields.map((field) => {
-              const value = (
-                currentUserTodayStandup?.formData as DynamicFormValues
-              )[field.name];
-              if (!value) {
-                return null;
-              }
-
-              const html = parseMarkdownToHtml(value);
-
-              return (
-                <Flex key={field.name} direction="column" gap="2">
-                  <Text size="2" className="font-semibold">
-                    {field.label}
-                  </Text>
-                  <Box
-                    className={`prose prose-sm ${
-                      appearance === "dark" ? "dark:prose-invert" : ""
-                    }`}
-                    dangerouslySetInnerHTML={{ __html: html }}
-                  />
-                </Flex>
-              );
-            })}
-          </Flex>
-          <Flex justify="end" gap="2">
-            <Button
-              highContrast
-              size="2"
-              variant="surface"
-              onClick={handleEditButtonClick}
-            >
-              Edit
-            </Button>
-          </Flex>
-        </Flex>
-      )}
-    </>
+export function TodayStandupNewSkeleton() {
+  return (
+    <Card
+      tabIndex={0}
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <ContentSkeleton />
+    </Card>
   );
 }
 
 function TodayStandupNew() {
   const contentRef = useRef<ContentRef>(null);
-
-  const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
-    useLoaderData<typeof loader>();
-
-  const rootData = useRouteLoaderData<typeof rootLoader>("root");
-  const currentUserPromise =
-    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -431,6 +394,7 @@ function TodayStandupNew() {
     }
 
     if (event.key === "Escape") {
+      // TODO: pressing escape triggers an error
       contentRef.current?.cancel();
     }
   }
@@ -444,37 +408,7 @@ function TodayStandupNew() {
       }}
       onKeyDown={handleKeyDown}
     >
-      <Suspense fallback={<FormSkeleton />}>
-        <Await resolve={currentUserPromise}>
-          {(currentUser) => (
-            <Await resolve={boardPromise}>
-              {(board) => (
-                <Await resolve={standupsPromise}>
-                  {(standups) => (
-                    <Await resolve={boardActiveStandupFormPromise}>
-                      {(structure) => {
-                        if (!board || !standups || !structure) {
-                          return <FormSkeleton />;
-                        }
-
-                        return (
-                          <Content
-                            ref={contentRef}
-                            board={board}
-                            standups={standups}
-                            structure={structure}
-                            currentUser={currentUser}
-                          />
-                        );
-                      }}
-                    </Await>
-                  )}
-                </Await>
-              )}
-            </Await>
-          )}
-        </Await>
-      </Suspense>
+      <ContentResolver ref={contentRef} />
     </Card>
   );
 }

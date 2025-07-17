@@ -25,7 +25,7 @@ import type { loader } from "./board-route";
 import type { loader as rootLoader } from "~/root";
 import { DateTime } from "luxon";
 import DynamicForm, {
-  FormSkeleton,
+  DynamicFormSkeleton,
   type DynamicFormRef,
   validateDynamicFormSchema,
   type DynamicFormValues,
@@ -70,7 +70,7 @@ function Content({
 
   // Guard clause: don't show standup if no current user
   if (!currentUser) {
-    return <FormSkeleton />;
+    return <DynamicFormSkeleton />;
   }
 
   const dynamicFormRef = useRef<DynamicFormRef>(null);
@@ -330,7 +330,7 @@ function TodayStandup() {
         }}
         onKeyDown={handleKeyDown}
       >
-        <Suspense fallback={<FormSkeleton />}>
+        <Suspense fallback={<DynamicFormSkeleton />}>
           <Await resolve={currentUserPromise}>
             {(currentUser) => (
               <Await resolve={boardPromise}>
@@ -340,7 +340,7 @@ function TodayStandup() {
                       <Await resolve={boardActiveStandupFormPromise}>
                         {(structure) => {
                           if (!board || !standups || !structure) {
-                            return <FormSkeleton />;
+                            return <DynamicFormSkeleton />;
                           }
 
                           return (

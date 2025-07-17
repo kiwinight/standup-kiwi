@@ -1,11 +1,11 @@
 import { Await, useLoaderData, useRouteLoaderData } from "react-router";
 import type { loader } from "./board-route";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import {
   Box,
   Card,
   Flex,
-  Grid,
+  Grid as RadixGrid,
   Skeleton,
   Text,
   Tooltip,
@@ -13,40 +13,145 @@ import {
 } from "@radix-ui/themes";
 import { DateTime } from "luxon";
 import type { Board, Standup, StandupForm, Collaborator, User } from "types";
-import { validateDynamicFormSchema } from "./dynamic-form";
+import { DynamicFormSkeleton, validateDynamicFormSchema } from "./dynamic-form";
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { type DynamicFormValues } from "./dynamic-form";
-import TodayStandupNew from "./today-standup-new";
+import TodayStandupNew, {
+  ContentSkeleton,
+  TodayStandupNewSkeleton,
+} from "./today-standup-new";
 import type { loader as rootLoader } from "~/root";
+import {
+  useGridViewSettings,
+  type CardSize,
+} from "~/context/GridViewSettingsContext";
 
-// Helper function to convert user settings to component props
-function getGridColumns(columns: number) {
-  return {
-    initial: "1",
-    sm: String(columns),
-  } as const;
+// Helper function to map card sizes to pixel values
+function getCardWidth(cardSize: CardSize): string {
+  switch (cardSize) {
+    case "small":
+      return "296px";
+    case "medium":
+      return "384px";
+    case "large":
+      return "520px";
+    case "auto":
+      return "100%";
+    default:
+      return "384px";
+  }
 }
 
-export function getContainerMaxWidth(width: "narrow" | "wide") {
-  return width === "narrow" ? "672px" : "1024px";
+export function StandupsGridSkeleton({
+  collaboratorsCount,
+}: {
+  collaboratorsCount: number;
+}) {
+  const isSharedBoard = collaboratorsCount > 1;
+
+  const card = (
+    <Card
+      variant="surface"
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+      style={{ alignSelf: "start" }}
+    >
+      <Flex direction="column" gap="5" align="start">
+        <Text size="4" weight="bold">
+          <Skeleton>username</Skeleton>
+        </Text>
+        <Flex direction="column" gap="2">
+          <Flex direction="column" gap="2">
+            <Text size="2" weight="medium">
+              <Skeleton>What did you do yesterday?</Skeleton>
+            </Text>
+            <Text size="2" className="max-h-[40px] overflow-hidden">
+              <Skeleton width="100%">
+                {Array.from({ length: 100 }).map((_, index) => "A ")}
+              </Skeleton>
+            </Text>
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text size="2" weight="medium">
+              <Skeleton>What will you do today?</Skeleton>
+            </Text>
+            <Text size="2" className="max-h-[40px] overflow-hidden">
+              <Skeleton width="100%">
+                {Array.from({ length: 100 }).map((_, index) => "A ")}
+              </Skeleton>
+            </Text>
+          </Flex>
+          <Flex direction="column" gap="2">
+            <Text size="2" weight="medium">
+              <Skeleton>What will you do today?</Skeleton>
+            </Text>
+            <Text size="2" className="max-h-[40px] overflow-hidden">
+              <Skeleton width="100%">
+                {Array.from({ length: 100 }).map((_, index) => "A ")}
+              </Skeleton>
+            </Text>
+          </Flex>
+        </Flex>
+      </Flex>
+    </Card>
+  );
+
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Flex key={index} direction="column" gap="5">
+          <Text size="3" weight="bold">
+            {index === 0 ? "Today" : <Skeleton>Thu, Jun 19, 2025</Skeleton>}
+          </Text>
+          <RadixGrid
+            columns={{
+              initial: "1",
+              sm: `repeat(auto-fill, minmax(${
+                isSharedBoard ? getCardWidth("medium") : getCardWidth("auto")
+              }, 1fr))`,
+            }}
+            gap="5"
+          >
+            {index === 0 && <TodayStandupNewSkeleton />}
+            {index !== 0 && (
+              <>
+                {/* TODO: if it's shared board, put multiple cards */}
+                {isSharedBoard ? (
+                  <>
+                    {card}
+                    {card}
+                    {card}
+                  </>
+                ) : (
+                  <>{card}</>
+                )}
+              </>
+            )}
+          </RadixGrid>
+        </Flex>
+      ))}
+    </>
+  );
 }
 
-function StandupsContent({
-  board,
+function StandupsGrid({
   standups,
   standupForms,
+  boardTimezone,
   collaborators,
   currentUser,
 }: {
-  board: Board;
   standups: Standup[];
   standupForms: StandupForm[];
+  boardTimezone: Board["timezone"];
   collaborators: Collaborator[];
   currentUser: User | null;
 }) {
   const { appearance } = useThemeContext();
+  const { viewSettings } = useGridViewSettings();
 
-  const boardTimezone = board.timezone;
   const today = DateTime.now().setZone(boardTimezone).startOf("day");
 
   // Group all standups by date
@@ -148,9 +253,14 @@ function StandupsContent({
               {dateLabel}
             </Text>
 
-            <Grid
-              columns="repeat(auto-fill, minmax(304px, 1fr))" // hmmm...
-              gap="5"
+            <RadixGrid
+              columns={{
+                initial: "1",
+                sm: `repeat(auto-fill, minmax(${getCardWidth(
+                  viewSettings.cardSize
+                )}, 1fr))`,
+              }}
+              gap="4"
             >
               {/* For today, show the TodayStandupNew component first */}
               {isToday && currentUser && <TodayStandupNew />}
@@ -183,6 +293,7 @@ function StandupsContent({
                       initial: "3",
                       sm: "4",
                     }}
+                    style={{ alignSelf: "start" }}
                   >
                     <Flex direction="column" gap="5" align="start">
                       <Tooltip
@@ -234,7 +345,7 @@ function StandupsContent({
                   </Card>
                 );
               })}
-            </Grid>
+            </RadixGrid>
           </Flex>
         );
       })}
@@ -242,128 +353,77 @@ function StandupsContent({
   );
 }
 
-function Standups() {
-  const { appearance } = useThemeContext();
-
+function StandupsGridResolver() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const { collaboratorsCount } = useLoaderData<typeof loader>();
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
   const {
-    boardPromise,
     standupsPromise,
     standupFormsPromise,
     collaboratorsPromise,
+    boardTimezonePromise,
   } = useLoaderData<typeof loader>();
 
+  const fallbackUI = (
+    <StandupsGridSkeleton collaboratorsCount={collaboratorsCount ?? 0} />
+  );
+
   return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <Await resolve={currentUserPromise}>
-        {(currentUser) => (
-          <Await resolve={boardPromise}>
-            {(board) => {
-              if (!board) {
-                return <SuspenseFallback />;
-              }
+    <Suspense fallback={fallbackUI}>
+      <Await
+        resolve={useMemo(() => {
+          return Promise.all([
+            currentUserPromise,
+            boardTimezonePromise,
+            standupsPromise,
+            standupFormsPromise,
+            collaboratorsPromise,
+          ]);
+        }, [
+          currentUserPromise,
+          boardTimezonePromise,
+          standupsPromise,
+          standupFormsPromise,
+          collaboratorsPromise,
+        ])}
+      >
+        {([
+          currentUser,
+          boardTimezone,
+          standups,
+          standupForms,
+          collaborators,
+        ]) => {
+          if (
+            !currentUser ||
+            !boardTimezone ||
+            !standups ||
+            !standupForms ||
+            !collaborators
+          ) {
+            return fallbackUI;
+          }
 
-              return (
-                <Await resolve={standupsPromise}>
-                  {(standups) => {
-                    if (!standups) {
-                      return <SuspenseFallback />;
-                    }
+          // return fallbackUI;
 
-                    return (
-                      <Await resolve={standupFormsPromise}>
-                        {(standupForms) => {
-                          if (!standupForms) {
-                            return <SuspenseFallback />;
-                          }
-
-                          return (
-                            <Await resolve={collaboratorsPromise}>
-                              {(collaborators) => {
-                                if (!collaborators) {
-                                  return <SuspenseFallback />;
-                                }
-
-                                return (
-                                  <StandupsContent
-                                    board={board}
-                                    standups={standups}
-                                    standupForms={standupForms}
-                                    collaborators={collaborators}
-                                    currentUser={currentUser}
-                                  />
-                                );
-                              }}
-                            </Await>
-                          );
-                        }}
-                      </Await>
-                    );
-                  }}
-                </Await>
-              );
-            }}
-          </Await>
-        )}
+          return (
+            <StandupsGrid
+              standups={standups}
+              standupForms={standupForms}
+              boardTimezone={boardTimezone}
+              collaborators={collaborators}
+              currentUser={currentUser}
+            />
+          );
+        }}
       </Await>
     </Suspense>
   );
 }
 
-export function SuspenseFallback() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Flex key={index} direction="column" gap="5">
-          <Text size="3" weight="bold">
-            <Skeleton>Thu, Jun 19, 2025</Skeleton>
-          </Text>
-          <Grid
-            // columns={getGridColumns(USER_SETTINGS.gridColumns)}
-            // gap={String(USER_SETTINGS.gridGap)}
-            columns="repeat(auto-fill, minmax(304px, 1fr))"
-            gap="5"
-          >
-            <Card
-              variant="surface"
-              size={{
-                initial: "3",
-                sm: "4",
-              }}
-            >
-              <Flex direction="column" gap="5" align="start">
-                <Text size="4" weight="bold">
-                  <Skeleton>username</Skeleton>
-                </Text>
-                <Flex direction="column" gap="2">
-                  <Text size="2" weight="medium">
-                    <Skeleton>What did you do yesterday?</Skeleton>
-                  </Text>
-                  <Text size="2" className="max-h-[40px] overflow-hidden">
-                    <Skeleton width="100%">
-                      {Array.from({ length: 100 }).map((_, index) => "A ")}
-                    </Skeleton>
-                  </Text>
-                </Flex>
-                <Flex direction="column" gap="2">
-                  <Text size="2" weight="medium">
-                    <Skeleton>What will you do today?</Skeleton>
-                  </Text>
-                  <Text size="2" className="max-h-[40px] overflow-hidden">
-                    <Skeleton width="100%">
-                      {Array.from({ length: 100 }).map((_, index) => "A ")}
-                    </Skeleton>
-                  </Text>
-                </Flex>
-              </Flex>
-            </Card>
-          </Grid>
-        </Flex>
-      ))}
-    </>
-  );
+function Standups() {
+  return <StandupsGridResolver />;
 }
 
 export default Standups;

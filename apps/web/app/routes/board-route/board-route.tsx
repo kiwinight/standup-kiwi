@@ -8,16 +8,38 @@ import {
   type Board,
   type Standup,
   type StandupForm,
-  type Collaborator,
 } from "types";
 import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
-import { Suspense } from "react";
-import { Await, data, useLoaderData } from "react-router";
+import { Suspense, useState, useEffect } from "react";
+import { Await, data, useLoaderData, useParams } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-import Standups, { USER_SETTINGS, getContainerMaxWidth } from "./standups";
+import Standups from "./standups";
 import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
+import {
+  useGridViewSettings,
+  GridViewSettingsProvider,
+  type GridWidth,
+  type GridViewSettings,
+} from "~/context/GridViewSettingsContext";
+import { useAwait } from "~/hooks/use-await";
+
+// Helper function to map layout settings to maxWidth values
+function getContainerMaxWidth(width: GridWidth): string {
+  switch (width) {
+    case "narrow":
+      return "736px";
+    case "medium":
+      return "992px";
+    case "wide":
+      return "1248px";
+    case "full":
+      return "100%";
+    default:
+      return "992px";
+  }
+}
 
 export function getBoard(
   boardId: number,
@@ -56,6 +78,21 @@ function listStandups(
   }).then((response) => response.json() as Promise<ApiData<Standup[]>>);
 }
 
+function countCollaborators(
+  boardId: number,
+  { accessToken }: { accessToken: string }
+) {
+  return fetch(
+    import.meta.env.VITE_API_URL +
+      `/boards/${boardId}/collaborators?view=count`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  ).then((response) => response.json() as Promise<ApiData<{ count: number }>>);
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
@@ -74,6 +111,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return null;
     }
     return data;
+  });
+
+  const boardNamePromise = boardPromise.then((board) => {
+    if (!board) {
+      return null;
+    }
+    return board.name;
+  });
+
+  const boardTimezonePromise = boardPromise.then((board) => {
+    if (!board) {
+      return null;
+    }
+    return board.timezone;
   });
 
   const standupsPromise = listStandups(boardId, { accessToken }).then(
@@ -134,23 +185,37 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     });
   });
 
-  const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
-    (data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
+  const collaboratorsDataPromise = listCollaborators(boardId, { accessToken });
+
+  const collaboratorsPromise = collaboratorsDataPromise.then((data) => {
+    if (isErrorData(data)) {
+      return null;
     }
-  );
+    return data;
+  });
+
+  const collaboratorsCountPromise = countCollaborators(boardId, {
+    accessToken,
+  }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data.count;
+  });
+
+  const collaboratorsCount = await collaboratorsCountPromise;
 
   return data(
     {
       boardDataPromise,
       boardPromise,
+      boardNamePromise,
+      boardTimezonePromise,
       standupsPromise,
       boardActiveStandupFormPromise,
       standupFormsPromise,
       collaboratorsPromise,
+      collaboratorsCount,
     },
     {
       headers: {
@@ -177,21 +242,46 @@ function BoardExistanceGuard() {
   );
 }
 
+function GridViewWidthSettingContainer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { viewSettings } = useGridViewSettings();
+  return (
+    <Container
+      px="4"
+      py="7"
+      maxWidth={getContainerMaxWidth(viewSettings.width)}
+    >
+      {children}
+    </Container>
+  );
+}
+
 export default function BoardRoute({}: Route.ComponentProps) {
+  const { collaboratorsCount } = useLoaderData<typeof loader>();
+  const params = useParams();
+  const boardId = params?.boardId ? parseInt(params.boardId, 10) : null;
+
+  if (!boardId) {
+    return null;
+  }
+
   return (
     <>
       <BoardExistanceGuard />
-
-      <Container
-        py="7"
-        maxWidth="672px" // 100%? numbers that are modular to 8px?
-        px="4"
+      <GridViewSettingsProvider
+        boardId={boardId}
+        collaboratorsCount={collaboratorsCount}
       >
-        <Flex direction="column" gap="7">
-          <Toolbar />
-          <Standups />
-        </Flex>
-      </Container>
+        <GridViewWidthSettingContainer>
+          <Flex direction="column" gap="7">
+            <Toolbar />
+            <Standups />
+          </Flex>
+        </GridViewWidthSettingContainer>
+      </GridViewSettingsProvider>
     </>
   );
 }

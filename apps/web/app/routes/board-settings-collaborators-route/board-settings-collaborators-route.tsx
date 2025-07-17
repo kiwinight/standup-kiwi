@@ -1,4 +1,4 @@
-import { useLoaderData, data, Await } from "react-router";
+import { useLoaderData, data, Await, useParams } from "react-router";
 import type { Collaborator, Invitation } from "../../../types";
 import { type ApiData, isErrorData } from "../../../types";
 import { commitSession } from "~/libs/auth-session.server";
