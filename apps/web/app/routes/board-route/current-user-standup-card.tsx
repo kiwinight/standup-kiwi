@@ -209,8 +209,6 @@ function Content({
     setIsEditing(true);
   }
 
-  console.log(DateTime.fromISO(""));
-
   return (
     <Flex direction="column" gap="5">
       {/* TODO: hide user name if there's only one collaborator */}
