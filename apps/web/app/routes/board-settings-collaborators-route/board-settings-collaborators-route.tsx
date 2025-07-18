@@ -1,4 +1,4 @@
-import { useLoaderData, data, Await } from "react-router";
+import { useLoaderData, data, Await, useParams } from "react-router";
 import type { Collaborator, Invitation } from "../../../types";
 import { type ApiData, isErrorData } from "../../../types";
 import { commitSession } from "~/libs/auth-session.server";
@@ -11,7 +11,7 @@ import type { Route } from "./+types/board-settings-collaborators-route";
 import { getBoard } from "../board-route/board-route";
 import LeaveBoardSetting from "./leave-board-setting";
 
-function listCollaborators(
+export function listCollaborators(
   boardId: number,
   { accessToken }: { accessToken: string }
 ) {

@@ -1,7 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { UsersToBoards, usersToBoards } from '../../libs/db/schema';
 import { Database, DATABASE_TOKEN } from '../../db/db.module';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, count } from 'drizzle-orm';
 import { UsersService } from '../../auth/users/users.service';
 import { User } from '../../auth/auth-service.types';
 import { CollaboratorUpdateItem } from './dto/bulk-update-collaborators.dto';
@@ -37,6 +37,15 @@ export class CollaboratorsService {
         user,
       };
     });
+  }
+
+  async count(boardId: number): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(usersToBoards)
+      .where(eq(usersToBoards.boardId, boardId));
+
+    return result.count;
   }
 
   async update(

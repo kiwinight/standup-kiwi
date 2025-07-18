@@ -1,22 +1,165 @@
-import { GearIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
-import { Flex, Skeleton, Button, Text } from "@radix-ui/themes";
-import { Suspense, use } from "react";
-import { Link, useLoaderData, useParams } from "react-router";
+import {
+  GearIcon,
+  EnvelopeClosedIcon,
+  MixerHorizontalIcon,
+} from "@radix-ui/react-icons";
+import {
+  Flex,
+  Skeleton,
+  Button,
+  Text,
+  Popover,
+  Select,
+} from "@radix-ui/themes";
+import { Suspense } from "react";
+import { Await, Link, useLoaderData, useParams } from "react-router";
 import type { loader } from "./board-route";
+import {
+  useGridViewSettings,
+  type GridWidth,
+  type CardSize,
+} from "~/context/GridViewSettingsContext";
+import { useViewSettings, type ViewType } from "~/context/ViewSettingsContext";
 
-function BoardName() {
-  const { boardPromise } = useLoaderData<typeof loader>();
-
-  const board = use(boardPromise);
-
-  if (!board) {
+function BoardName({ name }: { name: string | null }) {
+  if (!name) {
     return <Skeleton>Sample name</Skeleton>;
   }
 
-  return <>{board.name}</>;
+  return (
+    <Text size="6" weight="bold">
+      {name}
+    </Text>
+  );
+}
+
+function BoardNameSkeleton() {
+  return (
+    <Flex direction="column" gap="2">
+      <Skeleton>
+        <Text size="6" weight="bold">
+          Sample board name
+        </Text>
+      </Skeleton>
+    </Flex>
+  );
+}
+
+function BoardNameResolver() {
+  const { boardNamePromise } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={<BoardNameSkeleton />}>
+      <Await resolve={boardNamePromise}>
+        {(name) => {
+          return <BoardName name={name} />;
+        }}
+      </Await>
+    </Suspense>
+  );
 }
 
 type Props = {};
+
+function ViewTypeSelector() {
+  const {
+    viewSettings,
+    updateViewSettings,
+    allowedViewTypes,
+    isPersonalBoard,
+  } = useViewSettings();
+
+  return (
+    <Flex direction="column" gap="2">
+      <Text className="font-semibold" size="2">
+        View
+      </Text>
+      <Select.Root
+        value={viewSettings.viewType}
+        disabled={isPersonalBoard}
+        onValueChange={(value) => {
+          if (!isPersonalBoard) {
+            updateViewSettings({ viewType: value as ViewType });
+          }
+        }}
+      >
+        <Select.Trigger />
+        <Select.Content>
+          <Select.Group>
+            {allowedViewTypes.includes("feed") && (
+              <Select.Item value="feed">Feed</Select.Item>
+            )}
+            {allowedViewTypes.includes("grid") && (
+              <Select.Item value="grid">Grid</Select.Item>
+            )}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    </Flex>
+  );
+}
+
+function GridViewSettings() {
+  const { collaboratorsCount } = useLoaderData<typeof loader>();
+  const { viewSettings: viewTypeSettings } = useViewSettings();
+  const { viewSettings, updateViewSettings } = useGridViewSettings();
+
+  const isSharedBoard = collaboratorsCount ? collaboratorsCount > 1 : false;
+
+  // Only show grid settings when in grid view
+  if (viewTypeSettings.viewType !== "grid") {
+    return null;
+  }
+
+  return (
+    <>
+      {isSharedBoard && (
+        <Flex direction="column" gap="2">
+          <Text className="font-semibold" size="2">
+            Width
+          </Text>
+          <Select.Root
+            value={viewSettings.width}
+            onValueChange={(value) =>
+              updateViewSettings({ width: value as GridWidth })
+            }
+          >
+            <Select.Trigger />
+            <Select.Content>
+              <Select.Group>
+                <Select.Item value="medium">Medium</Select.Item>
+                <Select.Item value="wide">Wide</Select.Item>
+                <Select.Item value="full">Full</Select.Item>
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+        </Flex>
+      )}
+      {isSharedBoard && (
+        <Flex direction="column" gap="2">
+          <Text className="font-semibold" size="2">
+            Card size
+          </Text>
+          <Select.Root
+            value={viewSettings.cardSize}
+            onValueChange={(value) =>
+              updateViewSettings({ cardSize: value as CardSize })
+            }
+          >
+            <Select.Trigger />
+            <Select.Content>
+              <Select.Group>
+                <Select.Item value="small">Small</Select.Item>
+                <Select.Item value="medium">Medium</Select.Item>
+                <Select.Item value="large">Large</Select.Item>
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+        </Flex>
+      )}
+    </>
+  );
+}
 
 function Toolbar({}: Props) {
   const { boardId } = useParams();
@@ -33,11 +176,7 @@ function Toolbar({}: Props) {
         sm: "row",
       }}
     >
-      <Text size="6" weight="bold">
-        <Suspense fallback={<Skeleton>Sample name</Skeleton>}>
-          <BoardName />
-        </Suspense>
-      </Text>
+      <BoardNameResolver />
 
       <Flex
         gap="5"
@@ -52,6 +191,25 @@ function Toolbar({}: Props) {
             Invite
           </Link>
         </Button>
+
+        <Popover.Root>
+          <Popover.Trigger>
+            <Button variant="ghost" highContrast>
+              <MixerHorizontalIcon />
+              View
+            </Button>
+          </Popover.Trigger>
+          <Popover.Content width="320px" size="3">
+            <Flex direction="column" gap="5">
+              <Text className="font-semibold" size="4">
+                View settings
+              </Text>
+
+              <ViewTypeSelector />
+              <GridViewSettings />
+            </Flex>
+          </Popover.Content>
+        </Popover.Root>
 
         <Button asChild variant="ghost" highContrast>
           <Link to={`/boards/${boardId}/settings`}>

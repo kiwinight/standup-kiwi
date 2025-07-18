@@ -1,13 +1,8 @@
-import { Suspense, useContext } from "react";
+import { Suspense } from "react";
 import type { Route } from "./+types/board-layout-route";
 import { Await, Link, useLoaderData, useRouteLoaderData } from "react-router";
 import { useParams } from "react-router";
-import {
-  ListBulletIcon,
-  PlusIcon,
-  PersonIcon,
-  DashboardIcon,
-} from "@radix-ui/react-icons";
+import { ListBulletIcon, PersonIcon } from "@radix-ui/react-icons";
 import {
   Flex,
   DropdownMenu,
@@ -15,14 +10,13 @@ import {
   Skeleton,
   Text,
   Badge,
-  Tooltip,
   IconButton,
 } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
-import { Layers2Icon, Palette, SquarePlus } from "lucide-react";
+import { Palette, SquarePlus } from "lucide-react";
 
 function NavBar() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
@@ -63,6 +57,7 @@ function NavBar() {
               <Layers2Icon size={15} strokeWidth={1.5} />
               Boards
             </DropdownMenu.Item> */}
+            {/* TODO: split this part into resolver component */}
             <Suspense
               fallback={
                 <>
@@ -109,7 +104,11 @@ function NavBar() {
                                 ? parseInt(boardId, 10) === board.id
                                 : false;
                               return (
-                                <Link key={board.id} to={`/boards/${board.id}`}>
+                                <Link
+                                  key={board.id}
+                                  reloadDocument
+                                  to={`/boards/${board.id}`}
+                                >
                                   <DropdownMenu.CheckboxItem checked={isActive}>
                                     {board.name}
                                   </DropdownMenu.CheckboxItem>
@@ -133,7 +132,11 @@ function NavBar() {
                                 ? parseInt(boardId, 10) === board.id
                                 : false;
                               return (
-                                <Link key={board.id} to={`/boards/${board.id}`}>
+                                <Link
+                                  key={board.id}
+                                  reloadDocument
+                                  to={`/boards/${board.id}`}
+                                >
                                   <DropdownMenu.CheckboxItem checked={isActive}>
                                     {board.name}
                                   </DropdownMenu.CheckboxItem>

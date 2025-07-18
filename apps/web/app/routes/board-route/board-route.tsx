@@ -8,16 +8,38 @@ import {
   type Board,
   type Standup,
   type StandupForm,
-  type Collaborator,
 } from "types";
 import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
-import TodayStandup from "./today-standup";
-import PastStandups from "./past-standups";
 import { Suspense } from "react";
-import { Await, data, useLoaderData } from "react-router";
+import { Await, data, useLoaderData, useParams } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
+import View from "./view";
+import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
+import {
+  useGridViewSettings,
+  GridViewSettingsProvider,
+  type GridWidth,
+} from "~/context/GridViewSettingsContext";
+import {
+  ViewSettingsProvider,
+  useViewSettings,
+} from "~/context/ViewSettingsContext";
+
+// Helper function to map layout settings to maxWidth values
+function getContainerMaxWidth(width: GridWidth): string {
+  switch (width) {
+    case "medium":
+      return "992px";
+    case "wide":
+      return "1248px";
+    case "full":
+      return "100%";
+    default:
+      return "992px";
+  }
+}
 
 export function getBoard(
   boardId: number,
@@ -56,20 +78,19 @@ function listStandups(
   }).then((response) => response.json() as Promise<ApiData<Standup[]>>);
 }
 
-function listCollaborators(
+function countCollaborators(
   boardId: number,
   { accessToken }: { accessToken: string }
 ) {
   return fetch(
-    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
+    import.meta.env.VITE_API_URL +
+      `/boards/${boardId}/collaborators?view=count`,
     {
-      method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     }
-  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
+  ).then((response) => response.json() as Promise<ApiData<{ count: number }>>);
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -90,6 +111,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return null;
     }
     return data;
+  });
+
+  const boardNamePromise = boardPromise.then((board) => {
+    if (!board) {
+      return null;
+    }
+    return board.name;
+  });
+
+  const boardTimezonePromise = boardPromise.then((board) => {
+    if (!board) {
+      return null;
+    }
+    return board.timezone;
   });
 
   const standupsPromise = listStandups(boardId, { accessToken }).then(
@@ -150,23 +185,37 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     });
   });
 
-  const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
-    (data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
+  const collaboratorsDataPromise = listCollaborators(boardId, { accessToken });
+
+  const collaboratorsPromise = collaboratorsDataPromise.then((data) => {
+    if (isErrorData(data)) {
+      return null;
     }
-  );
+    return data;
+  });
+
+  const collaboratorsCountPromise = countCollaborators(boardId, {
+    accessToken,
+  }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data.count;
+  });
+
+  const collaboratorsCount = await collaboratorsCountPromise;
 
   return data(
     {
       boardDataPromise,
       boardPromise,
+      boardNamePromise,
+      boardTimezonePromise,
       standupsPromise,
       boardActiveStandupFormPromise,
       standupFormsPromise,
       collaboratorsPromise,
+      collaboratorsCount,
     },
     {
       headers: {
@@ -193,18 +242,56 @@ function BoardExistanceGuard() {
   );
 }
 
+function ViewWidthSettingContainer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { viewSettings: viewTypeSettings } = useViewSettings();
+  const { viewSettings: gridSettings } = useGridViewSettings();
+
+  // For feed view, use a narrow readable width
+  // For grid view, use the grid width settings
+  const maxWidth =
+    viewTypeSettings.viewType === "feed"
+      ? "736px"
+      : getContainerMaxWidth(gridSettings.width);
+
+  return (
+    <Container px="4" py="7" maxWidth={maxWidth}>
+      {children}
+    </Container>
+  );
+}
+
 export default function BoardRoute({}: Route.ComponentProps) {
+  const { collaboratorsCount } = useLoaderData<typeof loader>();
+  const params = useParams();
+  const boardId = params?.boardId ? parseInt(params.boardId, 10) : null;
+
+  if (!boardId) {
+    return null;
+  }
+
   return (
     <>
       <BoardExistanceGuard />
-
-      <Container py="7" maxWidth="672px" px="4">
-        <Flex direction="column" gap="7">
-          <Toolbar />
-          <TodayStandup />
-          <PastStandups />
-        </Flex>
-      </Container>
+      <ViewSettingsProvider
+        boardId={boardId}
+        collaboratorsCount={collaboratorsCount}
+      >
+        <GridViewSettingsProvider
+          boardId={boardId}
+          collaboratorsCount={collaboratorsCount}
+        >
+          <ViewWidthSettingContainer>
+            <Flex direction="column" gap="7">
+              <Toolbar />
+              <View />
+            </Flex>
+          </ViewWidthSettingContainer>
+        </GridViewSettingsProvider>
+      </ViewSettingsProvider>
     </>
   );
 }
