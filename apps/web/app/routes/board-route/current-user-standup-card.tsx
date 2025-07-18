@@ -209,6 +209,8 @@ function Content({
     setIsEditing(true);
   }
 
+  console.log(DateTime.fromISO(""));
+
   return (
     <Flex direction="column" gap="5">
       {/* TODO: hide user name if there's only one collaborator */}
@@ -216,15 +218,17 @@ function Content({
         content={
           <Flex direction="column" gap="1">
             <Text size="2">{currentUser?.primary_email}</Text>
-            <Text size="2">
-              Last saved at{" "}
-              {DateTime.fromISO(currentUserTodayStandup?.createdAt || "", {
-                zone: "utc",
-              })
-                .setZone(boardTimezone)
-                .toLocaleString(DateTime.DATETIME_MED)}{" "}
-              ({boardTimezone})
-            </Text>
+            {currentUserTodayStandup?.updatedAt && (
+              <Text size="2">
+                Last saved at{" "}
+                {DateTime.fromISO(currentUserTodayStandup.updatedAt, {
+                  zone: "utc",
+                })
+                  .setZone(boardTimezone)
+                  .toLocaleString(DateTime.DATETIME_MED)}{" "}
+                ({boardTimezone})
+              </Text>
+            )}
           </Flex>
         }
       >
