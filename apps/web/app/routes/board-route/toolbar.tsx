@@ -19,6 +19,7 @@ import {
   type GridWidth,
   type CardSize,
 } from "~/context/GridViewSettingsContext";
+import { useViewSettings, type ViewType } from "~/context/ViewSettingsContext";
 
 function BoardName({ name }: { name: string | null }) {
   if (!name) {
@@ -60,12 +61,55 @@ function BoardNameResolver() {
 
 type Props = {};
 
+function ViewTypeSelector() {
+  const {
+    viewSettings,
+    updateViewSettings,
+    allowedViewTypes,
+    isPersonalBoard,
+  } = useViewSettings();
+
+  return (
+    <Flex direction="column" gap="2">
+      <Text className="font-semibold" size="2">
+        View
+      </Text>
+      <Select.Root
+        value={viewSettings.viewType}
+        disabled={isPersonalBoard}
+        onValueChange={(value) => {
+          if (!isPersonalBoard) {
+            updateViewSettings({ viewType: value as ViewType });
+          }
+        }}
+      >
+        <Select.Trigger />
+        <Select.Content>
+          <Select.Group>
+            {allowedViewTypes.includes("feed") && (
+              <Select.Item value="feed">Feed</Select.Item>
+            )}
+            {allowedViewTypes.includes("grid") && (
+              <Select.Item value="grid">Grid</Select.Item>
+            )}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    </Flex>
+  );
+}
+
 function GridViewSettings() {
   const { collaboratorsCount } = useLoaderData<typeof loader>();
-
+  const { viewSettings: viewTypeSettings } = useViewSettings();
   const { viewSettings, updateViewSettings } = useGridViewSettings();
 
   const isSharedBoard = collaboratorsCount ? collaboratorsCount > 1 : false;
+
+  // Only show grid settings when in grid view
+  if (viewTypeSettings.viewType !== "grid") {
+    return null;
+  }
 
   return (
     <>
@@ -83,7 +127,6 @@ function GridViewSettings() {
             <Select.Trigger />
             <Select.Content>
               <Select.Group>
-                <Select.Item value="narrow">Narrow</Select.Item>
                 <Select.Item value="medium">Medium</Select.Item>
                 <Select.Item value="wide">Wide</Select.Item>
                 <Select.Item value="full">Full</Select.Item>
@@ -109,7 +152,6 @@ function GridViewSettings() {
                 <Select.Item value="small">Small</Select.Item>
                 <Select.Item value="medium">Medium</Select.Item>
                 <Select.Item value="large">Large</Select.Item>
-                <Select.Item value="auto">Auto</Select.Item>
               </Select.Group>
             </Select.Content>
           </Select.Root>
@@ -163,26 +205,7 @@ function Toolbar({}: Props) {
                 View settings
               </Text>
 
-              <Flex direction="column" gap="2">
-                <Text className="font-semibold" size="2">
-                  View
-                </Text>
-                <Select.Root
-                  value={"grid"}
-                  disabled
-                  onValueChange={(value) => {
-                    // TODO: Support view change
-                    console.log("view change", value);
-                  }}
-                >
-                  <Select.Trigger />
-                  <Select.Content>
-                    <Select.Group>
-                      <Select.Item value="grid">Grid</Select.Item>
-                    </Select.Group>
-                  </Select.Content>
-                </Select.Root>
-              </Flex>
+              <ViewTypeSelector />
               <GridViewSettings />
             </Flex>
           </Popover.Content>

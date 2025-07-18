@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const STORAGE_KEY = "grid-view-settings";
 
-export type GridWidth = "narrow" | "medium" | "wide" | "full";
-export type CardSize = "small" | "medium" | "large" | "auto";
+export type GridWidth = "medium" | "wide" | "full";
+export type CardSize = "small" | "medium" | "large";
 
 export interface GridViewSettings {
   width: GridWidth;
@@ -15,17 +15,12 @@ interface GridViewSettingsContext {
   updateViewSettings: (settings: Partial<GridViewSettings>) => void;
 }
 
-// Helper function to determine default settings based on collaboration
-function getDefaultViewSettings(
+// Helper function to determine default settings for grid view
+function getDefaultGridViewSettings(
   collaboratorCount?: number | null
 ): GridViewSettings {
-  if (!collaboratorCount || collaboratorCount <= 1) {
-    return {
-      width: "narrow",
-      cardSize: "auto",
-    };
-  }
-
+  // Grid view is only for shared boards, so we can assume collaboratorCount > 1
+  // Default to wide width and medium cards for optimal grid layout
   return {
     width: "wide",
     cardSize: "medium",
@@ -42,7 +37,7 @@ export const GridViewSettingsProvider: React.FC<{
   collaboratorsCount: number | null;
 }> = ({ children, boardId, collaboratorsCount }) => {
   const [viewSettings, setViewSettings] = useState<GridViewSettings>(
-    getDefaultViewSettings(collaboratorsCount)
+    getDefaultGridViewSettings(collaboratorsCount)
   );
 
   useEffect(() => {
@@ -52,14 +47,14 @@ export const GridViewSettingsProvider: React.FC<{
 
     const isSharedBoard = collaboratorsCount && collaboratorsCount > 1;
     if (!isSharedBoard) {
-      setViewSettings(getDefaultViewSettings(collaboratorsCount));
+      setViewSettings(getDefaultGridViewSettings(collaboratorsCount));
       return;
     }
 
     const savedSettingsJson = localStorage.getItem(STORAGE_KEY);
 
     if (!savedSettingsJson) {
-      setViewSettings(getDefaultViewSettings(collaboratorsCount));
+      setViewSettings(getDefaultGridViewSettings(collaboratorsCount));
       return;
     }
 
@@ -71,11 +66,26 @@ export const GridViewSettingsProvider: React.FC<{
     const boardSettings = allBoardSettings[boardId.toString()];
 
     if (!boardSettings) {
-      setViewSettings(getDefaultViewSettings(collaboratorsCount));
+      setViewSettings(getDefaultGridViewSettings(collaboratorsCount));
       return;
     }
 
-    setViewSettings(boardSettings);
+    // Migrate old invalid values
+    const migratedSettings = {
+      ...boardSettings,
+      // Convert old "narrow" width to "medium"
+      width:
+        boardSettings.width === ("narrow" as any)
+          ? "medium"
+          : boardSettings.width,
+      // Convert old "auto" cardSize to "medium"
+      cardSize:
+        boardSettings.cardSize === ("auto" as any)
+          ? "medium"
+          : boardSettings.cardSize,
+    } as GridViewSettings;
+
+    setViewSettings(migratedSettings);
   }, [boardId, collaboratorsCount]);
 
   function updateViewSettings(settings: Partial<GridViewSettings>) {
