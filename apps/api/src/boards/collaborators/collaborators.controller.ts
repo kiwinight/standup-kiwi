@@ -13,6 +13,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { CollaboratorsService } from './collaborators.service';
 import { BoardAccessGuard } from '../guards/board-access.guard';
@@ -34,8 +35,14 @@ export class CollaboratorsController {
   @Get()
   async list(
     @Param('boardId', ParseIntPipe) boardId: number,
-  ): Promise<Collaborator[]> {
+    @Query('view') view?: string,
+  ): Promise<Collaborator[] | { count: number }> {
     try {
+      if (view === 'count') {
+        const count = await this.collaboratorsService.count(boardId);
+        return { count };
+      }
+
       return await this.collaboratorsService.list(boardId);
     } catch (error) {
       ErrorHandler.handle(

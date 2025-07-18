@@ -3,7 +3,9 @@ import {
   Button,
   Card,
   Flex,
+  Skeleton,
   Text,
+  Tooltip,
   useThemeContext,
 } from "@radix-ui/themes";
 import {
@@ -14,6 +16,7 @@ import {
   useRef,
   useImperativeHandle,
   type Ref,
+  useMemo,
 } from "react";
 import {
   Await,
@@ -25,7 +28,7 @@ import type { loader } from "./board-route";
 import type { loader as rootLoader } from "~/root";
 import { DateTime } from "luxon";
 import DynamicForm, {
-  FormSkeleton,
+  DynamicFormSkeleton,
   type DynamicFormRef,
   validateDynamicFormSchema,
   type DynamicFormValues,
@@ -40,6 +43,17 @@ import type { Board, Standup, StandupForm, User } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
+
+export function ContentSkeleton() {
+  return (
+    <Flex direction="column" gap="5">
+      <Text size="4" weight="bold">
+        <Skeleton>username</Skeleton>
+      </Text>
+      <DynamicFormSkeleton />
+    </Flex>
+  );
+}
 
 interface ContentRef {
   edit: () => void;
@@ -70,7 +84,7 @@ function Content({
 
   // Guard clause: don't show standup if no current user
   if (!currentUser) {
-    return <FormSkeleton />;
+    return <DynamicFormSkeleton />;
   }
 
   const dynamicFormRef = useRef<DynamicFormRef>(null);
@@ -196,7 +210,30 @@ function Content({
   }
 
   return (
-    <>
+    <Flex direction="column" gap="5">
+      {/* TODO: hide user name if there's only one collaborator */}
+      <Tooltip
+        content={
+          <Flex direction="column" gap="1">
+            <Text size="2">{currentUser?.primary_email}</Text>
+            {currentUserTodayStandup?.updatedAt && (
+              <Text size="2">
+                Last saved at{" "}
+                {DateTime.fromISO(currentUserTodayStandup.updatedAt, {
+                  zone: "utc",
+                })
+                  .setZone(boardTimezone)
+                  .toLocaleString(DateTime.DATETIME_MED)}{" "}
+                ({boardTimezone})
+              </Text>
+            )}
+          </Flex>
+        }
+      >
+        <Text size="4" weight="bold">
+          {currentUser?.primary_email.split("@")[0]}
+        </Text>
+      </Tooltip>
       {isEditing && (
         <DynamicForm
           ref={dynamicFormRef}
@@ -246,7 +283,6 @@ function Content({
           }
         />
       )}
-
       {!isEditing && (
         <Flex direction="column" gap="5">
           <Flex direction="column" gap="5">
@@ -287,19 +323,76 @@ function Content({
           </Flex>
         </Flex>
       )}
-    </>
+    </Flex>
   );
 }
 
-function TodayStandup() {
-  const contentRef = useRef<ContentRef>(null);
+function Resolver({
+  ref,
+  children,
+}: {
+  ref: Ref<ContentRef>;
+  children: (data: {
+    currentUser: User | null;
+    board: Board;
+    standups: Standup[];
+    structure: StandupForm;
+  }) => React.ReactNode;
+}) {
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   const { boardPromise, standupsPromise, boardActiveStandupFormPromise } =
     useLoaderData<typeof loader>();
 
-  const rootData = useRouteLoaderData<typeof rootLoader>("root");
-  const currentUserPromise =
-    rootData?.currentUserPromise ?? Promise.resolve(null);
+  return (
+    <Suspense fallback={<ContentSkeleton />}>
+      <Await
+        resolve={useMemo(() => {
+          return Promise.all([
+            currentUserPromise,
+            boardPromise,
+            standupsPromise,
+            boardActiveStandupFormPromise,
+          ]);
+        }, [boardPromise, standupsPromise, boardActiveStandupFormPromise])}
+      >
+        {(data) => {
+          const [currentUser, board, standups, structure] = data;
+
+          if (!board || !standups || !structure) {
+            return <ContentSkeleton />;
+          }
+
+          return children({
+            currentUser,
+            board,
+            standups,
+            structure,
+          });
+        }}
+      </Await>
+    </Suspense>
+  );
+}
+
+export function TodayStandupNewSkeleton() {
+  return (
+    <Card
+      tabIndex={0}
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <ContentSkeleton />
+    </Card>
+  );
+}
+
+function CurrentUserStandupCard() {
+  const contentRef = useRef<ContentRef>(null);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -311,59 +404,35 @@ function TodayStandup() {
     }
 
     if (event.key === "Escape") {
+      // TODO: pressing escape triggers an error
       contentRef.current?.cancel();
     }
   }
 
   return (
-    <Flex direction="column" gap="5">
-      <Box>
-        <Text size="3" weight="bold">
-          Today
-        </Text>
-      </Box>
-      <Card
-        tabIndex={0}
-        size={{
-          initial: "3",
-          sm: "4",
+    <Card
+      tabIndex={0}
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+      onKeyDown={handleKeyDown}
+    >
+      <Resolver ref={contentRef}>
+        {({ currentUser, board, standups, structure }) => {
+          return (
+            <Content
+              ref={contentRef}
+              currentUser={currentUser}
+              board={board}
+              standups={standups}
+              structure={structure}
+            />
+          );
         }}
-        onKeyDown={handleKeyDown}
-      >
-        <Suspense fallback={<FormSkeleton />}>
-          <Await resolve={currentUserPromise}>
-            {(currentUser) => (
-              <Await resolve={boardPromise}>
-                {(board) => (
-                  <Await resolve={standupsPromise}>
-                    {(standups) => (
-                      <Await resolve={boardActiveStandupFormPromise}>
-                        {(structure) => {
-                          if (!board || !standups || !structure) {
-                            return <FormSkeleton />;
-                          }
-
-                          return (
-                            <Content
-                              ref={contentRef}
-                              board={board}
-                              standups={standups}
-                              structure={structure}
-                              currentUser={currentUser}
-                            />
-                          );
-                        }}
-                      </Await>
-                    )}
-                  </Await>
-                )}
-              </Await>
-            )}
-          </Await>
-        </Suspense>
-      </Card>
-    </Flex>
+      </Resolver>
+    </Card>
   );
 }
 
-export default TodayStandup;
+export default CurrentUserStandupCard;

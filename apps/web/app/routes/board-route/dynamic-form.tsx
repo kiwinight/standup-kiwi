@@ -222,15 +222,15 @@ function DynamicForm({
 
 export default DynamicForm;
 
-export function FormSkeleton() {
+export function DynamicFormSkeleton() {
   return (
     <form>
       <Flex direction="column">
-        <Box>
+        <Flex direction="column" gap="5">
           <Flex direction="column" gap="2">
             <label>
-              <Flex>
-                <Text size="2" weight="medium">
+              <Flex align="center" gap="2">
+                <Text size="2" className="font-semibold">
                   <Skeleton>What did you do yesterday? *</Skeleton>
                 </Text>
               </Flex>
@@ -240,10 +240,10 @@ export function FormSkeleton() {
             </Skeleton>
           </Flex>
 
-          <Flex direction="column" gap="2" mt="5">
+          <Flex direction="column" gap="2">
             <label>
-              <Flex>
-                <Text size="2" weight="medium">
+              <Flex align="center" gap="2">
+                <Text size="2" className="font-semibold">
                   <Skeleton>What will you do today? *</Skeleton>
                 </Text>
               </Flex>
@@ -253,10 +253,10 @@ export function FormSkeleton() {
             </Skeleton>
           </Flex>
 
-          <Flex direction="column" gap="2" mt="5">
+          <Flex direction="column" gap="2">
             <label>
-              <Flex>
-                <Text size="2" weight="medium">
+              <Flex align="center" gap="2">
+                <Text size="2" className="font-semibold">
                   <Skeleton>Do you have any blockers?</Skeleton>
                 </Text>
               </Flex>
@@ -265,8 +265,8 @@ export function FormSkeleton() {
               <Box py="1" px="2" height="72px" />
             </Skeleton>
           </Flex>
-        </Box>
-        <Flex justify="end" mt="5" gap="2">
+        </Flex>
+        <Flex justify="end" gap="2" mt="5">
           <Skeleton>
             <Button size="2">Save</Button>
           </Skeleton>
