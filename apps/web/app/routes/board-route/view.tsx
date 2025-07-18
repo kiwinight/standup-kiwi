@@ -154,7 +154,7 @@ function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
           </Flex>
           <Flex direction="column" gap="2">
             <Text size="2" weight="medium">
-              <Skeleton>What will you do today?</Skeleton>
+              <Skeleton>Do you have any blockers?</Skeleton>
             </Text>
             <Text size="2" className="max-h-[40px] overflow-hidden">
               <Skeleton width="100%">
