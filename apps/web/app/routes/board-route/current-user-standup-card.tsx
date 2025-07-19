@@ -9,7 +9,6 @@ import {
   Tooltip,
   useThemeContext,
 } from "@radix-ui/themes";
-import { RowSpacingIcon, Cross2Icon } from "@radix-ui/react-icons";
 import {
   Suspense,
   useEffect,
@@ -102,6 +101,7 @@ function ExpansionButton() {
   return (
     <Tooltip content={isExpanded ? "Minimize" : "Expand"}>
       <IconButton
+        variant="ghost"
         onClick={toggleExpansion}
         aria-label={isExpanded ? "Minimize card" : "Expand card"}
         className="opacity-0! group-hover:opacity-100! transition-opacity! duration-0!"
@@ -283,7 +283,6 @@ function Content({
 
   return (
     <Flex direction="column" gap="5">
-      {/* TODO: hide user name if there's only one collaborator */}
       <Flex justify="between">
         <Tooltip
           content={
