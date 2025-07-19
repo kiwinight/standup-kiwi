@@ -27,7 +27,6 @@ import {
   useViewSettings,
 } from "~/context/ViewSettingsContext";
 
-// Helper function to map layout settings to maxWidth values
 function getContainerMaxWidth(width: GridWidth): string {
   switch (width) {
     case "medium":
@@ -250,12 +249,11 @@ function ViewWidthSettingContainer({
   const { viewSettings: viewTypeSettings } = useViewSettings();
   const { viewSettings: gridSettings } = useGridViewSettings();
 
-  // For feed view, use a narrow readable width
-  // For grid view, use the grid width settings
-  const maxWidth =
-    viewTypeSettings.viewType === "feed"
-      ? "736px"
-      : getContainerMaxWidth(gridSettings.width);
+  let maxWidth = "736px"; // NOTE: 768px - 16px (padding) - 16px (padding)
+
+  if (viewTypeSettings.viewType === "grid") {
+    maxWidth = getContainerMaxWidth(gridSettings.width);
+  }
 
   return (
     <Container px="4" py="7" maxWidth={maxWidth}>
