@@ -6,9 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   useRouteLoaderData,
-  type ErrorResponse,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -16,7 +14,6 @@ import stylesheet from "./app.css?url";
 import "@radix-ui/themes/styles.css";
 import "./radix.css";
 import { Button, Flex, Heading, Text, Theme } from "@radix-ui/themes";
-import { UserAppearanceSettingProvider } from "./context/UserAppearanceSettingContext";
 import {
   ColorSchemeProvider,
   useColorScheme,
@@ -126,16 +123,23 @@ export async function loader({ request }: Route.LoaderArgs) {
     session: newSession,
   } = await verifyAndRefreshAccessToken(session);
 
+  let currentUser: User | null = null;
+  let currentUserPromise: Promise<User | null> | null = null;
+
+  if (isValid) {
+    currentUserPromise = getCurrentUser(accessToken).then((data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
+      return data;
+    });
+    currentUser = await currentUserPromise;
+  }
+
   return data(
     {
-      currentUserPromise: isValid
-        ? getCurrentUser(accessToken).then((data) => {
-            if (isErrorData(data)) {
-              return null;
-            }
-            return data;
-          })
-        : null,
+      currentUserPromise,
+      currentUser,
     },
     {
       headers: {
@@ -147,8 +151,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const rootData = useRouteLoaderData<typeof loader>("root");
+  // TODO: Replace to use currentUser instead of currentUserPromise
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
+
+  const currentUser = rootData?.currentUser;
+  const userAppearanceSetting =
+    currentUser?.client_read_only_metadata?.settings?.appearance ?? null;
 
   useEffect(() => {
     if (currentUserPromise) {
@@ -165,7 +174,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [currentUserPromise]);
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta
@@ -175,13 +184,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
         <script
-          dangerouslySetInnerHTML={{ __html: colorSchemeFlickerPrevention }}
+          dangerouslySetInnerHTML={{
+            __html: colorSchemeFlickerPrevention(userAppearanceSetting),
+          }}
         />
       </head>
       <body>
-        <UserAppearanceSettingProvider>
-          <ColorSchemeProvider>{children}</ColorSchemeProvider>
-        </UserAppearanceSettingProvider>
+        <ColorSchemeProvider>{children}</ColorSchemeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

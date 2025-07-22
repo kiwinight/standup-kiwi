@@ -1,8 +1,9 @@
 import {
   Box,
   Button,
-  Card,
+  Card as RadixCard,
   Flex,
+  IconButton,
   Skeleton,
   Text,
   Tooltip,
@@ -12,11 +13,12 @@ import {
   Suspense,
   useEffect,
   useState,
-  use,
   useRef,
   useImperativeHandle,
   type Ref,
-  useMemo,
+  createContext,
+  useContext,
+  type ReactNode,
 } from "react";
 import {
   Await,
@@ -43,6 +45,75 @@ import type { Board, Standup, StandupForm, User } from "types";
 
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
+import { Maximize2Icon, Minimize2Icon } from "lucide-react";
+
+interface CurrentUserStandupCardContextType {
+  isExpanded: boolean;
+  toggleExpansion: () => void;
+  setIsExpanded: (expanded: boolean) => void;
+}
+
+const CurrentUserStandupCardContext =
+  createContext<CurrentUserStandupCardContextType | null>(null);
+
+function useCurrentUserStandupCard() {
+  const context = useContext(CurrentUserStandupCardContext);
+  if (!context) {
+    throw new Error(
+      "useCurrentUserStandupCard must be used within a CurrentUserStandupCardProvider"
+    );
+  }
+  return context;
+}
+
+interface CurrentUserStandupCardProviderProps {
+  children: ReactNode;
+  defaultExpanded?: boolean;
+}
+
+function CurrentUserStandupCardProvider({
+  children,
+  defaultExpanded = false,
+}: CurrentUserStandupCardProviderProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  const toggleExpansion = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
+  return (
+    <CurrentUserStandupCardContext.Provider
+      value={{
+        isExpanded,
+        toggleExpansion,
+        setIsExpanded,
+      }}
+    >
+      {children}
+    </CurrentUserStandupCardContext.Provider>
+  );
+}
+
+function ExpansionButton() {
+  const { isExpanded, toggleExpansion } = useCurrentUserStandupCard();
+
+  return (
+    <Tooltip content={isExpanded ? "Minimize" : "Expand"}>
+      <IconButton
+        variant="ghost"
+        onClick={toggleExpansion}
+        aria-label={isExpanded ? "Minimize card" : "Expand card"}
+        className="opacity-0! group-hover:opacity-100! transition-opacity! duration-0!"
+      >
+        {isExpanded ? (
+          <Minimize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
+        ) : (
+          <Maximize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
+}
 
 export function ContentSkeleton() {
   return (
@@ -211,29 +282,33 @@ function Content({
 
   return (
     <Flex direction="column" gap="5">
-      {/* TODO: hide user name if there's only one collaborator */}
-      <Tooltip
-        content={
-          <Flex direction="column" gap="1">
-            <Text size="2">{currentUser?.primary_email}</Text>
-            {currentUserTodayStandup?.updatedAt && (
-              <Text size="2">
-                Last saved at{" "}
-                {DateTime.fromISO(currentUserTodayStandup.updatedAt, {
-                  zone: "utc",
-                })
-                  .setZone(boardTimezone)
-                  .toLocaleString(DateTime.DATETIME_MED)}{" "}
-                ({boardTimezone})
-              </Text>
-            )}
-          </Flex>
-        }
-      >
-        <Text size="4" weight="bold">
-          {currentUser?.primary_email.split("@")[0]}
-        </Text>
-      </Tooltip>
+      <Flex justify="between">
+        <Tooltip
+          content={
+            <Flex direction="column" gap="1">
+              <Text size="2">{currentUser?.primary_email}</Text>
+              {currentUserTodayStandup?.updatedAt && (
+                <Text size="2">
+                  Last saved at{" "}
+                  {DateTime.fromISO(currentUserTodayStandup.updatedAt, {
+                    zone: "utc",
+                  })
+                    .setZone(boardTimezone)
+                    .toLocaleString(DateTime.DATETIME_MED)}{" "}
+                  ({boardTimezone})
+                </Text>
+              )}
+            </Flex>
+          }
+        >
+          <Text size="4" weight="bold">
+            {currentUser?.primary_email.split("@")[0]}
+          </Text>
+        </Tooltip>
+        <Flex justify="end" align="center" gap="4">
+          <ExpansionButton />
+        </Flex>
+      </Flex>
       {isEditing && (
         <DynamicForm
           ref={dynamicFormRef}
@@ -348,30 +423,31 @@ function Resolver({
 
   return (
     <Suspense fallback={<ContentSkeleton />}>
-      <Await
-        resolve={useMemo(() => {
-          return Promise.all([
-            currentUserPromise,
-            boardPromise,
-            standupsPromise,
-            boardActiveStandupFormPromise,
-          ]);
-        }, [boardPromise, standupsPromise, boardActiveStandupFormPromise])}
-      >
-        {(data) => {
-          const [currentUser, board, standups, structure] = data;
+      <Await resolve={currentUserPromise}>
+        {(currentUser) => (
+          <Await resolve={boardPromise}>
+            {(board) => (
+              <Await resolve={standupsPromise}>
+                {(standups) => (
+                  <Await resolve={boardActiveStandupFormPromise}>
+                    {(structure) => {
+                      if (!board || !standups || !structure) {
+                        return <ContentSkeleton />;
+                      }
 
-          if (!board || !standups || !structure) {
-            return <ContentSkeleton />;
-          }
-
-          return children({
-            currentUser,
-            board,
-            standups,
-            structure,
-          });
-        }}
+                      return children({
+                        currentUser,
+                        board,
+                        standups,
+                        structure,
+                      });
+                    }}
+                  </Await>
+                )}
+              </Await>
+            )}
+          </Await>
+        )}
       </Await>
     </Suspense>
   );
@@ -379,15 +455,44 @@ function Resolver({
 
 export function TodayStandupNewSkeleton() {
   return (
-    <Card
+    <RadixCard
       tabIndex={0}
       size={{
         initial: "3",
         sm: "4",
       }}
+      className="group"
     >
       <ContentSkeleton />
-    </Card>
+    </RadixCard>
+  );
+}
+
+function Card({
+  children,
+  onKeyDown,
+}: {
+  children: React.ReactNode;
+  onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+}) {
+  const { isExpanded } = useCurrentUserStandupCard();
+
+  return (
+    <RadixCard
+      variant="surface"
+      tabIndex={0}
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+      onKeyDown={onKeyDown}
+      className="group"
+      style={{
+        gridColumn: isExpanded ? "span 2" : undefined,
+      }}
+    >
+      {children}
+    </RadixCard>
   );
 }
 
@@ -410,28 +515,23 @@ function CurrentUserStandupCard() {
   }
 
   return (
-    <Card
-      tabIndex={0}
-      size={{
-        initial: "3",
-        sm: "4",
-      }}
-      onKeyDown={handleKeyDown}
-    >
-      <Resolver ref={contentRef}>
-        {({ currentUser, board, standups, structure }) => {
-          return (
-            <Content
-              ref={contentRef}
-              currentUser={currentUser}
-              board={board}
-              standups={standups}
-              structure={structure}
-            />
-          );
-        }}
-      </Resolver>
-    </Card>
+    <CurrentUserStandupCardProvider>
+      <Card onKeyDown={handleKeyDown}>
+        <Resolver ref={contentRef}>
+          {({ currentUser, board, standups, structure }) => {
+            return (
+              <Content
+                ref={contentRef}
+                currentUser={currentUser}
+                board={board}
+                standups={standups}
+                structure={structure}
+              />
+            );
+          }}
+        </Resolver>
+      </Card>
+    </CurrentUserStandupCardProvider>
   );
 }
 

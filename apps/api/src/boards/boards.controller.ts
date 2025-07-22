@@ -63,10 +63,8 @@ export class BoardsController {
     const userId = request.userId;
     try {
       // NOTE: This is to update the last accessed board in user metadata
-      this.usersService.update(userId, {
-        client_read_only_metadata: {
-          lastAccessedBoardId: boardId,
-        },
+      this.usersService.updateClientReadOnlyMetadata(userId, {
+        lastAccessedBoardId: boardId,
       });
 
       return await this.boardsService.get(boardId);

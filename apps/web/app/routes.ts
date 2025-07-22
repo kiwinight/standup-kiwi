@@ -71,15 +71,19 @@ export default [
   ),
   route(
     "/boards/:boardId/collaborators/update",
-    "routes/update-board-collaborators/update-board-collaborators.tsx"
+    "routes/update-board-collaborators/update-board-collaborators.tsx" // TODO: rename to update-board-collaborators-route
   ),
   route(
     "/boards/:boardId/collaborators/delete",
-    "routes/delete-board-collaborator/delete-board-collaborator.tsx"
+    "routes/delete-board-collaborator/delete-board-collaborator.tsx" // TODO: rename to delete-board-collaborator-route
   ),
   route(
     "/accept-invitation",
     "routes/accept-invitation-route/accept-invitation-route.tsx"
+  ),
+  route(
+    "/update-current-user-metadata",
+    "routes/update-current-user-metadata-route/update-current-user-metadata-route.tsx"
   ),
   // TODO: Add delete session route - logout
   // route(
