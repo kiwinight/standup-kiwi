@@ -758,48 +758,42 @@ function Resolver({
 
   return (
     <Suspense fallback={fallbackUI}>
-      <Await
-        resolve={useMemo(() => {
-          return Promise.all([
-            currentUserPromise,
-            boardTimezonePromise,
-            standupsPromise,
-            standupFormsPromise,
-            collaboratorsPromise,
-          ]);
-        }, [
-          currentUserPromise,
-          boardTimezonePromise,
-          standupsPromise,
-          standupFormsPromise,
-          collaboratorsPromise,
-        ])}
-      >
-        {([
-          currentUser,
-          boardTimezone,
-          standups,
-          standupForms,
-          collaborators,
-        ]) => {
-          if (
-            !currentUser ||
-            !boardTimezone ||
-            !standups ||
-            !standupForms ||
-            !collaborators
-          ) {
-            return fallbackUI;
-          }
+      <Await resolve={currentUserPromise}>
+        {(currentUser) => (
+          <Await resolve={boardTimezonePromise}>
+            {(boardTimezone) => (
+              <Await resolve={standupsPromise}>
+                {(standups) => (
+                  <Await resolve={standupFormsPromise}>
+                    {(standupForms) => (
+                      <Await resolve={collaboratorsPromise}>
+                        {(collaborators) => {
+                          if (
+                            !currentUser ||
+                            !boardTimezone ||
+                            !standups ||
+                            !standupForms ||
+                            !collaborators
+                          ) {
+                            return fallbackUI;
+                          }
 
-          return children({
-            currentUser,
-            boardTimezone,
-            standups,
-            standupForms,
-            collaborators,
-          });
-        }}
+                          return children({
+                            currentUser,
+                            boardTimezone,
+                            standups,
+                            standupForms,
+                            collaborators,
+                          });
+                        }}
+                      </Await>
+                    )}
+                  </Await>
+                )}
+              </Await>
+            )}
+          </Await>
+        )}
       </Await>
     </Suspense>
   );

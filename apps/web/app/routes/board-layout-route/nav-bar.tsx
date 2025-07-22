@@ -1,6 +1,12 @@
 import { Suspense } from "react";
 import type { Route } from "./+types/board-layout-route";
-import { Await, Link, useLoaderData, useRouteLoaderData } from "react-router";
+import {
+  Await,
+  Link,
+  useFetcher,
+  useLoaderData,
+  useRouteLoaderData,
+} from "react-router";
 import { useParams } from "react-router";
 import { ListBulletIcon, PersonIcon } from "@radix-ui/react-icons";
 import {
@@ -13,10 +19,10 @@ import {
   IconButton,
 } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
-import { useUserAppearanceSetting } from "~/context/UserAppearanceSettingContext";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
 import { Palette, SquarePlus } from "lucide-react";
+import { useCurrentUserAppearanceSetting } from "~/hooks/use-current-user-appearance-setting";
 
 function NavBar() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
@@ -28,7 +34,8 @@ function NavBar() {
 
   const { boardId } = useParams();
 
-  const { appearance, setAppearance } = useUserAppearanceSetting();
+  const appearance = useCurrentUserAppearanceSetting();
+  const fetcher = useFetcher({ key: "update-current-user-metadata" });
 
   return (
     <Flex
@@ -40,7 +47,7 @@ function NavBar() {
     >
       <Flex gap="3" align="center">
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
+          <DropdownMenu.Trigger suppressHydrationWarning>
             <IconButton variant="surface" size="2" radius="large">
               <ListBulletIcon fontSize={24} width={16} height={16} />
             </IconButton>
@@ -162,7 +169,21 @@ function NavBar() {
                 <DropdownMenu.CheckboxItem
                   checked={appearance === "light"}
                   onCheckedChange={() => {
-                    setAppearance("light");
+                    // setAppearance("light");
+                    fetcher.submit(
+                      {
+                        metadata: {
+                          settings: {
+                            appearance: "light",
+                          },
+                        },
+                      },
+                      {
+                        encType: "application/json",
+                        method: "POST",
+                        action: "/update-current-user-metadata",
+                      }
+                    );
                   }}
                 >
                   Light
@@ -170,7 +191,21 @@ function NavBar() {
                 <DropdownMenu.CheckboxItem
                   checked={appearance === "dark"}
                   onCheckedChange={() => {
-                    setAppearance("dark");
+                    // setAppearance("dark");
+                    fetcher.submit(
+                      {
+                        metadata: {
+                          settings: {
+                            appearance: "dark",
+                          },
+                        },
+                      },
+                      {
+                        encType: "application/json",
+                        method: "POST",
+                        action: "/update-current-user-metadata",
+                      }
+                    );
                   }}
                 >
                   Dark
@@ -178,7 +213,21 @@ function NavBar() {
                 <DropdownMenu.CheckboxItem
                   checked={appearance === "inherit"}
                   onCheckedChange={() => {
-                    setAppearance("inherit");
+                    // setAppearance("inherit");
+                    fetcher.submit(
+                      {
+                        metadata: {
+                          settings: {
+                            appearance: "inherit",
+                          },
+                        },
+                      },
+                      {
+                        encType: "application/json",
+                        method: "POST",
+                        action: "/update-current-user-metadata",
+                      }
+                    );
                   }}
                 >
                   System

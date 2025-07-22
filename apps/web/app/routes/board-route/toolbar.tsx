@@ -193,7 +193,7 @@ function Toolbar({}: Props) {
         </Button>
 
         <Popover.Root>
-          <Popover.Trigger>
+          <Popover.Trigger suppressHydrationWarning>
             <Button variant="ghost" highContrast>
               <MixerHorizontalIcon />
               View

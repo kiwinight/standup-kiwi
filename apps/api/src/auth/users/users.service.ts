@@ -1,8 +1,62 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { boards, usersToBoards, Board } from '../../libs/db/schema';
 import { eq } from 'drizzle-orm';
-import { ListUser, User } from '../auth-service.types';
+import { ListUser, User, ClientReadOnlyMetadata } from '../auth-service.types';
 import { Database, DATABASE_TOKEN } from '../../db/db.module';
+
+/**
+ * Recursively deep merge two objects
+ */
+function deepMerge(target: any, source: any): any {
+  if (source === null || source === undefined) {
+    return target;
+  }
+
+  if (target === null || target === undefined) {
+    return source;
+  }
+
+  // If source is not an object, return it directly
+  if (typeof source !== 'object' || Array.isArray(source)) {
+    return source;
+  }
+
+  const result = { ...target };
+
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      const targetValue = result[key];
+      const sourceValue = source[key];
+
+      if (
+        targetValue &&
+        sourceValue &&
+        typeof targetValue === 'object' &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(targetValue) &&
+        !Array.isArray(sourceValue)
+      ) {
+        // Recursively merge nested objects
+        result[key] = deepMerge(targetValue, sourceValue);
+      } else {
+        // Replace with source value
+        result[key] = sourceValue;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Deep merge utility function for merging ClientReadOnlyMetadata objects
+ */
+function mergeMetadata(
+  target: ClientReadOnlyMetadata | null,
+  source: Partial<ClientReadOnlyMetadata>,
+): ClientReadOnlyMetadata {
+  return deepMerge(target || {}, source) as ClientReadOnlyMetadata;
+}
 
 @Injectable()
 export class UsersService {
@@ -107,6 +161,25 @@ export class UsersService {
     const updatedUser: User = await response.json(); // TODO: handle error case
 
     return updatedUser;
+  }
+
+  async updateClientReadOnlyMetadata(
+    userId: string,
+    updates: Partial<ClientReadOnlyMetadata>,
+  ) {
+    // Get current user data
+    const currentUser = await this.get(userId);
+
+    // Deep merge with existing client_read_only_metadata
+    const updatedMetadata = mergeMetadata(
+      currentUser.client_read_only_metadata,
+      updates,
+    );
+
+    // Call Stack Auth API to update user's client_read_only_metadata field
+    return await this.update(userId, {
+      client_read_only_metadata: updatedMetadata,
+    });
   }
 
   async getBoardsOfUser(

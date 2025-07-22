@@ -16,7 +16,6 @@ import {
   useRef,
   useImperativeHandle,
   type Ref,
-  useMemo,
   createContext,
   useContext,
   type ReactNode,
@@ -424,30 +423,31 @@ function Resolver({
 
   return (
     <Suspense fallback={<ContentSkeleton />}>
-      <Await
-        resolve={useMemo(() => {
-          return Promise.all([
-            currentUserPromise,
-            boardPromise,
-            standupsPromise,
-            boardActiveStandupFormPromise,
-          ]);
-        }, [boardPromise, standupsPromise, boardActiveStandupFormPromise])}
-      >
-        {(data) => {
-          const [currentUser, board, standups, structure] = data;
+      <Await resolve={currentUserPromise}>
+        {(currentUser) => (
+          <Await resolve={boardPromise}>
+            {(board) => (
+              <Await resolve={standupsPromise}>
+                {(standups) => (
+                  <Await resolve={boardActiveStandupFormPromise}>
+                    {(structure) => {
+                      if (!board || !standups || !structure) {
+                        return <ContentSkeleton />;
+                      }
 
-          if (!board || !standups || !structure) {
-            return <ContentSkeleton />;
-          }
-
-          return children({
-            currentUser,
-            board,
-            standups,
-            structure,
-          });
-        }}
+                      return children({
+                        currentUser,
+                        board,
+                        standups,
+                        structure,
+                      });
+                    }}
+                  </Await>
+                )}
+              </Await>
+            )}
+          </Await>
+        )}
       </Await>
     </Suspense>
   );
