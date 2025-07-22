@@ -186,7 +186,6 @@ function StandupCard({
 }
 
 function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
-  // TODO: apply settings to the skeleton
   const card = (
     <Card
       variant="surface"
@@ -260,8 +259,9 @@ function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
   );
 }
 
-// TODO: apply settings to the skeleton
 function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
+  const { boardId } = useParams();
+  const { cardSize } = useBoardGridViewSettings(parseInt(boardId!, 10));
   const isSharedBoard = collaboratorsCount > 1;
 
   const card = (
@@ -324,10 +324,10 @@ function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
             columns={{
               initial: "1",
               sm: `repeat(auto-fill, minmax(${
-                isSharedBoard ? getCardWidth("medium") : "100%"
+                isSharedBoard ? getCardWidth(cardSize) : "100%"
               }, 1fr))`,
             }}
-            gap="5"
+            gap="4"
           >
             {index === 0 && <TodayStandupNewSkeleton />}
             {index !== 0 && (
@@ -742,7 +742,9 @@ function Resolver({
   }) => React.ReactNode;
 }) {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const { boardId } = useParams();
   const { collaboratorsCount } = useLoaderData<typeof loader>();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
   const {
@@ -752,14 +754,13 @@ function Resolver({
     boardTimezonePromise,
   } = useLoaderData<typeof loader>();
 
-  // TODO: Work on the fallback ui after saving the view settings on the server side
+  // Show skeleton based on user's actual view preference
   const fallbackUI = useMemo(() => {
-    if (collaboratorsCount === 0) {
+    if (viewType === "feed") {
       return <FeedSkeleton collaboratorsCount={collaboratorsCount ?? 0} />;
     }
-
     return <GridSkeleton collaboratorsCount={collaboratorsCount ?? 0} />;
-  }, [collaboratorsCount]);
+  }, [viewType, collaboratorsCount]);
 
   return (
     <Suspense fallback={fallbackUI}>
