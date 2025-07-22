@@ -224,7 +224,7 @@ function Content({
   }
 
   useEffect(() => {
-    if (createStandupFetcher.data) {
+    if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
       const { error } = createStandupFetcher.data;
       if (error) {
         toast.error(error);
@@ -234,7 +234,7 @@ function Content({
         toast.success("Your standup has been saved");
       }
     }
-  }, [createStandupFetcher.data]);
+  }, [createStandupFetcher.state, createStandupFetcher.data]);
 
   if (updateStandupFetcher.data) {
     const standup = updateStandupFetcher.data?.standup;
@@ -258,7 +258,7 @@ function Content({
   }
 
   useEffect(() => {
-    if (updateStandupFetcher.data) {
+    if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
       const error = updateStandupFetcher.data.error;
       if (error) {
         toast.error(error);
@@ -268,7 +268,7 @@ function Content({
         toast.success("Your standup has been saved");
       }
     }
-  }, [updateStandupFetcher.data]);
+  }, [updateStandupFetcher.state, updateStandupFetcher.data]);
 
   const [isEditing, setIsEditing] = useState(!Boolean(currentUserTodayStandup));
 
