@@ -17,17 +17,11 @@ import { Await, data, useLoaderData, useParams } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 import View from "./view";
 import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
-import {
-  useGridViewSettings,
-  GridViewSettingsProvider,
-  type GridWidth,
-} from "~/context/GridViewSettingsContext";
-import {
-  ViewSettingsProvider,
-  useViewSettings,
-} from "~/context/ViewSettingsContext";
+import { type GridWidth } from "~/hooks/use-board-grid-view-settings";
+import { useBoardGridViewSettings } from "~/hooks/use-board-grid-view-settings";
 
-// Helper function to map layout settings to maxWidth values
+import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
+
 function getContainerMaxWidth(width: GridWidth): string {
   switch (width) {
     case "medium":
@@ -244,18 +238,19 @@ function BoardExistanceGuard() {
 
 function ViewWidthSettingContainer({
   children,
+  boardId,
 }: {
   children: React.ReactNode;
+  boardId: number;
 }) {
-  const { viewSettings: viewTypeSettings } = useViewSettings();
-  const { viewSettings: gridSettings } = useGridViewSettings();
+  const { viewType } = useBoardViewSettings(boardId);
+  const { width } = useBoardGridViewSettings(boardId);
 
-  // For feed view, use a narrow readable width
-  // For grid view, use the grid width settings
-  const maxWidth =
-    viewTypeSettings.viewType === "feed"
-      ? "736px"
-      : getContainerMaxWidth(gridSettings.width);
+  let maxWidth = "736px"; // NOTE: 768px - 16px (padding) - 16px (padding)
+
+  if (viewType === "grid") {
+    maxWidth = getContainerMaxWidth(width);
+  }
 
   return (
     <Container px="4" py="7" maxWidth={maxWidth}>
@@ -276,22 +271,12 @@ export default function BoardRoute({}: Route.ComponentProps) {
   return (
     <>
       <BoardExistanceGuard />
-      <ViewSettingsProvider
-        boardId={boardId}
-        collaboratorsCount={collaboratorsCount}
-      >
-        <GridViewSettingsProvider
-          boardId={boardId}
-          collaboratorsCount={collaboratorsCount}
-        >
-          <ViewWidthSettingContainer>
-            <Flex direction="column" gap="7">
-              <Toolbar />
-              <View />
-            </Flex>
-          </ViewWidthSettingContainer>
-        </GridViewSettingsProvider>
-      </ViewSettingsProvider>
+      <ViewWidthSettingContainer boardId={boardId}>
+        <Flex direction="column" gap="7">
+          <Toolbar />
+          <View />
+        </Flex>
+      </ViewWidthSettingContainer>
     </>
   );
 }

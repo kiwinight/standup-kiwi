@@ -5,10 +5,13 @@ import {
   UseGuards,
   Query,
   InternalServerErrorException,
+  Patch,
+  Body,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedRequest, AuthGuard } from '../guards/auth.guard';
 import { Board } from '../../libs/db/schema';
+import { UpdateMyMetadataDto } from './dto/update-my-metadata.dto';
 
 @Controller('auth/users')
 export class UsersController {
@@ -27,6 +30,24 @@ export class UsersController {
     const userId = request.userId;
     // TODO: handle error case
     return this.usersService.getBoardsOfUser(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('me/metadata')
+  async updateMyMetadata(
+    @Req() request: AuthenticatedRequest,
+    @Body() metadata: UpdateMyMetadataDto,
+  ) {
+    const userId = request.userId;
+    try {
+      return await this.usersService.updateClientReadOnlyMetadata(
+        userId,
+        metadata,
+      );
+    } catch (error) {
+      console.error('Error updating client metadata:', error);
+      throw new InternalServerErrorException('Failed to update user metadata');
+    }
   }
 
   @UseGuards(AuthGuard)

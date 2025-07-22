@@ -1,8 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import {
-  useUserAppearanceSetting,
-  type Appearance,
-} from "./UserAppearanceSettingContext";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import { useCurrentUserAppearanceSetting } from "~/hooks/use-current-user-appearance-setting";
+import type { Appearance } from "types";
 
 export type ColorScheme = "light" | "dark";
 
@@ -23,7 +21,7 @@ function useCleanupFlickerPrevention(colorScheme: ColorScheme | null) {
   useEffect(() => {
     // Ensure we're on the client side before accessing document
     if (typeof window === "undefined") return;
-    
+
     if (colorScheme) {
       document.documentElement.removeAttribute("class");
     }
@@ -40,7 +38,7 @@ function useDetermineColorScheme(
   useEffect(() => {
     // Ensure we're on the client side before accessing window
     if (typeof window === "undefined") return;
-    
+
     if (appearance === "inherit") {
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
@@ -63,7 +61,7 @@ function useHandleSystemColorSchemeChange(
   useEffect(() => {
     // Ensure we're on the client side before accessing window
     if (typeof window === "undefined") return;
-    
+
     if (appearance === "inherit") {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -83,7 +81,7 @@ function useHandleSystemColorSchemeChange(
 export const ColorSchemeProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { appearance } = useUserAppearanceSetting();
+  const appearance = useCurrentUserAppearanceSetting();
 
   const [colorScheme, setColorScheme] = useState<
     typeof defaultValue.colorScheme
@@ -114,14 +112,21 @@ export function useColorScheme() {
   return context;
 }
 
-export const colorSchemeFlickerPrevention = `
+/**
+ * This is used to prevent the flicker of the color scheme on the page load
+ */
+export const colorSchemeFlickerPrevention = (
+  userAppearanceSetting: Appearance | null
+) => `
 (function () {
   try {
     var classList = document.documentElement.classList;
 
     classList.remove("dark");
 
-    var userAppearanceSetting = localStorage.getItem("user-appearance-setting") || "inherit";
+    var userAppearanceSetting = ${
+      userAppearanceSetting ? `"${userAppearanceSetting}"` : `"inherit"`
+    };
 
     if (userAppearanceSetting === "inherit") {
       var darkModeQuery = "(prefers-color-scheme: dark)",

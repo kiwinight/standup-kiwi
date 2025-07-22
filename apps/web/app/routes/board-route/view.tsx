@@ -1,10 +1,21 @@
-import { Await, useLoaderData, useRouteLoaderData } from "react-router";
+import {
+  Await,
+  useLoaderData,
+  useRouteLoaderData,
+  useParams,
+} from "react-router";
 import type { loader } from "./board-route";
 import { Suspense, useMemo } from "react";
 import {
+  Avatar,
   Box,
+  Button,
+  Callout,
   Card,
+  ContextMenu,
   Flex,
+  IconButton,
+  Popover,
   Grid as RadixGrid,
   Skeleton,
   Text,
@@ -22,12 +33,12 @@ import CurrentUserStandupCard, {
 } from "./current-user-standup-card";
 import type { loader as rootLoader } from "~/root";
 import {
-  useGridViewSettings,
+  useBoardGridViewSettings,
   type CardSize,
-} from "~/context/GridViewSettingsContext";
-import { useViewSettings } from "~/context/ViewSettingsContext";
+} from "~/hooks/use-board-grid-view-settings";
+import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
+import { Cross2Icon, InfoCircledIcon } from "@radix-ui/react-icons";
 
-// Helper function to map card sizes to pixel values
 function getCardWidth(cardSize: CardSize): string {
   switch (cardSize) {
     case "small":
@@ -39,6 +50,139 @@ function getCardWidth(cardSize: CardSize): string {
     default:
       return "384px";
   }
+}
+
+// NOTE: By default, the standups are grouped by date. In the future, we can group by something else with a different option.
+function useGroupedStandups({
+  standups,
+  timezone,
+}: {
+  standups: Standup[];
+  timezone: string;
+}) {
+  const today = DateTime.now().setZone(timezone).startOf("day");
+
+  const groupedStandups = standups.reduce<Map<string, Standup[]>>(
+    (grouped, standup) => {
+      const standupDate = DateTime.fromISO(standup.createdAt, { zone: "utc" })
+        .setZone(timezone)
+        .startOf("day");
+
+      const key = standupDate.equals(today) ? "today" : standupDate.toISODate();
+
+      if (!key) {
+        return grouped;
+      }
+
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+      }
+
+      grouped.get(key)?.push(standup);
+
+      return grouped;
+    },
+    new Map<string, Standup[]>()
+  );
+
+  if (!groupedStandups.has("today")) {
+    groupedStandups.set("today", []);
+  }
+
+  const sortedGroups = Array.from(groupedStandups.entries()).sort((a, b) => {
+    if (a[0] === "today") return -1;
+    if (b[0] === "today") return 1;
+
+    return DateTime.fromISO(b[0], { zone: "utc" })
+      .setZone(timezone)
+      .diff(DateTime.fromISO(a[0], { zone: "utc" }).setZone(timezone))
+      .toMillis();
+  });
+
+  return {
+    groups: sortedGroups,
+  };
+}
+
+function StandupCard({
+  standup,
+  standupForm,
+  user,
+  boardTimezone,
+  style,
+}: {
+  standup: Standup;
+  standupForm: StandupForm | undefined;
+  user: User;
+  boardTimezone: Board["timezone"];
+  style?: React.CSSProperties;
+}) {
+  const { appearance } = useThemeContext();
+
+  const schema = validateDynamicFormSchema(standupForm?.schema);
+
+  if (!schema) {
+    return null;
+  }
+
+  return (
+    <Card
+      variant="surface"
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+      style={style}
+    >
+      <Flex direction="column" gap="5" align="start">
+        <Tooltip
+          content={
+            <Flex direction="column" gap="1">
+              <Text size="2">{user.primary_email}</Text>
+              <Text size="2">
+                Last saved at{" "}
+                {DateTime.fromISO(standup.createdAt, {
+                  zone: "utc",
+                })
+                  .setZone(boardTimezone)
+                  .toLocaleString(DateTime.DATETIME_MED)}{" "}
+                ({boardTimezone})
+              </Text>
+            </Flex>
+          }
+        >
+          <Text size="4" weight="bold">
+            {user.primary_email.split("@")[0]}
+          </Text>
+        </Tooltip>
+        {schema.fields.map((field) => {
+          const value = (
+            standup.formData as Standup["formData"] as DynamicFormValues
+          )[field.name];
+
+          if (!value) {
+            return null;
+          }
+
+          const html = parseMarkdownToHtml(value);
+
+          return (
+            <Flex key={field.name} direction="column" gap="2">
+              <Text size="2" weight="medium">
+                {field.label}
+              </Text>
+              <Box
+                className={`prose prose-sm ${
+                  appearance === "dark" ? "dark:prose-invert" : ""
+                }`}
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </Flex>
+          );
+        })}
+      </Flex>
+    </Card>
+  );
 }
 
 function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
@@ -116,6 +260,8 @@ function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
 }
 
 function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
+  const { boardId } = useParams();
+  const { cardSize } = useBoardGridViewSettings(parseInt(boardId!, 10));
   const isSharedBoard = collaboratorsCount > 1;
 
   const card = (
@@ -178,10 +324,10 @@ function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
             columns={{
               initial: "1",
               sm: `repeat(auto-fill, minmax(${
-                isSharedBoard ? getCardWidth("medium") : "100%"
+                isSharedBoard ? getCardWidth(cardSize) : "100%"
               }, 1fr))`,
             }}
-            gap="5"
+            gap="4"
           >
             {index === 0 && <TodayStandupNewSkeleton />}
             {index !== 0 && (
@@ -222,86 +368,34 @@ function Feed({
 }) {
   const { appearance } = useThemeContext();
 
-  const today = DateTime.now().setZone(boardTimezone).startOf("day");
-
-  // Group all standups by date
-  const groupedStandups = standups.reduce<Map<string, Standup[]>>(
-    (grouped, standup) => {
-      const standupDate = DateTime.fromISO(standup.createdAt, { zone: "utc" })
-        .setZone(boardTimezone)
-        .startOf("day");
-
-      const key = standupDate.equals(today) ? "today" : standupDate.toISODate();
-
-      if (!key) {
-        return grouped;
-      }
-
-      if (!grouped.has(key)) {
-        grouped.set(key, []);
-      }
-
-      grouped.get(key)?.push(standup);
-
-      return grouped;
-    },
-    new Map<string, Standup[]>()
-  );
-
-  // Always ensure "today" group exists when there's a current user
-  if (currentUser && !groupedStandups.has("today")) {
-    groupedStandups.set("today", []);
-  }
-
-  // Sort groups with today first, then by date descending
-  const sortedGroups = Array.from(groupedStandups.entries()).sort((a, b) => {
-    if (a[0] === "today") return -1;
-    if (b[0] === "today") return 1;
-
-    return DateTime.fromISO(b[0], { zone: "utc" })
-      .setZone(boardTimezone)
-      .diff(DateTime.fromISO(a[0], { zone: "utc" }).setZone(boardTimezone))
-      .toMillis();
+  const { groups } = useGroupedStandups({
+    standups,
+    timezone: boardTimezone,
   });
 
-  if (sortedGroups.length === 0) {
-    return (
-      <Flex direction="column" gap="5">
-        <Box>
-          <Text size="3" weight="bold">
-            Standups
-          </Text>
-        </Box>
-        <Card
-          size={{
-            initial: "3",
-            sm: "4",
-          }}
-        >
-          <Flex
-            direction="column"
-            justify="center"
-            align="center"
-            gap="2"
-            py="128px"
-            maxWidth="360px"
-            mx="auto"
-          >
-            <Text weight="medium" size="2">
-              No standups yet
-            </Text>
-            <Text size="2" align="center">
-              Start by submitting your first standup update.
-            </Text>
-          </Flex>
-        </Card>
-      </Flex>
-    );
-  }
+  const isEmptyBoard = standups.length === 0;
+
+  const standupFormsMap = useMemo(
+    () => new Map(standupForms.map((form) => [form.id, form])),
+    [standupForms]
+  );
+
+  const usersMap = useMemo(
+    () =>
+      new Map(
+        collaborators.map((collaborator) => [
+          collaborator.userId,
+          collaborator.user,
+        ])
+      ),
+    [collaborators]
+  );
+
+  const nontodayGroups = groups.filter(([dateKey]) => dateKey !== "today");
 
   return (
     <>
-      {sortedGroups.map(([dateKey, standups]) => {
+      {groups.map(([dateKey, groupStandups]) => {
         const isToday = dateKey === "today";
         const dateLabel = isToday
           ? "Today"
@@ -309,10 +403,8 @@ function Feed({
               .setZone(boardTimezone)
               .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY);
 
-        let otherStandups = standups;
-
         if (isToday && currentUser) {
-          otherStandups = standups.filter(
+          groupStandups = groupStandups.filter(
             (standup) => standup.userId !== currentUser.id
           );
         }
@@ -324,92 +416,99 @@ function Feed({
             </Text>
 
             <Flex direction="column" gap="4">
-              {/* For today, show the TodayStandupNew component first */}
-              {isToday && currentUser && currentUserTodayStandupCard}
+              {/* NOTE: This was UI prototyping */}
+              {/* {isToday &&
+                groupStandups.length === 0 &&
+                collaborators.length > 1 &&
+                groupStandups.length === 0 && (
+                  <Callout.Root
+                    size="2"
+                    variant="surface"
+                    style={{
+                      gridRow: "1",
+                      gridColumn: "span 1",
+                      backgroundColor: "var(--color-panel-translucent)",
+                      ...(appearance === "dark"
+                        ? {
+                            boxShadow: "inset 0 0 0 1px var(--accent-a4)",
+                          }
+                        : {}),
+                    }}
+                  >
+                    <Callout.Icon>
+                      <InfoCircledIcon />
+                    </Callout.Icon>
+                    <Callout.Text>
+                      Be the first to share an update for today.
+                    </Callout.Text>
+                  </Callout.Root>
+                )} */}
+
+              {isToday && currentUser && <>{currentUserTodayStandupCard}</>}
 
               {/* Show all other standups in single column */}
-              {otherStandups.map((standup) => {
-                const form = standupForms.find(
-                  (form) => form.id === standup.formId
-                );
-
-                const schema = validateDynamicFormSchema(form?.schema);
-
-                if (!schema) {
-                  return null;
-                }
-
-                const user = collaborators.find(
-                  (collaborator) => collaborator.userId === standup.userId
-                )?.user;
+              {groupStandups.map((standup) => {
+                const user = usersMap.get(standup.userId);
 
                 if (!user) {
                   return null;
                 }
 
                 return (
-                  <Card
+                  <StandupCard
                     key={standup.id}
-                    variant="surface"
-                    size={{
-                      initial: "3",
-                      sm: "4",
-                    }}
-                  >
-                    <Flex direction="column" gap="5" align="start">
-                      <Tooltip
-                        content={
-                          <Flex direction="column" gap="1">
-                            <Text size="2">{user.primary_email}</Text>
-                            <Text size="2">
-                              Last saved at{" "}
-                              {DateTime.fromISO(standup.createdAt, {
-                                zone: "utc",
-                              })
-                                .setZone(boardTimezone)
-                                .toLocaleString(DateTime.DATETIME_MED)}{" "}
-                              ({boardTimezone})
-                            </Text>
-                          </Flex>
-                        }
-                      >
-                        <Text size="4" weight="bold">
-                          {user.primary_email.split("@")[0]}
-                        </Text>
-                      </Tooltip>
-                      {schema.fields.map((field) => {
-                        const value = (
-                          standup.formData as Standup["formData"] as DynamicFormValues
-                        )[field.name];
-
-                        if (!value) {
-                          return null;
-                        }
-
-                        const html = parseMarkdownToHtml(value);
-
-                        return (
-                          <Flex key={field.name} direction="column" gap="2">
-                            <Text size="2" weight="medium">
-                              {field.label}
-                            </Text>
-                            <Box
-                              className={`prose prose-sm ${
-                                appearance === "dark" ? "dark:prose-invert" : ""
-                              }`}
-                              dangerouslySetInnerHTML={{ __html: html }}
-                            />
-                          </Flex>
-                        );
-                      })}
-                    </Flex>
-                  </Card>
+                    standup={standup}
+                    standupForm={standupFormsMap.get(standup.formId)}
+                    user={user}
+                    boardTimezone={boardTimezone}
+                  />
                 );
               })}
             </Flex>
           </Flex>
         );
       })}
+      {/* TODO: UI experiment */}
+      {/* {isEmptyBoard && (
+        <Flex direction="column" gap="5">
+          <Box>
+            <Text size="3" weight="bold">
+              Past standups
+            </Text>
+          </Box>
+          <Flex direction="column" gap="4">
+            <Flex
+              style={{
+                border:
+                  appearance === "dark"
+                    ? "1px solid var(--accent-a4)"
+                    : "1px solid var(--accent-a6)",
+                backgroundColor: "var(--color-panel-translucent)",
+                borderRadius: "var(--radius-3)",
+              }}
+              py="240px"
+              gridColumn="1 / -1"
+            >
+              <Flex
+                direction="column"
+                align="center"
+                justify="center"
+                gap="2"
+                maxWidth="360px"
+                mx="auto"
+              >
+                <Text className="font-semibold" size="2">
+                  No past standups yet
+                </Text>
+                <Text size="2" align="center" color="gray">
+                  Start by submitting standup updates. This board's past
+                  standups will appear in this area.
+                </Text>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+      )} */}
     </>
   );
 }
@@ -430,205 +529,203 @@ function Grid({
   currentUser: User | null;
 }) {
   const { appearance } = useThemeContext();
-  const { viewSettings: gridSettings } = useGridViewSettings();
+  const { boardId } = useParams();
+  const { cardSize } = useBoardGridViewSettings(parseInt(boardId!, 10));
 
-  const today = DateTime.now().setZone(boardTimezone).startOf("day");
+  const isEmptyBoard = standups.length === 0;
 
-  // Group all standups by date
-  const groupedStandups = standups.reduce<Map<string, Standup[]>>(
-    (grouped, standup) => {
-      const standupDate = DateTime.fromISO(standup.createdAt, { zone: "utc" })
-        .setZone(boardTimezone)
-        .startOf("day");
-
-      const key = standupDate.equals(today) ? "today" : standupDate.toISODate();
-
-      if (!key) {
-        return grouped;
-      }
-
-      if (!grouped.has(key)) {
-        grouped.set(key, []);
-      }
-
-      grouped.get(key)?.push(standup);
-
-      return grouped;
-    },
-    new Map<string, Standup[]>()
-  );
-
-  // Always ensure "today" group exists when there's a current user
-  if (currentUser && !groupedStandups.has("today")) {
-    groupedStandups.set("today", []);
-  }
-
-  // Sort groups with today first, then by date descending
-  const sortedGroups = Array.from(groupedStandups.entries()).sort((a, b) => {
-    if (a[0] === "today") return -1;
-    if (b[0] === "today") return 1;
-
-    return DateTime.fromISO(b[0], { zone: "utc" })
-      .setZone(boardTimezone)
-      .diff(DateTime.fromISO(a[0], { zone: "utc" }).setZone(boardTimezone))
-      .toMillis();
+  const { groups } = useGroupedStandups({
+    standups,
+    timezone: boardTimezone,
   });
 
-  if (sortedGroups.length === 0) {
-    return (
-      <Flex direction="column" gap="5">
-        <Box>
-          <Text size="3" weight="bold">
-            Standups
-          </Text>
-        </Box>
-        <Card
-          size={{
-            initial: "3",
-            sm: "4",
-          }}
-        >
-          <Flex
-            direction="column"
-            justify="center"
-            align="center"
-            gap="2"
-            py="128px"
-            maxWidth="360px"
-            mx="auto"
-          >
-            <Text weight="medium" size="2">
-              No standups yet
-            </Text>
-            <Text size="2" align="center">
-              Start by submitting your first standup update.
-            </Text>
-          </Flex>
-        </Card>
-      </Flex>
-    );
-  }
+  const standupFormsMap = useMemo(
+    () => new Map(standupForms.map((form) => [form.id, form])),
+    [standupForms]
+  );
+
+  const usersMap = useMemo(
+    () =>
+      new Map(
+        collaborators.map((collaborator) => [
+          collaborator.userId,
+          collaborator.user,
+        ])
+      ),
+    [collaborators]
+  );
+
+  const todayGroupStandups =
+    groups.find(([dateKey]) => dateKey === "today")?.[1] ?? [];
+  const nontodayGroups = groups.filter(([dateKey]) => dateKey !== "today");
+
+  const showNoPastStandupsPlaceholder =
+    todayGroupStandups.length === 0 && nontodayGroups.length === 0;
 
   return (
     <>
-      {sortedGroups.map(([dateKey, standups]) => {
+      {groups.map(([dateKey, groupStandups]) => {
         const isToday = dateKey === "today";
+
         const dateLabel = isToday
           ? "Today"
           : DateTime.fromISO(dateKey, { zone: "utc" })
               .setZone(boardTimezone)
               .toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY);
 
-        let otherStandups = standups;
-
         if (isToday && currentUser) {
-          otherStandups = standups.filter(
+          groupStandups = groupStandups.filter(
             (standup) => standup.userId !== currentUser.id
           );
         }
 
+        const showCalloutForNoStandupsToday =
+          isToday &&
+          isEmptyBoard &&
+          collaborators.length > 1 &&
+          groupStandups.length === 0;
+
         return (
           <Flex direction="column" gap="5" key={dateKey}>
-            <Text size="3" weight="bold">
-              {dateLabel}
-            </Text>
+            <Flex align="center" gap="2">
+              <Text size="3" weight="bold">
+                {dateLabel}
+              </Text>
+              {/* TODO: Display submitted users for today */}
+              {/* {isToday && (
+                <Flex align="center" gap="">
+                  {groupStandups.map((standup) => {
+                    const user = collaborators.find(
+                      (collaborator) => collaborator.userId === standup.userId
+                    )?.user;
+
+                    if (!user) {
+                      return null;
+                    }
+
+                    return (
+                      <Tooltip content={user.primary_email}>
+                        <Avatar
+                          radius="full"
+                          fallback={user?.primary_email.split("@")[0]}
+                          size="1"
+                        />
+                      </Tooltip>
+                    );
+                  })}
+                </Flex>
+              )} */}
+            </Flex>
 
             <RadixGrid
               columns={{
                 initial: "1",
-                sm: `repeat(auto-fill, minmax(${getCardWidth(
-                  gridSettings.cardSize
-                )}, 1fr))`,
+                sm: `repeat(auto-fill, minmax(${getCardWidth(cardSize)}, 1fr))`,
               }}
               gap="4"
             >
-              {/* For today, show the TodayStandupNew component first */}
-              {isToday && currentUser && currentUserTodayStandupCard}
+              {/* NOTE: This was UI prototyping */}
+              {/* {showCalloutForNoStandupsToday && (
+                <>
+                  <Callout.Root
+                    size="2"
+                    variant="surface"
+                    style={{
+                      gridRow: "1",
+                      gridColumn: "span 1",
+                      backgroundColor: "var(--color-panel-translucent)",
+                      ...(appearance === "dark"
+                        ? {
+                            boxShadow: "inset 0 0 0 1px var(--accent-a4)",
+                          }
+                        : {}),
+                    }}
+                  >
+                    <Callout.Icon>
+                      <InfoCircledIcon />
+                    </Callout.Icon>
+                    <Callout.Text>
+                      Be the first to share an update for today.
+                    </Callout.Text>
+                  </Callout.Root>
+                  <Box style={{ gridColumn: "2 / -1" }}></Box>
+                </>
+              )} */}
 
-              {/* Show all other standups */}
-              {otherStandups.map((standup) => {
-                const form = standupForms.find(
-                  (form) => form.id === standup.formId
-                );
+              {isToday && currentUser && <>{currentUserTodayStandupCard}</>}
 
-                const schema = validateDynamicFormSchema(form?.schema);
-
-                if (!schema) {
-                  return null;
-                }
-
-                const user = collaborators.find(
-                  (collaborator) => collaborator.userId === standup.userId
-                )?.user;
+              {groupStandups.map((standup) => {
+                const user = usersMap.get(standup.userId);
 
                 if (!user) {
                   return null;
                 }
 
                 return (
-                  <Card
+                  <StandupCard
                     key={standup.id}
-                    variant="surface"
-                    size={{
-                      initial: "3",
-                      sm: "4",
-                    }}
+                    standup={standup}
+                    standupForm={standupFormsMap.get(standup.formId)}
+                    user={user}
+                    boardTimezone={boardTimezone}
                     style={{ alignSelf: "start" }}
-                  >
-                    <Flex direction="column" gap="5" align="start">
-                      <Tooltip
-                        content={
-                          <Flex direction="column" gap="1">
-                            <Text size="2">{user.primary_email}</Text>
-                            <Text size="2">
-                              Last saved at{" "}
-                              {DateTime.fromISO(standup.createdAt, {
-                                zone: "utc",
-                              })
-                                .setZone(boardTimezone)
-                                .toLocaleString(DateTime.DATETIME_MED)}{" "}
-                              ({boardTimezone})
-                            </Text>
-                          </Flex>
-                        }
-                      >
-                        <Text size="4" weight="bold">
-                          {user.primary_email.split("@")[0]}
-                        </Text>
-                      </Tooltip>
-                      {schema.fields.map((field) => {
-                        const value = (
-                          standup.formData as Standup["formData"] as DynamicFormValues
-                        )[field.name];
-
-                        if (!value) {
-                          return null;
-                        }
-
-                        const html = parseMarkdownToHtml(value);
-
-                        return (
-                          <Flex key={field.name} direction="column" gap="2">
-                            <Text size="2" weight="medium">
-                              {field.label}
-                            </Text>
-                            <Box
-                              className={`prose prose-sm ${
-                                appearance === "dark" ? "dark:prose-invert" : ""
-                              }`}
-                              dangerouslySetInnerHTML={{ __html: html }}
-                            />
-                          </Flex>
-                        );
-                      })}
-                    </Flex>
-                  </Card>
+                  />
                 );
               })}
             </RadixGrid>
           </Flex>
         );
       })}
+
+      {/* TODO: UI experiment */}
+      {/* {isEmptyBoard && (
+        <Flex direction="column" gap="5">
+          <Box>
+            <Text size="3" weight="bold">
+              Past standups
+            </Text>
+          </Box>
+          <RadixGrid
+            columns={{
+              initial: "1",
+              sm: `repeat(auto-fill, minmax(${getCardWidth(
+                gridSettings.cardSize
+              )}, 1fr))`,
+            }}
+            gap="4"
+          >
+            <Flex
+              style={{
+                border:
+                  appearance === "dark"
+                    ? "1px solid var(--accent-a4)"
+                    : "1px solid var(--accent-a6)",
+                backgroundColor: "var(--color-panel-translucent)",
+                borderRadius: "var(--radius-3)",
+              }}
+              py="240px"
+              gridColumn="1 / -1"
+            >
+              <Flex
+                direction="column"
+                align="center"
+                justify="center"
+                gap="2"
+                maxWidth="360px"
+                mx="auto"
+              >
+                <Text className="font-semibold" size="2">
+                  No past standups yet
+                </Text>
+                <Text size="2" align="center" color="gray">
+                  Start by submitting standup updates. This board's past
+                  standups will appear in this area.
+                </Text>
+              </Flex>
+            </Flex>
+          </RadixGrid>
+        </Flex>
+      )} */}
     </>
   );
 }
@@ -645,7 +742,9 @@ function Resolver({
   }) => React.ReactNode;
 }) {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const { boardId } = useParams();
   const { collaboratorsCount } = useLoaderData<typeof loader>();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
   const {
@@ -655,59 +754,52 @@ function Resolver({
     boardTimezonePromise,
   } = useLoaderData<typeof loader>();
 
-  // TODO: Work on the fallback ui after saving the view settings on the server side
+  // Show skeleton based on user's actual view preference
   const fallbackUI = useMemo(() => {
-    if (collaboratorsCount === 0) {
+    if (viewType === "feed") {
       return <FeedSkeleton collaboratorsCount={collaboratorsCount ?? 0} />;
     }
-
     return <GridSkeleton collaboratorsCount={collaboratorsCount ?? 0} />;
-  }, [collaboratorsCount]);
+  }, [viewType, collaboratorsCount]);
 
   return (
     <Suspense fallback={fallbackUI}>
-      <Await
-        resolve={useMemo(() => {
-          return Promise.all([
-            currentUserPromise,
-            boardTimezonePromise,
-            standupsPromise,
-            standupFormsPromise,
-            collaboratorsPromise,
-          ]);
-        }, [
-          currentUserPromise,
-          boardTimezonePromise,
-          standupsPromise,
-          standupFormsPromise,
-          collaboratorsPromise,
-        ])}
-      >
-        {([
-          currentUser,
-          boardTimezone,
-          standups,
-          standupForms,
-          collaborators,
-        ]) => {
-          if (
-            !currentUser ||
-            !boardTimezone ||
-            !standups ||
-            !standupForms ||
-            !collaborators
-          ) {
-            return fallbackUI;
-          }
+      <Await resolve={currentUserPromise}>
+        {(currentUser) => (
+          <Await resolve={boardTimezonePromise}>
+            {(boardTimezone) => (
+              <Await resolve={standupsPromise}>
+                {(standups) => (
+                  <Await resolve={standupFormsPromise}>
+                    {(standupForms) => (
+                      <Await resolve={collaboratorsPromise}>
+                        {(collaborators) => {
+                          if (
+                            !currentUser ||
+                            !boardTimezone ||
+                            !standups ||
+                            !standupForms ||
+                            !collaborators
+                          ) {
+                            return fallbackUI;
+                          }
 
-          return children({
-            currentUser,
-            boardTimezone,
-            standups,
-            standupForms,
-            collaborators,
-          });
-        }}
+                          return children({
+                            currentUser,
+                            boardTimezone,
+                            standups,
+                            standupForms,
+                            collaborators,
+                          });
+                        }}
+                      </Await>
+                    )}
+                  </Await>
+                )}
+              </Await>
+            )}
+          </Await>
+        )}
       </Await>
     </Suspense>
   );
@@ -720,9 +812,10 @@ function Switcher({
   feed: React.ReactNode;
   grid: React.ReactNode;
 }) {
-  const { viewSettings } = useViewSettings();
+  const { boardId } = useParams();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
 
-  switch (viewSettings.viewType) {
+  switch (viewType) {
     case "feed":
       return feed;
     case "grid":

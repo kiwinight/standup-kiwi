@@ -1,5 +1,8 @@
 // TODO: Resolve monorepo type import issue and remove this
 
+export type Appearance = "light" | "dark" | "inherit";
+export type ViewType = "feed" | "grid";
+
 /**
  * Schemas
  */
@@ -30,6 +33,24 @@ interface Team {
   client_read_only_metadata: Record<string, any>;
 }
 
+export interface ClientReadOnlyMetadata {
+  lastAccessedBoardId?: number;
+  settings?: {
+    appearance?: Appearance;
+    boards?: {
+      [boardId: string]: {
+        view?: {
+          viewType?: ViewType;
+          grid?: {
+            width?: "medium" | "wide" | "full";
+            cardSize?: "small" | "medium" | "large";
+          };
+        };
+      };
+    };
+  };
+}
+
 export interface User {
   id: string;
   requires_totp_mfa: boolean;
@@ -48,9 +69,7 @@ export interface User {
   client_metadata: Record<string, any> | null;
   passkey_auth_enabled: boolean;
   otp_auth_enabled: boolean;
-  client_read_only_metadata:
-    | (Record<string, any> & { lastAccessedBoardId?: number })
-    | null;
+  client_read_only_metadata: ClientReadOnlyMetadata | null;
   server_metadata: null; // NOTE: This value should be always null from the client side
   has_password: boolean;
 }
