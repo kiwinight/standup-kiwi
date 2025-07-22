@@ -124,26 +124,21 @@ export async function loader({ request }: Route.LoaderArgs) {
   } = await verifyAndRefreshAccessToken(session);
 
   let currentUser: User | null = null;
+  let currentUserPromise: Promise<User | null> | null = null;
 
   if (isValid) {
-    currentUser = await getCurrentUser(accessToken).then((data) => {
+    currentUserPromise = getCurrentUser(accessToken).then((data) => {
       if (isErrorData(data)) {
         return null;
       }
       return data;
     });
+    currentUser = await currentUserPromise;
   }
 
   return data(
     {
-      currentUserPromise: isValid
-        ? getCurrentUser(accessToken).then((data) => {
-            if (isErrorData(data)) {
-              return null;
-            }
-            return data;
-          })
-        : null,
+      currentUserPromise,
       currentUser,
     },
     {
