@@ -13,7 +13,14 @@ function acceptInvitation(token: string, accessToken: string) {
     },
   }).then(
     (response) =>
-      response.json() as Promise<ApiData<{ success: boolean; boardId: number }>>
+      response.json() as Promise<
+        ApiData<{
+          success: boolean;
+          boardId: number;
+          wasAlreadyCollaborator: boolean;
+          role: "admin" | "collaborator";
+        }>
+      >
   );
 }
 

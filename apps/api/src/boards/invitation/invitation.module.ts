@@ -6,9 +6,10 @@ import {
 } from './invitation.controller';
 import { DbModule } from 'src/db/db.module';
 import { BoardsModule } from '../boards.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [DbModule, forwardRef(() => BoardsModule)],
+  imports: [DbModule, forwardRef(() => BoardsModule), AuthModule],
   controllers: [InvitationController, PublicInvitationsController],
   providers: [InvitationService],
   exports: [InvitationService],
