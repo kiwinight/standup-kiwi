@@ -1,6 +1,7 @@
 // TODO: Resolve monorepo type import issue and remove this
 
 export type Appearance = "light" | "dark" | "inherit";
+export type ViewType = "feed" | "grid";
 
 /**
  * Schemas
@@ -36,6 +37,17 @@ export interface ClientReadOnlyMetadata {
   lastAccessedBoardId?: number;
   settings?: {
     appearance?: Appearance;
+    boards?: {
+      [boardId: string]: {
+        view?: {
+          viewType?: ViewType;
+          grid?: {
+            width?: "medium" | "wide" | "full";
+            cardSize?: "small" | "medium" | "large";
+          };
+        };
+      };
+    };
   };
 }
 

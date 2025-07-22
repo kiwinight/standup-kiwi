@@ -15,11 +15,12 @@ import { Suspense } from "react";
 import { Await, Link, useLoaderData, useParams } from "react-router";
 import type { loader } from "./board-route";
 import {
-  useGridViewSettings,
+  useBoardGridViewSettings,
   type GridWidth,
   type CardSize,
-} from "~/context/GridViewSettingsContext";
-import { useViewSettings, type ViewType } from "~/context/ViewSettingsContext";
+} from "~/hooks/use-board-grid-view-settings";
+import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
+import type { ViewType } from "types";
 
 function BoardName({ name }: { name: string | null }) {
   if (!name) {
@@ -62,12 +63,9 @@ function BoardNameResolver() {
 type Props = {};
 
 function ViewTypeSelector() {
-  const {
-    viewSettings,
-    updateViewSettings,
-    allowedViewTypes,
-    isPersonalBoard,
-  } = useViewSettings();
+  const { boardId } = useParams();
+  const { viewType, updateViewType, allowedViewTypes, isPersonalBoard } =
+    useBoardViewSettings(parseInt(boardId!, 10));
 
   return (
     <Flex direction="column" gap="2">
@@ -75,11 +73,11 @@ function ViewTypeSelector() {
         View
       </Text>
       <Select.Root
-        value={viewSettings.viewType}
+        value={viewType}
         disabled={isPersonalBoard}
         onValueChange={(value) => {
           if (!isPersonalBoard) {
-            updateViewSettings({ viewType: value as ViewType });
+            updateViewType(value as ViewType);
           }
         }}
       >
@@ -100,14 +98,14 @@ function ViewTypeSelector() {
 }
 
 function GridViewSettings() {
+  const { boardId } = useParams();
   const { collaboratorsCount } = useLoaderData<typeof loader>();
-  const { viewSettings: viewTypeSettings } = useViewSettings();
-  const { viewSettings, updateViewSettings } = useGridViewSettings();
-
-  const isSharedBoard = collaboratorsCount ? collaboratorsCount > 1 : false;
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
+  const { width, cardSize, updateWidth, updateCardSize, isSharedBoard } =
+    useBoardGridViewSettings(parseInt(boardId!, 10));
 
   // Only show grid settings when in grid view
-  if (viewTypeSettings.viewType !== "grid") {
+  if (viewType !== "grid") {
     return null;
   }
 
@@ -119,10 +117,8 @@ function GridViewSettings() {
             Width
           </Text>
           <Select.Root
-            value={viewSettings.width}
-            onValueChange={(value) =>
-              updateViewSettings({ width: value as GridWidth })
-            }
+            value={width}
+            onValueChange={(value) => updateWidth(value as GridWidth)}
           >
             <Select.Trigger />
             <Select.Content>
@@ -141,10 +137,8 @@ function GridViewSettings() {
             Card size
           </Text>
           <Select.Root
-            value={viewSettings.cardSize}
-            onValueChange={(value) =>
-              updateViewSettings({ cardSize: value as CardSize })
-            }
+            value={cardSize}
+            onValueChange={(value) => updateCardSize(value as CardSize)}
           >
             <Select.Trigger />
             <Select.Content>

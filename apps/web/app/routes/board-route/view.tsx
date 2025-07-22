@@ -1,4 +1,9 @@
-import { Await, useLoaderData, useRouteLoaderData } from "react-router";
+import {
+  Await,
+  useLoaderData,
+  useRouteLoaderData,
+  useParams,
+} from "react-router";
 import type { loader } from "./board-route";
 import { Suspense, useMemo } from "react";
 import {
@@ -28,10 +33,10 @@ import CurrentUserStandupCard, {
 } from "./current-user-standup-card";
 import type { loader as rootLoader } from "~/root";
 import {
-  useGridViewSettings,
+  useBoardGridViewSettings,
   type CardSize,
-} from "~/context/GridViewSettingsContext";
-import { useViewSettings } from "~/context/ViewSettingsContext";
+} from "~/hooks/use-board-grid-view-settings";
+import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
 import { Cross2Icon, InfoCircledIcon } from "@radix-ui/react-icons";
 
 function getCardWidth(cardSize: CardSize): string {
@@ -181,6 +186,7 @@ function StandupCard({
 }
 
 function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
+  // TODO: apply settings to the skeleton
   const card = (
     <Card
       variant="surface"
@@ -254,6 +260,7 @@ function FeedSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
   );
 }
 
+// TODO: apply settings to the skeleton
 function GridSkeleton({ collaboratorsCount }: { collaboratorsCount: number }) {
   const isSharedBoard = collaboratorsCount > 1;
 
@@ -522,8 +529,8 @@ function Grid({
   currentUser: User | null;
 }) {
   const { appearance } = useThemeContext();
-
-  const { viewSettings: gridSettings } = useGridViewSettings();
+  const { boardId } = useParams();
+  const { cardSize } = useBoardGridViewSettings(parseInt(boardId!, 10));
 
   const isEmptyBoard = standups.length === 0;
 
@@ -613,9 +620,7 @@ function Grid({
             <RadixGrid
               columns={{
                 initial: "1",
-                sm: `repeat(auto-fill, minmax(${getCardWidth(
-                  gridSettings.cardSize
-                )}, 1fr))`,
+                sm: `repeat(auto-fill, minmax(${getCardWidth(cardSize)}, 1fr))`,
               }}
               gap="4"
             >
@@ -806,9 +811,10 @@ function Switcher({
   feed: React.ReactNode;
   grid: React.ReactNode;
 }) {
-  const { viewSettings } = useViewSettings();
+  const { boardId } = useParams();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
 
-  switch (viewSettings.viewType) {
+  switch (viewType) {
     case "feed":
       return feed;
     case "grid":
