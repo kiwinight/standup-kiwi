@@ -71,11 +71,11 @@ export default [
   ),
   route(
     "/boards/:boardId/collaborators/update",
-    "routes/update-board-collaborators/update-board-collaborators.tsx" // TODO: rename to update-board-collaborators-route
+    "routes/update-board-collaborators-route/update-board-collaborators-route.tsx"
   ),
   route(
     "/boards/:boardId/collaborators/delete",
-    "routes/delete-board-collaborator/delete-board-collaborator.tsx" // TODO: rename to delete-board-collaborator-route
+    "routes/delete-board-collaborator-route/delete-board-collaborator-route.tsx"
   ),
   route(
     "/accept-invitation",
