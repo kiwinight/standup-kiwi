@@ -24,6 +24,7 @@ import {
   Await,
   useFetcher,
   useLoaderData,
+  useParams,
   useRouteLoaderData,
 } from "react-router";
 import type { loader } from "./board-route";
@@ -46,6 +47,7 @@ import type { Board, Standup, StandupForm, User } from "types";
 import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
 import { Maximize2Icon, Minimize2Icon } from "lucide-react";
+import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
 
 interface CurrentUserStandupCardContextType {
   isExpanded: boolean;
@@ -94,28 +96,7 @@ function CurrentUserStandupCardProvider({
   );
 }
 
-function ExpansionButton() {
-  const { isExpanded, toggleExpansion } = useCurrentUserStandupCard();
-
-  return (
-    <Tooltip content={isExpanded ? "Minimize" : "Expand"}>
-      <IconButton
-        variant="ghost"
-        onClick={toggleExpansion}
-        aria-label={isExpanded ? "Minimize card" : "Expand card"}
-        className="opacity-0! group-hover:opacity-100! transition-opacity! duration-0!"
-      >
-        {isExpanded ? (
-          <Minimize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
-        ) : (
-          <Maximize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
-        )}
-      </IconButton>
-    </Tooltip>
-  );
-}
-
-export function ContentSkeleton() {
+export function CardContentSkeleton() {
   return (
     <Flex direction="column" gap="5">
       <Text size="4" weight="bold">
@@ -132,7 +113,7 @@ interface ContentRef {
   save: () => void;
 }
 
-function Content({
+function CardContentUI({
   ref,
   board,
   standups,
@@ -402,17 +383,17 @@ function Content({
   );
 }
 
-function Resolver({
-  ref,
+function CardContentDataResolver({
   children,
+  fallback,
 }: {
-  ref: Ref<ContentRef>;
   children: (data: {
     currentUser: User | null;
     board: Board;
     standups: Standup[];
     structure: StandupForm;
   }) => React.ReactNode;
+  fallback: React.ReactNode;
 }) {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
   const currentUserPromise =
@@ -422,7 +403,7 @@ function Resolver({
     useLoaderData<typeof loader>();
 
   return (
-    <Suspense fallback={<ContentSkeleton />}>
+    <Suspense fallback={fallback}>
       <Await resolve={currentUserPromise}>
         {(currentUser) => (
           <Await resolve={boardPromise}>
@@ -432,7 +413,7 @@ function Resolver({
                   <Await resolve={boardActiveStandupFormPromise}>
                     {(structure) => {
                       if (!board || !standups || !structure) {
-                        return <ContentSkeleton />;
+                        return fallback;
                       }
 
                       return children({
@@ -463,7 +444,7 @@ export function TodayStandupNewSkeleton() {
       }}
       className="group"
     >
-      <ContentSkeleton />
+      <CardContentSkeleton />
     </RadixCard>
   );
 }
@@ -496,6 +477,33 @@ function Card({
   );
 }
 
+function ExpansionButton() {
+  const { isExpanded, toggleExpansion } = useCurrentUserStandupCard();
+  const { boardId } = useParams();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
+
+  if (viewType === "feed") {
+    return null;
+  }
+
+  return (
+    <Tooltip content={isExpanded ? "Minimize" : "Expand"}>
+      <IconButton
+        variant="ghost"
+        onClick={toggleExpansion}
+        aria-label={isExpanded ? "Minimize card" : "Expand card"}
+        className="opacity-0! group-hover:opacity-100! transition-opacity! duration-0!"
+      >
+        {isExpanded ? (
+          <Minimize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
+        ) : (
+          <Maximize2Icon size={15} strokeWidth={1.5} className="rotate-45" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 function CurrentUserStandupCard() {
   const contentRef = useRef<ContentRef>(null);
 
@@ -517,10 +525,10 @@ function CurrentUserStandupCard() {
   return (
     <CurrentUserStandupCardProvider>
       <Card onKeyDown={handleKeyDown}>
-        <Resolver ref={contentRef}>
+        <CardContentDataResolver fallback={<CardContentSkeleton />}>
           {({ currentUser, board, standups, structure }) => {
             return (
-              <Content
+              <CardContentUI
                 ref={contentRef}
                 currentUser={currentUser}
                 board={board}
@@ -529,7 +537,7 @@ function CurrentUserStandupCard() {
               />
             );
           }}
-        </Resolver>
+        </CardContentDataResolver>
       </Card>
     </CurrentUserStandupCardProvider>
   );

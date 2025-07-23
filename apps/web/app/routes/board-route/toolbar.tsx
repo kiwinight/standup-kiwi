@@ -3,17 +3,8 @@ import {
   EnvelopeClosedIcon,
   MixerHorizontalIcon,
 } from "@radix-ui/react-icons";
-import {
-  Flex,
-  Skeleton,
-  Button,
-  Text,
-  Popover,
-  Select,
-} from "@radix-ui/themes";
-import { Suspense } from "react";
-import { Await, Link, useLoaderData, useParams } from "react-router";
-import type { loader } from "./board-route";
+import { Flex, Button, Text, Popover, Select } from "@radix-ui/themes";
+import { Link, useLoaderData, useParams } from "react-router";
 import {
   useBoardGridViewSettings,
   type GridWidth,
@@ -21,48 +12,12 @@ import {
 } from "~/hooks/use-board-grid-view-settings";
 import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
 import type { ViewType } from "types";
-
-function BoardName({ name }: { name: string | null }) {
-  if (!name) {
-    return <Skeleton>Sample name</Skeleton>;
-  }
-
-  return (
-    <Text size="6" weight="bold">
-      {name}
-    </Text>
-  );
-}
-
-function BoardNameSkeleton() {
-  return (
-    <Flex direction="column" gap="2">
-      <Skeleton>
-        <Text size="6" weight="bold">
-          Sample board name
-        </Text>
-      </Skeleton>
-    </Flex>
-  );
-}
-
-function BoardNameResolver() {
-  const { boardNamePromise } = useLoaderData<typeof loader>();
-
-  return (
-    <Suspense fallback={<BoardNameSkeleton />}>
-      <Await resolve={boardNamePromise}>
-        {(name) => {
-          return <BoardName name={name} />;
-        }}
-      </Await>
-    </Suspense>
-  );
-}
+import BoardName from "./board-name";
+import type { loader } from "./board-route";
 
 type Props = {};
 
-function ViewTypeSelector() {
+function ViewTypeSetting() {
   const { boardId } = useParams();
   const { viewType, updateViewType, allowedViewTypes, isPersonalBoard } =
     useBoardViewSettings(parseInt(boardId!, 10));
@@ -99,15 +54,8 @@ function ViewTypeSelector() {
 
 function GridViewSettings() {
   const { boardId } = useParams();
-  const { collaboratorsCount } = useLoaderData<typeof loader>();
-  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
   const { width, cardSize, updateWidth, updateCardSize, isSharedBoard } =
     useBoardGridViewSettings(parseInt(boardId!, 10));
-
-  // Only show grid settings when in grid view
-  if (viewType !== "grid") {
-    return null;
-  }
 
   return (
     <>
@@ -155,6 +103,37 @@ function GridViewSettings() {
   );
 }
 
+function ViewSettings() {
+  const { boardId } = useParams();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
+  const { collaboratorsCount } = useLoaderData<typeof loader>();
+
+  if (!collaboratorsCount || collaboratorsCount <= 1) {
+    return null;
+  }
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger suppressHydrationWarning>
+        <Button variant="ghost" highContrast>
+          <MixerHorizontalIcon />
+          View
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content width="320px" size="3">
+        <Flex direction="column" gap="5">
+          <Text className="font-semibold" size="4">
+            View settings
+          </Text>
+
+          <ViewTypeSetting />
+          {viewType === "grid" && <GridViewSettings />}
+        </Flex>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
 function Toolbar({}: Props) {
   const { boardId } = useParams();
 
@@ -170,7 +149,7 @@ function Toolbar({}: Props) {
         sm: "row",
       }}
     >
-      <BoardNameResolver />
+      <BoardName />
 
       <Flex
         gap="5"
@@ -186,24 +165,7 @@ function Toolbar({}: Props) {
           </Link>
         </Button>
 
-        <Popover.Root>
-          <Popover.Trigger suppressHydrationWarning>
-            <Button variant="ghost" highContrast>
-              <MixerHorizontalIcon />
-              View
-            </Button>
-          </Popover.Trigger>
-          <Popover.Content width="320px" size="3">
-            <Flex direction="column" gap="5">
-              <Text className="font-semibold" size="4">
-                View settings
-              </Text>
-
-              <ViewTypeSelector />
-              <GridViewSettings />
-            </Flex>
-          </Popover.Content>
-        </Popover.Root>
+        <ViewSettings />
 
         <Button asChild variant="ghost" highContrast>
           <Link to={`/boards/${boardId}/settings`}>
