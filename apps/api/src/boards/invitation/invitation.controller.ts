@@ -13,6 +13,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { AuthGuard, AuthenticatedRequest } from '../../auth/guards/auth.guard';
+import { PermissiveAuth } from '../../auth/decorators/permissive-auth.decorator';
 import { BoardAccessGuard } from '../guards/board-access.guard';
 import { InvitationService } from './invitation.service';
 import { RegenerateInvitationDto } from './dto/regenerate-invitation.dto';
@@ -95,9 +96,13 @@ export class PublicInvitationsController {
 
   // GET /invitations/:token
   @Get(':token')
-  async get(@Param('token') token: string) {
+  @PermissiveAuth()
+  async get(@Param('token') token: string, @Req() req: AuthenticatedRequest) {
     try {
-      const invitation = await this.invitationService.getByToken(token);
+      const invitation = await this.invitationService.getByToken(
+        token,
+        req.userId,
+      );
       return invitation;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -115,19 +120,14 @@ export class PublicInvitationsController {
     @Req() req: AuthenticatedRequest,
   ) {
     try {
-      await this.invitationService.accept(token, req.userId);
-
-      const invitation = await this.invitationService.getByToken(token);
+      const result = await this.invitationService.accept(token, req.userId);
 
       return {
         success: true,
-        boardId: invitation.boardId,
+        ...result,
       };
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
       throw new BadRequestException();

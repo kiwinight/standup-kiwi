@@ -18,24 +18,40 @@ import { Suspense } from "react";
 import { isErrorData, type ApiData, type Invitation, type User } from "types";
 import type { Route } from "./+types/invitation-route";
 import type { loader as rootLoader } from "~/root";
+import { getSession } from "~/libs/auth-session.server";
+import { verifyAndRefreshAccessToken } from "~/libs/auth";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 
-type InvitationWithBoard = Invitation & {
-  board: { id: number; name: string };
-};
+function getInvitation(
+  token: string,
+  accessToken?: string
+): Promise<ApiData<Invitation>> {
+  const headers: Record<string, string> = {};
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
 
-function getInvitation(token: string) {
   return fetch(import.meta.env.VITE_API_URL + `/invitations/${token}`, {
     method: "GET",
-  }).then(
-    (response) => response.json() as Promise<ApiData<InvitationWithBoard>>
-  );
+    headers,
+  }).then((response) => response.json());
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { token } = params;
 
-  const invitationPromise = getInvitation(token).then((data) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  let accessToken: string | undefined;
+
+  if (session?.get("access_token")) {
+    const { isValid, accessToken: validToken } =
+      await verifyAndRefreshAccessToken(session);
+    if (isValid) {
+      accessToken = validToken;
+    }
+  }
+
+  const invitationPromise = getInvitation(token, accessToken).then((data) => {
     if (isErrorData(data)) {
       return null;
     }
@@ -109,93 +125,118 @@ function InvitationRoute() {
               </Flex>
             }
           >
-            <Await
-              // TODO: Split into two Await components. Promise.all here could trigger rerendering issues.
-              resolve={Promise.all([invitationPromise, currentUserPromise])}
-            >
-              {([invitation, user]) => {
-                // Handle null invitation data (not found, expired, or API failure)
-                if (!invitation) {
-                  return (
-                    <Flex direction="column" gap="7">
-                      <Flex direction="column" gap="2" align="center">
-                        <Text size="6" weight="bold" align="center">
-                          Invitation not found
-                        </Text>
-                        <Text size="2" color="gray" align="center">
-                          This invitation may have expired, been deactivated, or
-                          does not exist. <br />
-                          Please check the invitation link and try again.
-                        </Text>
-                      </Flex>
-                      <Flex justify="center">
-                        <Button highContrast asChild>
-                          <Link to="/">Back to main</Link>
-                        </Button>
-                      </Flex>
-                    </Flex>
-                  );
-                }
+            <Await resolve={invitationPromise}>
+              {(invitation) => (
+                <Await resolve={currentUserPromise}>
+                  {(user) => {
+                    if (!invitation || !invitation.board) {
+                      return (
+                        <Flex direction="column" gap="7">
+                          <Flex direction="column" gap="2" align="center">
+                            <Text size="6" weight="bold" align="center">
+                              Invitation not found
+                            </Text>
+                            <Text size="2" color="gray" align="center">
+                              This invitation may have expired, been
+                              deactivated, or does not exist. <br />
+                              Please check the invitation link and try again.
+                            </Text>
+                          </Flex>
+                          <Flex justify="center">
+                            <Button highContrast asChild>
+                              <Link to="/">Back to main</Link>
+                            </Button>
+                          </Flex>
+                        </Flex>
+                      );
+                    }
 
-                return (
-                  <Flex direction="column" gap="7">
-                    <Flex direction="column" gap="2" align="center">
-                      <Text size="6" weight="bold" align="center">
-                        You are invited to collaborate on "
-                        {invitation.board.name}"
-                      </Text>
-                      <Text size="2" color="gray" align="center">
-                        {user ? (
-                          <>
-                            You are signed in as{" "}
-                            <strong>{user.primary_email}</strong>.
-                          </>
-                        ) : (
-                          <>
-                            To accept this invitation, you need to sign in
-                            first. Continue with your email to get started.
-                          </>
+                    if (user && invitation.currentUserStatus?.isCollaborator) {
+                      return (
+                        <Flex direction="column" gap="7">
+                          <Flex direction="column" gap="2" align="center">
+                            <Text size="6" weight="bold" align="center">
+                              You're already part of "{invitation.board.name}"
+                            </Text>
+                            <Text size="2" color="gray" align="center">
+                              You are signed in as{" "}
+                              <strong>{user.primary_email}</strong> and are
+                              already a collaborator on this board.
+                            </Text>
+                          </Flex>
+
+                          <Flex justify="center">
+                            <Button highContrast asChild>
+                              <Link to={`/boards/${invitation.boardId}`}>
+                                Go to board
+                              </Link>
+                            </Button>
+                          </Flex>
+                        </Flex>
+                      );
+                    }
+
+                    return (
+                      <Flex direction="column" gap="7">
+                        <Flex direction="column" gap="2" align="center">
+                          <Text size="6" weight="bold" align="center">
+                            You are invited to collaborate on "
+                            {invitation.board.name}"
+                          </Text>
+                          <Text size="2" color="gray" align="center">
+                            {user ? (
+                              <>
+                                You are signed in as{" "}
+                                <strong>{user.primary_email}</strong>.
+                              </>
+                            ) : (
+                              <>
+                                To accept this invitation, you need to sign in
+                                first. Continue with your email to get started.
+                              </>
+                            )}
+                          </Text>
+                        </Flex>
+
+                        <Flex justify="center">
+                          {user ? (
+                            <Button
+                              highContrast
+                              onClick={() => {
+                                fetcher.submit(
+                                  { token: invitation.token },
+                                  {
+                                    method: "post",
+                                    action: "/accept-invitation",
+                                    encType: "application/json",
+                                  }
+                                );
+                              }}
+                              disabled={isSubmitting}
+                              loading={isSubmitting}
+                            >
+                              Accept invitation
+                            </Button>
+                          ) : (
+                            <Button highContrast asChild>
+                              <Link
+                                to={`/auth/email?invitation=${invitation.token}`}
+                              >
+                                Continue with email
+                              </Link>
+                            </Button>
+                          )}
+                        </Flex>
+                        {fetcher.data?.error && (
+                          <Text size="2" color="red">
+                            {fetcher.data.error}
+                          </Text>
                         )}
-                      </Text>
-                    </Flex>
-
-                    <Flex justify="center">
-                      {user ? (
-                        <Button
-                          highContrast
-                          onClick={() => {
-                            fetcher.submit(
-                              { token: invitation.token },
-                              {
-                                method: "post",
-                                action: "/accept-invitation",
-                                encType: "application/json",
-                              }
-                            );
-                          }}
-                          disabled={isSubmitting}
-                          loading={isSubmitting}
-                        >
-                          Accept invitation
-                        </Button>
-                      ) : (
-                        <Button highContrast asChild>
-                          <Link
-                            to={`/auth/email?invitation=${invitation.token}`}
-                          >
-                            Continue with email
-                          </Link>
-                        </Button>
-                      )}
-                    </Flex>
-                    {fetcher.data?.error && (
-                      <Text size="2" color="red">
-                        {fetcher.data.error}
-                      </Text>
-                    )}
-                  </Flex>
-                );
-              }}
+                      </Flex>
+                    );
+                  }}
+                </Await>
+              )}
             </Await>
           </Suspense>
         </Container>

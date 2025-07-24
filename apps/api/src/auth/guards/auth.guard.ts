@@ -4,8 +4,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as jose from 'jose';
 import { Request } from 'express';
+import { AuthService } from '../auth.service';
 
 export interface AuthenticatedRequest extends Request {
   userId: string;
@@ -13,41 +13,27 @@ export interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor() {}
+  constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
-    const token = this.extractTokenFromHeader(request);
+    const token = this.authService.extractBearerToken(
+      request.headers.authorization,
+    );
 
     if (!token) {
       throw new UnauthorizedException();
     }
 
-    const jwks = jose.createRemoteJWKSet(
-      new URL(process.env.AUTH_SERVICE_JWKS_URL!),
-    );
-
     try {
-      const { payload } = await jose.jwtVerify<{
-        sub: string;
-        iss: string;
-        iat: number;
-        aud: string;
-        exp: number;
-      }>(token, jwks);
-      (request as AuthenticatedRequest).userId = payload.sub;
+      const userId = await this.authService.verifyToken(token);
+      (request as AuthenticatedRequest).userId = userId;
     } catch (error) {
       console.error(error);
       throw new UnauthorizedException();
     }
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const authHeader = request.headers.authorization;
-    const [type, token] = authHeader?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

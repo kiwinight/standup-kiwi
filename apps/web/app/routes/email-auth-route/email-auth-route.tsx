@@ -107,7 +107,7 @@ function EmailAuthRoute({}: Route.ComponentProps) {
                   highContrast
                   size="2"
                   type="submit"
-                  loading={fetcher.state === "submitting"}
+                  loading={fetcher.state !== "idle"}
                 >
                   Continue
                 </Button>

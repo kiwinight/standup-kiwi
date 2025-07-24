@@ -1,7 +1,6 @@
-import { data } from "react-router";
+import { data, type ActionFunctionArgs } from "react-router";
 import requireAuthenticated from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
-import type { Route } from "./+types/update-board-collaborators";
 import { isErrorData, type ApiData, type Collaborator } from "types";
 
 export type UpdateBoardCollaboratorsRequestBody = {
@@ -34,12 +33,22 @@ function updateBoardCollaborators(
   ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const { accessToken, refreshed, session } = await requireAuthenticated(
     request
   );
 
   const boardId = params.boardId;
+
+  if (!boardId) {
+    return data(
+      {
+        error: "Board ID is required",
+        collaborators: null,
+      },
+      { status: 400 }
+    );
+  }
 
   const body = (await request.json()) as UpdateBoardCollaboratorsRequestBody;
 

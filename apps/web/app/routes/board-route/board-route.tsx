@@ -260,13 +260,8 @@ function ViewWidthSettingContainer({
 }
 
 export default function BoardRoute({}: Route.ComponentProps) {
-  const { collaboratorsCount } = useLoaderData<typeof loader>();
   const params = useParams();
-  const boardId = params?.boardId ? parseInt(params.boardId, 10) : null;
-
-  if (!boardId) {
-    return null;
-  }
+  const boardId = parseInt(params.boardId!, 10);
 
   return (
     <>

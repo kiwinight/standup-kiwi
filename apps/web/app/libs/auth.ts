@@ -83,6 +83,18 @@ export async function verifyAndRefreshAccessToken(
     };
   }
 
+  if (refreshAccessTokenData.statusCode === 503) {
+    console.warn(
+      "Network connectivity issue during token refresh, maintaining current session"
+    );
+    return {
+      accessToken: accessToken!,
+      isValid: true,
+      refreshed: false,
+      session,
+    };
+  }
+
   session.unset("access_token");
   session.unset("refresh_token");
   return {

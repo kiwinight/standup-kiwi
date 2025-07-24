@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import type { Route } from "./+types/board-layout-route";
 import {
   Await,
@@ -17,12 +17,71 @@ import {
   Text,
   Badge,
   IconButton,
+  AlertDialog,
 } from "@radix-ui/themes";
 import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
 import { Palette, SquarePlus } from "lucide-react";
 import { useCurrentUserAppearanceSetting } from "~/hooks/use-current-user-appearance-setting";
+
+function SignOutDropdownMenuItem() {
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+
+  const signOutFetcher = useFetcher({ key: "sign-out" });
+
+  return (
+    <>
+      <DropdownMenu.Item
+        color="red"
+        onClick={(event) => {
+          event.preventDefault();
+          setShowSignOutDialog(true);
+        }}
+      >
+        Sign out
+      </DropdownMenu.Item>
+      <AlertDialog.Root
+        open={showSignOutDialog}
+        onOpenChange={setShowSignOutDialog}
+      >
+        <AlertDialog.Content maxWidth="450px">
+          <AlertDialog.Title>Sign out of your account?</AlertDialog.Title>
+          <AlertDialog.Description size="2" color="gray">
+            Are you sure you want to sign out?
+          </AlertDialog.Description>
+
+          <Flex gap="3" mt="4" justify="end">
+            <AlertDialog.Cancel>
+              <Button variant="soft" color="gray">
+                Cancel
+              </Button>
+            </AlertDialog.Cancel>
+            <AlertDialog.Action>
+              <Button
+                color="red"
+                variant="solid"
+                loading={signOutFetcher.state === "submitting"}
+                onClick={() => {
+                  signOutFetcher.submit(
+                    {},
+                    {
+                      method: "POST",
+                      encType: "application/json",
+                      action: "/sign-out",
+                    }
+                  );
+                }}
+              >
+                Sign out
+              </Button>
+            </AlertDialog.Action>
+          </Flex>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
+    </>
+  );
+}
 
 function NavBar() {
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
@@ -259,14 +318,7 @@ function NavBar() {
                 >
                   Settings
                 </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  color="red"
-                  onClick={() => {
-                    alertFeatureNotImplemented();
-                  }}
-                >
-                  Logout
-                </DropdownMenu.Item>
+                <SignOutDropdownMenuItem />
               </DropdownMenu.SubContent>
             </DropdownMenu.Sub>
           </DropdownMenu.Content>
