@@ -110,6 +110,14 @@ export type Invitation = {
   deactivatedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  currentUserStatus?: {
+    isCollaborator: boolean;
+    role?: "admin" | "collaborator";
+  } | null;
+  board?: {
+    id: number;
+    name: string;
+  };
 };
 
 /**

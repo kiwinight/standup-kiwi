@@ -302,25 +302,70 @@ export class InvitationService {
     };
   }
 
-  async getByToken(token: string) {
+  async checkUserCollaboration(
+    boardId: number,
+    userId: string,
+  ): Promise<{
+    isCollaborator: boolean;
+    role?: 'admin' | 'collaborator';
+  }> {
+    const [collaborator] = await this.db
+      .select()
+      .from(usersToBoards)
+      .where(
+        and(
+          eq(usersToBoards.boardId, boardId),
+          eq(usersToBoards.userId, userId),
+        ),
+      );
+
+    return {
+      isCollaborator: !!collaborator,
+      role: collaborator?.role,
+    };
+  }
+
+  async getByToken(token: string, userId?: string) {
     const invitation = await this.getInvitationByToken(token);
 
     if (!invitation) {
       throw new NotFoundException('Invitation not found or has expired');
     }
 
-    return invitation;
+    let currentUserStatus = null;
+    if (userId) {
+      currentUserStatus = await this.checkUserCollaboration(
+        invitation.boardId,
+        userId,
+      );
+    }
+
+    return {
+      ...invitation,
+      currentUserStatus,
+    };
   }
 
   /**
    * Accepts an invitation and adds the user as a collaborator to the board.
+   * Returns detailed information about the acceptance result.
    *
    * IMPORTANT: This method intentionally does NOT deactivate the invitation after use.
    * Invitations are designed to be reusable - multiple users can use the same
    * invitation token to join a board until it expires or is manually deactivated.
    * This is the intended behavior, not a security vulnerability.
+   *
+   * NEW BEHAVIOR: If user is already a collaborator, returns success with existing info
+   * instead of throwing an error. This provides a better user experience.
    */
-  async accept(token: string, userId: string): Promise<void> {
+  async accept(
+    token: string,
+    userId: string,
+  ): Promise<{
+    boardId: number;
+    wasAlreadyCollaborator: boolean;
+    role: 'admin' | 'collaborator';
+  }> {
     const invitation = await this.getInvitationByToken(token);
 
     if (!invitation) {
@@ -338,15 +383,25 @@ export class InvitationService {
       );
 
     if (existingCollaborator) {
-      throw new BadRequestException(
-        'User is already a collaborator of this board',
-      );
+      // User is already a collaborator - return success with existing info
+      return {
+        boardId: invitation.boardId,
+        wasAlreadyCollaborator: true,
+        role: existingCollaborator.role,
+      };
     }
 
+    // Add new user to board
     await this.db.insert(usersToBoards).values({
       userId,
       boardId: invitation.boardId,
       role: invitation.role,
     });
+
+    return {
+      boardId: invitation.boardId,
+      wasAlreadyCollaborator: false,
+      role: invitation.role,
+    };
   }
 }
