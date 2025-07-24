@@ -30,7 +30,7 @@ import type { Collaborator, User } from "types";
 import type { loader as rootLoader } from "~/root";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useToast } from "~/hooks/use-toast";
-import type { ActionType as UpdateBoardCollaboratorsActionType } from "../update-board-collaborators/update-board-collaborators";
+import type { ActionType as UpdateBoardCollaboratorsActionType } from "../update-board-collaborators-route/update-board-collaborators-route";
 
 type Props = {};
 

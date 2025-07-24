@@ -17,7 +17,7 @@ import { useToast } from "~/hooks/use-toast";
 import type { loader as rootLoader } from "~/root";
 import { Suspense, useEffect, useMemo } from "react";
 import { Await } from "react-router";
-import type { ActionType as DeleteBoardCollaboratorActionType } from "../delete-board-collaborator/delete-board-collaborator";
+import type { ActionType as DeleteBoardCollaboratorActionType } from "../delete-board-collaborator-route/delete-board-collaborator-route";
 import type { loader } from "./board-settings-collaborators-route";
 import type { Collaborator, User } from "types";
 

@@ -85,9 +85,5 @@ export default [
     "/update-current-user-metadata",
     "routes/update-current-user-metadata-route/update-current-user-metadata-route.tsx"
   ),
-  // TODO: Add delete session route - logout
-  // route(
-  //   "/session/delete",
-  //   "routes/delete-session-route/delete-session-route.tsx"
-  // ),
+  route("/sign-out", "routes/sign-out-route/sign-out-route.tsx"),
 ] satisfies RouteConfig;
