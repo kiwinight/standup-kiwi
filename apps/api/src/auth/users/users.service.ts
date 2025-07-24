@@ -78,7 +78,7 @@ export class UsersService {
         },
       },
     );
-    const user: User = await response.json(); // TODO: handle error case
+    const user: User = await response.json();
 
     // NOTE: This is to avoid the server_metadata property from being included in the response
     user.server_metadata = null;
