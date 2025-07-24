@@ -2,7 +2,7 @@ import type {
   Board as ApiBoard,
   StandupForm as ApiStandupForm,
   Standup as ApiStandup,
-  UsersToBoards,
+  UsersToBoards as ApiUsersToBoards,
   Invitation as ApiInvitation,
   UsersToBoardsRole,
   User as ApiUser,
@@ -31,10 +31,17 @@ export type Invitation = Serialized<ApiInvitation> & {
   };
 };
 
-export type { UsersToBoards };
+export type UsersToBoards = Serialized<ApiUsersToBoards>;
 export type Role = UsersToBoardsRole;
 
-export type User = ApiUser;
+export type User = ApiUser & {
+  requires_totp_mfa?: boolean;
+  auth_with_email?: boolean;
+  oauth_providers?: string[];
+  is_anonymous?: boolean;
+  passkey_auth_enabled?: boolean;
+  otp_auth_enabled?: boolean;
+};
 export type ListUser = ApiListUser;
 export type Team = ApiTeam;
 export type ClientReadOnlyMetadata = ApiClientReadOnlyMetadata;
@@ -72,5 +79,10 @@ export function isErrorData(data: unknown): data is ErrorData {
 export type ApiData<T> = T | ErrorData;
 
 export interface Collaborator extends UsersToBoards {
+  userId: string;
+  boardId: number;
+  role: Role;
+  createdAt: string;
+  updatedAt: string;
   user: User;
 }
