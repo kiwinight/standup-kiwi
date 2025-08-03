@@ -456,7 +456,10 @@ function Card({
   children: React.ReactNode;
   onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
 }) {
+  const { boardId } = useParams();
+
   const { isExpanded } = useCurrentUserStandupCard();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
 
   return (
     <RadixCard
@@ -470,6 +473,7 @@ function Card({
       className="group"
       style={{
         gridColumn: isExpanded ? "span 2" : undefined,
+        alignSelf: viewType === "grid" ? "start" : undefined,
       }}
     >
       {children}

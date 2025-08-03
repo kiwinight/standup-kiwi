@@ -28,6 +28,9 @@ function getContainerMaxWidth(width: GridWidth): string {
       return "992px";
     case "wide":
       return "1248px";
+    // TODO: Support extra-wide width when user have a wide screen
+    // case "extra-wide":
+    //   return "1608px";
     case "full":
       return "100%";
     default:
