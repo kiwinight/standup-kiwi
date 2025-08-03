@@ -25,7 +25,7 @@ import type { loader as rootLoader } from "~/root";
 import { Palette, SquarePlus } from "lucide-react";
 import { useCurrentUserAppearanceSetting } from "~/hooks/use-current-user-appearance-setting";
 
-function SignOutDropdownMenuItem() {
+function SignOutMenuItem() {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   const signOutFetcher = useFetcher({ key: "sign-out" });
@@ -318,7 +318,7 @@ function NavBar() {
                 >
                   Settings
                 </DropdownMenu.Item>
-                <SignOutDropdownMenuItem />
+                <SignOutMenuItem />
               </DropdownMenu.SubContent>
             </DropdownMenu.Sub>
           </DropdownMenu.Content>
