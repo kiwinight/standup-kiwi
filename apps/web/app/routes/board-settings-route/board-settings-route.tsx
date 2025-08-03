@@ -21,13 +21,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const boardId = params.boardId;
 
-  const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
+  const boardPromise = Promise.all([
+    getBoard(boardId, { accessToken }).then((data) => {
+      if (isErrorData(data)) {
+        return null;
+      }
 
-    return data;
-  });
+      return data;
+    }),
+    new Promise((resolve) => setTimeout(resolve, 50)),
+  ]).then(([boardData]) => boardData);
 
   return data(
     { boardPromise },

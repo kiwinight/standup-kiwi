@@ -77,7 +77,6 @@ function NameSetting({}: Props) {
     >
       {/* TODO: Apply skeleton UI for board name card content */}
       <form
-        method="post"
         onSubmit={handleBoardNameFormSubmit}
         onKeyDown={(event) => {
           if (event.key === "Enter") {

@@ -1,11 +1,11 @@
-import { Button, Card, Flex, Select, Text } from "@radix-ui/themes";
-import React, { use, useEffect, useMemo } from "react";
-import { useFetcher } from "react-router";
+import { Button, Card, Flex, Select, Text, Skeleton } from "@radix-ui/themes";
+import React, { useEffect, useMemo, Suspense } from "react";
+import { useFetcher, useLoaderData, Await } from "react-router";
 import type { loader } from "./board-settings-route";
-import { useLoaderData } from "react-router";
 import { type ActionType as UpdateBoardActionType } from "../update-board-route/update-board-route";
 import { useForm } from "react-hook-form";
 import { useToast } from "~/hooks/use-toast";
+import type { Board } from "types";
 
 function getTimezoneOptions() {
   // Get all timezone identifiers
@@ -104,17 +104,29 @@ function getTimezoneOptions() {
 
 type Props = {};
 
-function TimezoneSetting({}: Props) {
-  const updateBoardTimezoneFetcher = useFetcher<UpdateBoardActionType>();
-  const { toast } = useToast();
-
+function TimezoneFormDataResolver({
+  children,
+  fallback,
+}: {
+  children: (data: { board: Board | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
   const { boardPromise } = useLoaderData<typeof loader>();
 
-  const board = use(boardPromise);
+  return (
+    <Suspense fallback={fallback}>
+      <Await resolve={boardPromise}>
+        {(board) => {
+          return children({ board });
+        }}
+      </Await>
+    </Suspense>
+  );
+}
 
-  if (!board) {
-    return null;
-  }
+function TimezoneForm({ board }: { board: Board }) {
+  const updateBoardTimezoneFetcher = useFetcher<UpdateBoardActionType>();
+  const { toast } = useToast();
 
   const boardTimezone = updateBoardTimezoneFetcher.json
     ? (updateBoardTimezoneFetcher.json as { timezone: string }).timezone
@@ -161,13 +173,7 @@ function TimezoneSetting({}: Props) {
   };
 
   return (
-    <Card
-      size={{
-        initial: "2",
-        sm: "4",
-      }}
-    >
-      {/* TODO: Apply skeleton UI for board timezone card content */}
+    <>
       <form
         method="post"
         onSubmit={handleTimezoneFormSubmit}
@@ -197,7 +203,7 @@ function TimezoneSetting({}: Props) {
                   setValue("timezone", value);
                 }}
               >
-                <Select.Trigger />
+                <Select.Trigger suppressHydrationWarning />
                 <Select.Content>
                   {Object.entries(timezoneOptions).map(
                     ([offsetGroup, timezoneList]) => (
@@ -235,6 +241,60 @@ function TimezoneSetting({}: Props) {
           </Button>
         </Flex>
       </form>
+    </>
+  );
+}
+
+function TimezoneFormSkeleton() {
+  return (
+    <>
+      <form>
+        <Flex direction="column">
+          <Text size="4" weight="bold">
+            Timezone
+          </Text>
+          <Flex direction="column" mt="5" gap="5">
+            <Flex direction="column" gap="2">
+              <Text size="2" weight="medium">
+                Standup timezone
+              </Text>
+
+              <Skeleton height="32px" />
+
+              <Text color="gray" size="2">
+                This timezone determines the date assigned to all standups on
+                this board. Standups are recorded based on the selected
+                timezone.
+              </Text>
+            </Flex>
+          </Flex>
+        </Flex>
+        <Flex justify="end" mt="5" gap="2">
+          <Button highContrast size="2" disabled>
+            Save
+          </Button>
+        </Flex>
+      </form>
+    </>
+  );
+}
+
+function TimezoneSetting({}: Props) {
+  return (
+    <Card
+      size={{
+        initial: "2",
+        sm: "4",
+      }}
+    >
+      <TimezoneFormDataResolver fallback={<TimezoneFormSkeleton />}>
+        {({ board }) => {
+          if (!board) {
+            return <TimezoneFormSkeleton />;
+          }
+          return <TimezoneForm board={board} />;
+        }}
+      </TimezoneFormDataResolver>
     </Card>
   );
 }
