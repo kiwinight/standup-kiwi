@@ -23,7 +23,51 @@ import KiwinightSymbol from "~/components/kiwinight-symbol";
 import { alertFeatureNotImplemented } from "~/libs/alert";
 import type { loader as rootLoader } from "~/root";
 import { Palette, SquarePlus } from "lucide-react";
+import type { Board } from "~/types";
 import { useCurrentUserAppearanceSetting } from "~/hooks/use-current-user-appearance-setting";
+
+function BoardsMenuItemsSkeleton() {
+  return (
+    <>
+      <DropdownMenu.Separator />
+      <DropdownMenu.Group>
+        <DropdownMenu.Label>Boards</DropdownMenu.Label>
+        <DropdownMenu.CheckboxItem checked={false}>
+          <Skeleton>
+            {/* TODO: The skeleton height covers the full checkbox item. It should only cover the text height*/}
+            <span>Example board name</span>
+          </Skeleton>
+        </DropdownMenu.CheckboxItem>
+        <DropdownMenu.CheckboxItem checked={false}>
+          <Skeleton>
+            <span>Example board name</span>
+          </Skeleton>
+        </DropdownMenu.CheckboxItem>
+      </DropdownMenu.Group>
+    </>
+  );
+}
+
+function BoardsMenuItemsDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: { boards: (Board & { collaboratorsCount: number })[] | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  const { currentUserBoardsPromise } =
+    useLoaderData<Route.ComponentProps["loaderData"]>();
+
+  return (
+    <Suspense fallback={fallback}>
+      <Await resolve={currentUserBoardsPromise}>
+        {(currentUserBoards) => {
+          return children({ boards: currentUserBoards });
+        }}
+      </Await>
+    </Suspense>
+  );
+}
 
 function SignOutMenuItem() {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
@@ -123,100 +167,77 @@ function NavBar() {
               <Layers2Icon size={15} strokeWidth={1.5} />
               Boards
             </DropdownMenu.Item> */}
-            {/* TODO: split this part into resolver component */}
-            <Suspense
-              fallback={
-                <>
-                  <DropdownMenu.Separator />
-                  <DropdownMenu.Group>
-                    <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                    <DropdownMenu.CheckboxItem checked={false}>
-                      <Skeleton>
-                        {/* TODO: The skeleton height covers the full checkbox item. It should only cover the text height*/}
-                        <span>Example board name</span>
-                      </Skeleton>
-                    </DropdownMenu.CheckboxItem>
-                    <DropdownMenu.CheckboxItem checked={false}>
-                      <Skeleton>
-                        <span>Example board name</span>
-                      </Skeleton>
-                    </DropdownMenu.CheckboxItem>
-                  </DropdownMenu.Group>
-                </>
-              }
-            >
-              <Await resolve={currentUserBoardsPromise}>
-                {(currenctUserBoards) => {
-                  if (!currenctUserBoards) {
-                    return null;
-                  }
+            <BoardsMenuItemsDataLoader fallback={<BoardsMenuItemsSkeleton />}>
+              {({ boards: currentUserBoards }) => {
+                if (!currentUserBoards) {
+                  return null;
+                }
 
-                  const sharedBoards = currenctUserBoards.filter(
-                    (board) => board.collaboratorsCount > 1
-                  );
-                  const personalBoards = currenctUserBoards.filter(
-                    (board) => board.collaboratorsCount === 1
-                  );
+                const sharedBoards = currentUserBoards.filter(
+                  (board) => board.collaboratorsCount > 1
+                );
+                const personalBoards = currentUserBoards.filter(
+                  (board) => board.collaboratorsCount === 1
+                );
 
-                  return (
-                    <>
-                      {personalBoards.length > 0 && (
-                        <>
-                          <DropdownMenu.Separator />
-                          <DropdownMenu.Group>
-                            <DropdownMenu.Label>Boards</DropdownMenu.Label>
-                            {personalBoards.map((board) => {
-                              const isActive = boardId
-                                ? parseInt(boardId, 10) === board.id
-                                : false;
-                              return (
-                                <Link
-                                  key={board.id}
-                                  reloadDocument
-                                  to={`/boards/${board.id}`}
-                                >
-                                  <DropdownMenu.CheckboxItem checked={isActive}>
-                                    {board.name}
-                                  </DropdownMenu.CheckboxItem>
-                                </Link>
-                              );
-                            })}
-                          </DropdownMenu.Group>
-                        </>
-                      )}
-                      {sharedBoards.length > 0 && (
-                        <>
-                          <DropdownMenu.Separator />
+                return (
+                  <>
+                    {personalBoards.length > 0 && (
+                      <>
+                        <DropdownMenu.Separator />
+                        <DropdownMenu.Group>
+                          <DropdownMenu.Label>Boards</DropdownMenu.Label>
+                          {personalBoards.map((board) => {
+                            const isActive = boardId
+                              ? parseInt(boardId, 10) === board.id
+                              : false;
+                            return (
+                              <Link
+                                key={board.id}
+                                reloadDocument
+                                to={`/boards/${board.id}`}
+                              >
+                                <DropdownMenu.CheckboxItem checked={isActive}>
+                                  {board.name}
+                                </DropdownMenu.CheckboxItem>
+                              </Link>
+                            );
+                          })}
+                        </DropdownMenu.Group>
+                      </>
+                    )}
+                    {sharedBoards.length > 0 && (
+                      <>
+                        <DropdownMenu.Separator />
 
-                          <DropdownMenu.Group>
-                            <DropdownMenu.Label>
-                              Shared boards
-                            </DropdownMenu.Label>
+                        <DropdownMenu.Group>
+                          <DropdownMenu.Label>
+                            Shared boards
+                          </DropdownMenu.Label>
 
-                            {sharedBoards.map((board) => {
-                              const isActive = boardId
-                                ? parseInt(boardId, 10) === board.id
-                                : false;
-                              return (
-                                <Link
-                                  key={board.id}
-                                  reloadDocument
-                                  to={`/boards/${board.id}`}
-                                >
-                                  <DropdownMenu.CheckboxItem checked={isActive}>
-                                    {board.name}
-                                  </DropdownMenu.CheckboxItem>
-                                </Link>
-                              );
-                            })}
-                          </DropdownMenu.Group>
-                        </>
-                      )}
-                    </>
-                  );
-                }}
-              </Await>
-            </Suspense>
+                          {sharedBoards.map((board) => {
+                            const isActive = boardId
+                              ? parseInt(boardId, 10) === board.id
+                              : false;
+                            return (
+                              <Link
+                                key={board.id}
+                                reloadDocument
+                                to={`/boards/${board.id}`}
+                              >
+                                <DropdownMenu.CheckboxItem checked={isActive}>
+                                  {board.name}
+                                </DropdownMenu.CheckboxItem>
+                              </Link>
+                            );
+                          })}
+                        </DropdownMenu.Group>
+                      </>
+                    )}
+                  </>
+                );
+              }}
+            </BoardsMenuItemsDataLoader>
 
             <DropdownMenu.Separator />
             <DropdownMenu.Sub>
