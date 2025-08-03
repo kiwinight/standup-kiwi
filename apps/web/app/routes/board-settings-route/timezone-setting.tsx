@@ -128,10 +128,6 @@ function TimezoneForm({ board }: { board: Board }) {
   const updateBoardTimezoneFetcher = useFetcher<UpdateBoardActionType>();
   const { toast } = useToast();
 
-  const boardTimezone = updateBoardTimezoneFetcher.json
-    ? (updateBoardTimezoneFetcher.json as { timezone: string }).timezone
-    : board.timezone;
-
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
 
   const {
@@ -140,11 +136,14 @@ function TimezoneForm({ board }: { board: Board }) {
     watch,
     setValue,
   } = useForm<{ timezone: string }>({
-    defaultValues: { timezone: boardTimezone },
+    defaultValues: { timezone: board.timezone },
   });
 
   useEffect(() => {
-    if (updateBoardTimezoneFetcher.data) {
+    if (
+      updateBoardTimezoneFetcher.state === "idle" &&
+      updateBoardTimezoneFetcher.data
+    ) {
       const error = updateBoardTimezoneFetcher.data.error;
       if (error) {
         toast.error(error);
@@ -153,7 +152,7 @@ function TimezoneForm({ board }: { board: Board }) {
         toast.success("Board timezone has been saved");
       }
     }
-  }, [updateBoardTimezoneFetcher.data]);
+  }, [updateBoardTimezoneFetcher.state, updateBoardTimezoneFetcher.data]);
 
   const handleTimezoneFormSubmit = (
     event: React.FormEvent<HTMLFormElement>
@@ -173,109 +172,118 @@ function TimezoneForm({ board }: { board: Board }) {
   };
 
   return (
-    <>
-      <form
-        method="post"
-        onSubmit={handleTimezoneFormSubmit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            if (event.metaKey || event.ctrlKey) {
-              handleTimezoneFormSubmit(event);
-            } else {
-              event.preventDefault();
-            }
+    <form
+      method="post"
+      onSubmit={handleTimezoneFormSubmit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          if (event.metaKey || event.ctrlKey) {
+            event.currentTarget.requestSubmit();
+            return;
           }
-        }}
-      >
-        <Flex direction="column">
-          <Text size="4" weight="bold">
-            Timezone
-          </Text>
-          <Flex direction="column" mt="5" gap="5">
-            <Flex key="name" direction="column" gap="2">
-              <Text size="2" weight="medium">
-                Standup timezone
-              </Text>
+          if (document.activeElement?.getAttribute("type") === "submit") {
+            return;
+          }
+          event.preventDefault();
+        }
+      }}
+    >
+      <Flex direction="column">
+        <Text size="4" weight="bold">
+          Timezone
+        </Text>
+        <Flex direction="column" mt="5" gap="5">
+          <Flex key="timezone" direction="column" gap="2">
+            <Text size="2" weight="medium">
+              Standup timezone
+            </Text>
 
-              <Select.Root
-                defaultValue={boardTimezone}
-                onValueChange={(value) => {
-                  setValue("timezone", value);
+            <Select.Root
+              defaultValue={board.timezone}
+              onValueChange={(value) => {
+                setValue("timezone", value);
+              }}
+            >
+              <Select.Trigger
+                suppressHydrationWarning
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "Enter" &&
+                    (event.metaKey || event.ctrlKey)
+                  ) {
+                    event.preventDefault();
+                    return;
+                  }
                 }}
-              >
-                <Select.Trigger suppressHydrationWarning />
-                <Select.Content>
-                  {Object.entries(timezoneOptions).map(
-                    ([offsetGroup, timezoneList]) => (
-                      <React.Fragment key={offsetGroup}>
-                        <Select.Group>
-                          <Select.Label>{offsetGroup}</Select.Label>
-                          {timezoneList.map((tz) => (
-                            <Select.Item key={tz.value} value={tz.value}>
-                              (UTC{tz.offset}) {tz.label}
-                            </Select.Item>
-                          ))}
-                        </Select.Group>
-                        <Select.Separator />
-                      </React.Fragment>
-                    )
-                  )}
-                </Select.Content>
-              </Select.Root>
-              <Text color="gray" size="2">
-                This timezone determines the date assigned to all standups on
-                this board. Standups are recorded based on the selected
-                timezone.
-              </Text>
-            </Flex>
+              />
+              <Select.Content>
+                {Object.entries(timezoneOptions).map(
+                  ([offsetGroup, timezoneList]) => (
+                    <React.Fragment key={offsetGroup}>
+                      <Select.Group>
+                        <Select.Label>{offsetGroup}</Select.Label>
+                        {timezoneList.map((tz) => (
+                          <Select.Item key={tz.value} value={tz.value}>
+                            (UTC{tz.offset}) {tz.label}
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                      <Select.Separator />
+                    </React.Fragment>
+                  )
+                )}
+              </Select.Content>
+            </Select.Root>
+            <Text color="gray" size="2">
+              This timezone determines the date assigned to all standups on this
+              board. Standups are recorded based on the selected timezone.
+            </Text>
           </Flex>
         </Flex>
-        <Flex justify="end" mt="5" gap="2">
-          <Button
-            highContrast
-            size="2"
-            type="submit"
-            disabled={boardTimezone === watch("timezone")}
-          >
-            Save
-          </Button>
-        </Flex>
-      </form>
-    </>
+      </Flex>
+      <Flex justify="end" mt="5" gap="2">
+        <Button
+          highContrast
+          size="2"
+          type="submit"
+          disabled={board.timezone === watch("timezone")}
+          loading={updateBoardTimezoneFetcher.state !== "idle"}
+        >
+          Save
+        </Button>
+      </Flex>
+    </form>
   );
 }
 
 function TimezoneFormSkeleton() {
   return (
-    <>
-      <form>
-        <Flex direction="column">
-          <Text size="4" weight="bold">
-            Timezone
-          </Text>
-          <Flex direction="column" mt="5" gap="5">
-            <Flex direction="column" gap="2">
-              <Text size="2" weight="medium">
-                Standup timezone
-              </Text>
+    <form>
+      <Flex direction="column">
+        <Text size="4" weight="bold">
+          Timezone
+        </Text>
+        <Flex direction="column" mt="5" gap="5">
+          <Flex direction="column" gap="2">
+            <Text size="2" weight="medium">
+              Standup timezone
+            </Text>
 
-              <Skeleton height="32px" />
+            <Skeleton height="32px" />
 
-              <Text color="gray" size="2">
-                This timezone determines the date assigned to all standups on
-                this board. Standups are recorded based on the selected
-                timezone.
-              </Text>
-            </Flex>
+            <Text color="gray" size="2">
+              This timezone determines the date assigned to all standups on this
+              board. Standups are recorded based on the selected timezone.
+            </Text>
           </Flex>
         </Flex>
-        <Flex justify="end" mt="5" gap="2">
-          <Button highContrast size="2" disabled>
-            Save
-          </Button>
-        </Flex>
-      </form>
-    </>
+      </Flex>
+      <Flex justify="end" mt="5" gap="2">
+        <Button highContrast size="2" disabled>
+          Save
+        </Button>
+      </Flex>
+    </form>
   );
 }
 
