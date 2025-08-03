@@ -54,7 +54,6 @@ function NameSetting({}: Props) {
   const handleBoardNameFormSubmit = (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    // TODO: update the board list to show the new board name
     handleSubmit((data) => {
       updateBoardNameFetcher.submit(
         {

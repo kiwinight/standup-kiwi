@@ -112,7 +112,6 @@ function GridViewSkeleton({
             {index === 0 && <TodayStandupNewSkeleton />}
             {index !== 0 && (
               <>
-                {/* TODO: if it's shared board, put multiple cards */}
                 {isSharedBoard ? (
                   <>
                     {card}
