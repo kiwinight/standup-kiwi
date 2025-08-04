@@ -34,33 +34,29 @@ import type { ActionType as UpdateBoardCollaboratorsActionType } from "../update
 
 type Props = {};
 
-function CollaboratorsTableSuspense() {
+function CollaboratorsTableDataResolver({
+  children,
+  fallback,
+}: {
+  children: (data: {
+    collaborators: Collaborator[] | null;
+    currentUser: User | null;
+  }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
   const { collaboratorsPromise } = useLoaderData<typeof loader>();
   const rootData = useRouteLoaderData<typeof rootLoader>("root");
   const currentUserPromise =
     rootData?.currentUserPromise ?? Promise.resolve(null);
 
   return (
-    <Suspense fallback={<SuspenseFallback />}>
+    <Suspense fallback={fallback}>
       <Await resolve={collaboratorsPromise}>
         {(collaborators) => {
-          if (!collaborators) {
-            return <SuspenseFallback />;
-          }
-
           return (
             <Await resolve={currentUserPromise}>
               {(currentUser) => {
-                if (!currentUser) {
-                  return <SuspenseFallback />;
-                }
-
-                return (
-                  <CollaboratorsTable
-                    collaborators={collaborators}
-                    currentUser={currentUser}
-                  />
-                );
+                return children({ collaborators, currentUser });
               }}
             </Await>
           );
@@ -511,13 +507,27 @@ function CollaboratorsSetting({}: Props) {
           </Text>
         </Flex>
 
-        <CollaboratorsTableSuspense />
+        <CollaboratorsTableDataResolver
+          fallback={<CollaboratorsTableSkeleton />}
+        >
+          {({ collaborators, currentUser }) => {
+            if (!collaborators) {
+              return <CollaboratorsTableSkeleton />;
+            }
+            return (
+              <CollaboratorsTable
+                collaborators={collaborators}
+                currentUser={currentUser}
+              />
+            );
+          }}
+        </CollaboratorsTableDataResolver>
       </Flex>
     </Card>
   );
 }
 
-function SuspenseFallback() {
+function CollaboratorsTableSkeleton() {
   return (
     <Table.Root mt="5">
       <Table.Header>

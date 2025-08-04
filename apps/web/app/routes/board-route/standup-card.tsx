@@ -85,6 +85,9 @@ function StandupCard({
                 className={`prose prose-sm ${
                   appearance === "dark" ? "dark:prose-invert" : ""
                 }`}
+                style={{
+                  color: "var(--gray-12)",
+                }}
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             </Flex>

@@ -1,6 +1,6 @@
 import { useLoaderData, data, Await, useParams } from "react-router";
-import type { Collaborator, Invitation } from "../../../types";
-import { type ApiData, isErrorData } from "../../../types";
+import type { Collaborator, Invitation } from "types";
+import { type ApiData, isErrorData } from "types";
 import { commitSession } from "~/libs/auth-session.server";
 import requireAuthenticated from "~/libs/auth";
 import CollaboratorsSetting from "./collaborators-setting";

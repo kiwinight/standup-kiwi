@@ -38,7 +38,7 @@ export interface User {
   display_name: string | null;
   selected_team: Team | null;
   selected_team_id: string | null;
-  profile_image_url: string;
+  profile_image_url: string | null;
   client_metadata: Record<string, any> | null;
   client_read_only_metadata: ClientReadOnlyMetadata | null;
   server_metadata: Record<string, any> | null;

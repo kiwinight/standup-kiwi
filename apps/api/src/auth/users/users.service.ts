@@ -78,12 +78,23 @@ export class UsersService {
         },
       },
     );
-    const user: User = await response.json(); // TODO: handle error case
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch user: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const data: User | { error: string; code: string } = await response.json();
+
+    if ('error' in data) {
+      throw new Error(data.error);
+    }
 
     // NOTE: This is to avoid the server_metadata property from being included in the response
-    user.server_metadata = null;
+    data.server_metadata = null;
 
-    return user;
+    return data;
   }
 
   async list(params?: {
@@ -158,9 +169,19 @@ export class UsersService {
       },
     );
 
-    const updatedUser: User = await response.json(); // TODO: handle error case
+    if (!response.ok) {
+      throw new Error(
+        `Failed to update user: ${response.status} ${response.statusText}`,
+      );
+    }
 
-    return updatedUser;
+    const data: User | { error: string; code: string } = await response.json();
+
+    if ('error' in data) {
+      throw new Error(data.error);
+    }
+
+    return data;
   }
 
   async updateClientReadOnlyMetadata(

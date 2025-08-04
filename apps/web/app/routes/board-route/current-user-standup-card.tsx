@@ -48,6 +48,7 @@ import { parseMarkdownToHtml } from "~/libs/markdown";
 import { useToast } from "~/hooks/use-toast";
 import { Maximize2Icon, Minimize2Icon } from "lucide-react";
 import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
+import { useKeyPress } from "~/hooks/use-key-press";
 
 interface CurrentUserStandupCardContextType {
   isExpanded: boolean;
@@ -449,27 +450,23 @@ export function TodayStandupNewSkeleton() {
   );
 }
 
-function Card({
-  children,
-  onKeyDown,
-}: {
-  children: React.ReactNode;
-  onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
-}) {
+function Card({ children }: { children: React.ReactNode }) {
+  const { boardId } = useParams();
+
   const { isExpanded } = useCurrentUserStandupCard();
+  const { viewType } = useBoardViewSettings(parseInt(boardId!, 10));
 
   return (
     <RadixCard
       variant="surface"
-      tabIndex={0}
       size={{
         initial: "3",
         sm: "4",
       }}
-      onKeyDown={onKeyDown}
       className="group"
       style={{
         gridColumn: isExpanded ? "span 2" : undefined,
+        alignSelf: viewType === "grid" ? "start" : undefined,
       }}
     >
       {children}
@@ -507,24 +504,34 @@ function ExpansionButton() {
 function CurrentUserStandupCard() {
   const contentRef = useRef<ContentRef>(null);
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-      contentRef.current?.save();
+  useKeyPress("e", (event) => {
+    const target = event.target;
+
+    if (!target || !(target instanceof HTMLElement)) {
+      return;
     }
 
-    if (event.key.toLowerCase() === "e") {
-      contentRef.current?.edit();
+    if (
+      target.isContentEditable ||
+      ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+    ) {
+      return;
     }
 
-    if (event.key === "Escape") {
-      // TODO: pressing escape triggers an error
-      contentRef.current?.cancel();
-    }
-  }
+    contentRef.current?.edit();
+  });
+
+  useKeyPress(["Meta+Enter", "Control+Enter"], (event) => {
+    contentRef.current?.save();
+  });
+
+  useKeyPress("Escape", (event) => {
+    contentRef.current?.cancel();
+  });
 
   return (
     <CurrentUserStandupCardProvider>
-      <Card onKeyDown={handleKeyDown}>
+      <Card>
         <CardContentDataResolver fallback={<CardContentSkeleton />}>
           {({ currentUser, board, standups, structure }) => {
             return (
