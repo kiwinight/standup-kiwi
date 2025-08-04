@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   Flex,
   Grid,
+  IconButton,
   Text,
 } from "@radix-ui/themes";
 
@@ -18,13 +19,13 @@ export function NavBar() {
     <Flex
       position="sticky"
       height="56px"
-      className="px-4 z-10 bg-white"
+      className="px-4 z-10 bg-(--color-background)"
       top="0"
     >
       <Grid
         width="100%"
         columns={{
-          initial: "1fr 1fr",
+          initial: "auto 1fr",
           sm: "1fr auto 1fr",
         }}
         align="center"
@@ -109,15 +110,20 @@ export function NavBar() {
 
         <Flex gap="2" justify="end">
           <Button asChild size="2" radius="large" highContrast>
-            <a href={import.meta.env.PUBLIC_APP_URL}>Start Now</a>
+            <a href={import.meta.env.PUBLIC_APP_URL}>Get started</a>
           </Button>
 
           <Box display={{ initial: "block", sm: "none" }}>
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
-                <Button variant="surface" size="2" highContrast radius="large">
+                <IconButton
+                  variant="surface"
+                  size="2"
+                  highContrast
+                  radius="large"
+                >
                   <HamburgerMenuIcon width={15} height={15} />
-                </Button>
+                </IconButton>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
                 <DropdownMenu.Item asChild>

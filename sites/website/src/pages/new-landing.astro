@@ -1,0 +1,23 @@
+---
+import "@radix-ui/themes/styles.css";
+import "../styles/global.css";
+import NewLandingContent from "./new-landing-content.tsx";
+
+import BaseHead from "../components/base-head.astro";
+import ContentHead from "../components/content-head.astro";
+import { SITE_DESCRIPTION } from "../constants.ts";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead />
+    <ContentHead
+      title="The standup board for teams and solo experts"
+      description={SITE_DESCRIPTION}
+    />
+  </head>
+
+  <body>
+    <NewLandingContent client:load />
+  </body>
+</html>

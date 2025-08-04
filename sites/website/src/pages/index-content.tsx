@@ -1,521 +1,62 @@
 import {
+  Avatar,
+  Badge,
   Box,
   Button,
   Card,
   Container,
   Flex,
+  Grid,
   Heading,
+  Inset,
   Section,
-  SegmentedControl,
   Text,
   Theme,
 } from "@radix-ui/themes";
-import { BoxModelIcon, Pencil2Icon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+
+import howItWorksDemo3By4 from "../assets/overview/how-it-works-1080p-60fps-web-3x4.mp4";
+import howItWorksDemo16By9 from "../assets/overview/how-it-works-1080p-30fps-web-16x9.mp4";
+
 import { NavBar } from "../components/nav-bar";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 
-function PreviewA() {
-  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString(
-    "en-US",
-    {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
-  const dayBeforeYesterday = new Date(
-    Date.now() - 86400000 * 2
-  ).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+import { ClockFadingIcon, GithubIcon, LayoutGridIcon } from "lucide-react";
+
+import { ExternalLinkIcon } from "@radix-ui/react-icons";
+import { Accordion as AccordionPrimitive } from "radix-ui";
+
+function Hero({
+  goodVibesGradientImgSlot,
+  standupKiwiResponsiveMockupImgSlot,
+}: {
+  goodVibesGradientImgSlot: never;
+  standupKiwiResponsiveMockupImgSlot: never;
+}) {
   return (
-    <div
-      className="rt-Container rt-r-size-4 rt-r-px-4 rt-r-my-7"
-      style={{
-        transform: "scale(0.95)",
-        transformOrigin: "top",
-      }}
-    >
-      <div
-        className="rt-ContainerInner rt-r-max-w"
-        style={{
-          maxWidth: "672px",
+    <>
+      <Section
+        size={{
+          initial: "3",
+          sm: "4",
         }}
+        className="overflow-hidden relative"
       >
-        <div className="rt-Flex rt-r-fd-column rt-r-gap-7">
-          <div className="rt-Flex rt-r-fd-column sm:rt-r-fd-row rt-r-ai-start sm:rt-r-ai-center rt-r-jc-space-between">
-            <span className="rt-Text rt-r-size-6 rt-r-weight-bold">
-              Daily Touchbase
-            </span>
-            <div className="rt-Flex rt-r-gap-5 rt-r-mt-4 sm:rt-r-mt-0">
-              <a
-                data-accent-color=""
-                className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-ghost rt-high-contrast rt-Button"
-                href="/boards/27/settings/sharing"
-                data-discover="true"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 7.50003C5 8.32845 4.32843 9.00003 3.5 9.00003C2.67157 9.00003 2 8.32845 2 7.50003C2 6.6716 2.67157 6.00003 3.5 6.00003C4.32843 6.00003 5 6.6716 5 7.50003ZM5.71313 8.66388C5.29445 9.45838 4.46048 10 3.5 10C2.11929 10 1 8.88074 1 7.50003C1 6.11931 2.11929 5.00003 3.5 5.00003C4.46048 5.00003 5.29445 5.54167 5.71313 6.33616L9.10424 4.21671C9.03643 3.98968 9 3.74911 9 3.50003C9 2.11932 10.1193 1.00003 11.5 1.00003C12.8807 1.00003 14 2.11932 14 3.50003C14 4.88074 12.8807 6.00003 11.5 6.00003C10.6915 6.00003 9.97264 5.61624 9.51566 5.0209L5.9853 7.22738C5.99502 7.31692 6 7.40789 6 7.50003C6 7.59216 5.99502 7.68312 5.9853 7.77267L9.51567 9.97915C9.97265 9.38382 10.6915 9.00003 11.5 9.00003C12.8807 9.00003 14 10.1193 14 11.5C14 12.8807 12.8807 14 11.5 14C10.1193 14 9 12.8807 9 11.5C9 11.2509 9.03643 11.0104 9.10425 10.7833L5.71313 8.66388ZM11.5 5.00003C12.3284 5.00003 13 4.32846 13 3.50003C13 2.6716 12.3284 2.00003 11.5 2.00003C10.6716 2.00003 10 2.6716 10 3.50003C10 4.32846 10.6716 5.00003 11.5 5.00003ZM13 11.5C13 12.3285 12.3284 13 11.5 13C10.6716 13 10 12.3285 10 11.5C10 10.6716 10.6716 10 11.5 10C12.3284 10 13 10.6716 13 11.5Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Share
-              </a>
-              <a
-                data-accent-color=""
-                className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-ghost rt-high-contrast rt-Button"
-                href="/boards/27/settings"
-                data-discover="true"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.07095 0.650238C6.67391 0.650238 6.32977 0.925096 6.24198 1.31231L6.0039 2.36247C5.6249 2.47269 5.26335 2.62363 4.92436 2.81013L4.01335 2.23585C3.67748 2.02413 3.23978 2.07312 2.95903 2.35386L2.35294 2.95996C2.0722 3.2407 2.0232 3.6784 2.23493 4.01427L2.80942 4.92561C2.62307 5.2645 2.47227 5.62594 2.36216 6.00481L1.31209 6.24287C0.924883 6.33065 0.650024 6.6748 0.650024 7.07183V7.92897C0.650024 8.32601 0.924883 8.67015 1.31209 8.75794L2.36228 8.99603C2.47246 9.375 2.62335 9.73652 2.80979 10.0755L2.2354 10.9867C2.02367 11.3225 2.07267 11.7602 2.35341 12.041L2.95951 12.6471C3.24025 12.9278 3.67795 12.9768 4.01382 12.7651L4.92506 12.1907C5.26384 12.377 5.62516 12.5278 6.0039 12.6379L6.24198 13.6881C6.32977 14.0753 6.67391 14.3502 7.07095 14.3502H7.92809C8.32512 14.3502 8.66927 14.0753 8.75705 13.6881L8.99505 12.6383C9.37411 12.5282 9.73573 12.3773 10.0748 12.1909L10.986 12.7653C11.3218 12.977 11.7595 12.928 12.0403 12.6473L12.6464 12.0412C12.9271 11.7604 12.9761 11.3227 12.7644 10.9869L12.1902 10.076C12.3768 9.73688 12.5278 9.37515 12.638 8.99596L13.6879 8.75794C14.0751 8.67015 14.35 8.32601 14.35 7.92897V7.07183C14.35 6.6748 14.0751 6.33065 13.6879 6.24287L12.6381 6.00488C12.528 5.62578 12.3771 5.26414 12.1906 4.92507L12.7648 4.01407C12.9766 3.6782 12.9276 3.2405 12.6468 2.95975L12.0407 2.35366C11.76 2.07292 11.3223 2.02392 10.9864 2.23565L10.0755 2.80989C9.73622 2.62328 9.37437 2.47229 8.99505 2.36209L8.75705 1.31231C8.66927 0.925096 8.32512 0.650238 7.92809 0.650238H7.07095ZM4.92053 3.81251C5.44724 3.44339 6.05665 3.18424 6.71543 3.06839L7.07095 1.50024H7.92809L8.28355 3.06816C8.94267 3.18387 9.5524 3.44302 10.0794 3.81224L11.4397 2.9547L12.0458 3.56079L11.1882 4.92117C11.5573 5.44798 11.8164 6.0575 11.9321 6.71638L13.5 7.07183V7.92897L11.932 8.28444C11.8162 8.94342 11.557 9.55301 11.1878 10.0798L12.0453 11.4402L11.4392 12.0462L10.0787 11.1886C9.55192 11.5576 8.94241 11.8166 8.28355 11.9323L7.92809 13.5002H7.07095L6.71543 11.932C6.0569 11.8162 5.44772 11.5572 4.92116 11.1883L3.56055 12.046L2.95445 11.4399L3.81213 10.0794C3.4431 9.55266 3.18403 8.94326 3.06825 8.2845L1.50002 7.92897V7.07183L3.06818 6.71632C3.18388 6.05765 3.44283 5.44833 3.81171 4.92165L2.95398 3.561L3.56008 2.95491L4.92053 3.81251ZM9.02496 7.50008C9.02496 8.34226 8.34223 9.02499 7.50005 9.02499C6.65786 9.02499 5.97513 8.34226 5.97513 7.50008C5.97513 6.65789 6.65786 5.97516 7.50005 5.97516C8.34223 5.97516 9.02496 6.65789 9.02496 7.50008ZM9.92496 7.50008C9.92496 8.83932 8.83929 9.92499 7.50005 9.92499C6.1608 9.92499 5.07513 8.83932 5.07513 7.50008C5.07513 6.16084 6.1608 5.07516 7.50005 5.07516C8.83929 5.07516 9.92496 6.16084 9.92496 7.50008Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Settings
-              </a>
-            </div>
-          </div>
-          <div
-            tabIndex={0}
-            className="rt-reset rt-BaseCard rt-Card rt-r-size-2 sm:rt-r-size-4 rt-variant-surface"
-          >
-            <div className="rt-Flex rt-r-fd-column rt-r-gap-5">
-              <span className="rt-Text rt-r-size-4 rt-r-weight-bold">
-                Today's Standup
-              </span>
-              <div className="rt-Flex rt-r-fd-column rt-r-gap-5">
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 font-[var(--font-weight-semibold)]">
-                    What did you do yesterday?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>
-                        Connected the notification settings UI to live data
-                      </li>
-                      <li>
-                        Completed edge case testing with QA—
-                        <strong>no major issues found</strong>
-                      </li>
-                      <li>
-                        Drafted the first version of the v1.3.0{" "}
-                        <a href="https://standupkiwi.com/">release notes</a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 font-[var(--font-weight-semibold)]">
-                    What will you do today?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>Final UI tweaks based on design feedback</li>
-                      <li>Prep the release branch for v1.3.0</li>
-                      <li>
-                        <del>
-                          Circle back with content team on onboarding modal copy
-                        </del>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div className="rt-Flex rt-r-jc-end rt-r-gap-2">
-                <button
-                  data-accent-color=""
-                  className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-surface rt-high-contrast rt-Button"
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="rt-Flex rt-r-fd-column rt-r-gap-5">
-            <span className="rt-Text rt-r-size-3 rt-r-weight-bold">
-              Past Standups
-            </span>
-            <div className="rt-reset rt-BaseCard rt-Card rt-r-size-2 sm:rt-r-size-4 rt-variant-surface">
-              <div className="rt-Flex rt-r-fd-column rt-r-ai-start rt-r-gap-5">
-                <span
-                  data-state="closed"
-                  className="rt-Text rt-r-size-4 rt-r-weight-bold"
-                >
-                  {yesterday}
-                </span>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    What did you do yesterday?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>
-                        <strong>Built the first draft</strong> of the
-                        notification settings UI
-                      </li>
-                      <li>Synced with backend team on alert API versioning</li>
-                      <li>
-                        Wrote and shared the sprint review draft for feedback
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    What will you do today?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>
-                        Polish notification UI and hook it up to real data
-                      </li>
-                      <li>Test alert edge cases with QA</li>
-                      <li>
-                        Start drafting release notes for{" "}
-                        <a href="https://standupkiwi.com">v1.3.0</a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    Do you have any blockers?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>Still waiting on onboarding modal copy</li>
-                      <li>
-                        Need confirmation from product on fallback behavior for
-                        alert failures
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="rt-reset rt-BaseCard rt-Card rt-r-size-2 sm:rt-r-size-4 rt-variant-surface">
-              <div className="rt-Flex rt-r-fd-column rt-r-ai-start rt-r-gap-5">
-                <span
-                  data-state="closed"
-                  className="rt-Text rt-r-size-4 rt-r-weight-bold"
-                >
-                  {dayBeforeYesterday}
-                </span>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    What did you do yesterday?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>Wrapped up the auth flow redesign for mobile</li>
-                      <li>
-                        Fixed a <del>production</del> bug causing time zone
-                        issues in scheduled reports
-                      </li>
-                      <li>
-                        Reviewed PRs for the dashboard loading improvements
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    What will you do today?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>
-                        Start implementing the new notification settings UI
-                      </li>
-                      <li>
-                        Coordinate with backend on API versioning for alerts
-                      </li>
-                      <li>Draft a summary for next week's sprint review</li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                  <span className="rt-Text rt-r-size-2 rt-r-weight-medium">
-                    Do you have any blockers?
-                  </span>
-                  <div className="rt-Box prose prose-sm prose-custom">
-                    <ul>
-                      <li>
-                        Waiting on final copy from content team for the
-                        onboarding modal
-                      </li>
-                      <li>
-                        <strong>Still need clarity</strong> on edge case
-                        behavior for time-based triggers
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+        <Box className="absolute inset-0">
+          <Box className="w-full h-full [&>astro-slot]:w-full [&>astro-slot]:h-full [&>astro-slot>img]:w-full [&>astro-slot>img]:h-full [&>astro-slot>img]:object-cover [&>astro-slot>img]:object-center">
+            {goodVibesGradientImgSlot}
+          </Box>
+          <Box className="absolute inset-0 bg-gradient-to-b from-[var(--color-background)] to-[rgba(255,255,255,0.75)]" />
+        </Box>
 
-function PreviewB() {
-  return (
-    <div
-      className="rt-Container rt-r-size-4 rt-r-px-4 rt-r-my-7"
-      style={{
-        transform: "scale(0.95)",
-        transformOrigin: "top",
-      }}
-    >
-      <div
-        className="rt-ContainerInner rt-r-max-w"
-        style={{
-          maxWidth: "672px",
-        }}
-      >
-        <div className="rt-Flex rt-r-fd-column rt-r-gap-7">
-          <div className="rt-Flex rt-r-fd-column sm:rt-r-fd-row rt-r-ai-start sm:rt-r-ai-center rt-r-jc-space-between">
-            <span className="rt-Text rt-r-size-6 rt-r-weight-bold">
-              Team Kiwi and the Night – Daily Sync
-            </span>
-            <div className="rt-Flex rt-r-gap-5 rt-r-mt-4 sm:rt-r-mt-0">
-              <a
-                data-accent-color=""
-                className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-ghost rt-high-contrast rt-Button"
-                href="/boards/28/settings/sharing"
-                data-discover="true"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 7.50003C5 8.32845 4.32843 9.00003 3.5 9.00003C2.67157 9.00003 2 8.32845 2 7.50003C2 6.6716 2.67157 6.00003 3.5 6.00003C4.32843 6.00003 5 6.6716 5 7.50003ZM5.71313 8.66388C5.29445 9.45838 4.46048 10 3.5 10C2.11929 10 1 8.88074 1 7.50003C1 6.11931 2.11929 5.00003 3.5 5.00003C4.46048 5.00003 5.29445 5.54167 5.71313 6.33616L9.10424 4.21671C9.03643 3.98968 9 3.74911 9 3.50003C9 2.11932 10.1193 1.00003 11.5 1.00003C12.8807 1.00003 14 2.11932 14 3.50003C14 4.88074 12.8807 6.00003 11.5 6.00003C10.6915 6.00003 9.97264 5.61624 9.51566 5.0209L5.9853 7.22738C5.99502 7.31692 6 7.40789 6 7.50003C6 7.59216 5.99502 7.68312 5.9853 7.77267L9.51567 9.97915C9.97265 9.38382 10.6915 9.00003 11.5 9.00003C12.8807 9.00003 14 10.1193 14 11.5C14 12.8807 12.8807 14 11.5 14C10.1193 14 9 12.8807 9 11.5C9 11.2509 9.03643 11.0104 9.10425 10.7833L5.71313 8.66388ZM11.5 5.00003C12.3284 5.00003 13 4.32846 13 3.50003C13 2.6716 12.3284 2.00003 11.5 2.00003C10.6716 2.00003 10 2.6716 10 3.50003C10 4.32846 10.6716 5.00003 11.5 5.00003ZM13 11.5C13 12.3285 12.3284 13 11.5 13C10.6716 13 10 12.3285 10 11.5C10 10.6716 10.6716 10 11.5 10C12.3284 10 13 10.6716 13 11.5Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Share
-              </a>
-              <a
-                data-accent-color=""
-                className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-ghost rt-high-contrast rt-Button"
-                href="/boards/28/settings"
-                data-discover="true"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.07095 0.650238C6.67391 0.650238 6.32977 0.925096 6.24198 1.31231L6.0039 2.36247C5.6249 2.47269 5.26335 2.62363 4.92436 2.81013L4.01335 2.23585C3.67748 2.02413 3.23978 2.07312 2.95903 2.35386L2.35294 2.95996C2.0722 3.2407 2.0232 3.6784 2.23493 4.01427L2.80942 4.92561C2.62307 5.2645 2.47227 5.62594 2.36216 6.00481L1.31209 6.24287C0.924883 6.33065 0.650024 6.6748 0.650024 7.07183V7.92897C0.650024 8.32601 0.924883 8.67015 1.31209 8.75794L2.36228 8.99603C2.47246 9.375 2.62335 9.73652 2.80979 10.0755L2.2354 10.9867C2.02367 11.3225 2.07267 11.7602 2.35341 12.041L2.95951 12.6471C3.24025 12.9278 3.67795 12.9768 4.01382 12.7651L4.92506 12.1907C5.26384 12.377 5.62516 12.5278 6.0039 12.6379L6.24198 13.6881C6.32977 14.0753 6.67391 14.3502 7.07095 14.3502H7.92809C8.32512 14.3502 8.66927 14.0753 8.75705 13.6881L8.99505 12.6383C9.37411 12.5282 9.73573 12.3773 10.0748 12.1909L10.986 12.7653C11.3218 12.977 11.7595 12.928 12.0403 12.6473L12.6464 12.0412C12.9271 11.7604 12.9761 11.3227 12.7644 10.9869L12.1902 10.076C12.3768 9.73688 12.5278 9.37515 12.638 8.99596L13.6879 8.75794C14.0751 8.67015 14.35 8.32601 14.35 7.92897V7.07183C14.35 6.6748 14.0751 6.33065 13.6879 6.24287L12.6381 6.00488C12.528 5.62578 12.3771 5.26414 12.1906 4.92507L12.7648 4.01407C12.9766 3.6782 12.9276 3.2405 12.6468 2.95975L12.0407 2.35366C11.76 2.07292 11.3223 2.02392 10.9864 2.23565L10.0755 2.80989C9.73622 2.62328 9.37437 2.47229 8.99505 2.36209L8.75705 1.31231C8.66927 0.925096 8.32512 0.650238 7.92809 0.650238H7.07095ZM4.92053 3.81251C5.44724 3.44339 6.05665 3.18424 6.71543 3.06839L7.07095 1.50024H7.92809L8.28355 3.06816C8.94267 3.18387 9.5524 3.44302 10.0794 3.81224L11.4397 2.9547L12.0458 3.56079L11.1882 4.92117C11.5573 5.44798 11.8164 6.0575 11.9321 6.71638L13.5 7.07183V7.92897L11.932 8.28444C11.8162 8.94342 11.557 9.55301 11.1878 10.0798L12.0453 11.4402L11.4392 12.0462L10.0787 11.1886C9.55192 11.5576 8.94241 11.8166 8.28355 11.9323L7.92809 13.5002H7.07095L6.71543 11.932C6.0569 11.8162 5.44772 11.5572 4.92116 11.1883L3.56055 12.046L2.95445 11.4399L3.81213 10.0794C3.4431 9.55266 3.18403 8.94326 3.06825 8.2845L1.50002 7.92897V7.07183L3.06818 6.71632C3.18388 6.05765 3.44283 5.44833 3.81171 4.92165L2.95398 3.561L3.56008 2.95491L4.92053 3.81251ZM9.02496 7.50008C9.02496 8.34226 8.34223 9.02499 7.50005 9.02499C6.65786 9.02499 5.97513 8.34226 5.97513 7.50008C5.97513 6.65789 6.65786 5.97516 7.50005 5.97516C8.34223 5.97516 9.02496 6.65789 9.02496 7.50008ZM9.92496 7.50008C9.92496 8.83932 8.83929 9.92499 7.50005 9.92499C6.1608 9.92499 5.07513 8.83932 5.07513 7.50008C5.07513 6.16084 6.1608 5.07516 7.50005 5.07516C8.83929 5.07516 9.92496 6.16084 9.92496 7.50008Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Settings
-              </a>
-            </div>
-          </div>
-          <div
-            tabIndex={0}
-            className="rt-reset rt-BaseCard rt-Card rt-r-size-2 sm:rt-r-size-4 rt-variant-surface"
-          >
-            <form method="post">
-              <div className="rt-Flex rt-r-fd-column">
-                <span className="rt-Text rt-r-size-4 rt-r-weight-bold">
-                  Today's Standup
-                </span>
-                <div className="rt-Flex rt-r-fd-column rt-r-gap-5 rt-r-mt-5">
-                  <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                    <label>
-                      <div className="rt-Flex rt-r-ai-center rt-r-gap-2">
-                        <span className="rt-Text rt-r-size-2 font-[var(--font-weight-semibold)]">
-                          What did you do yesterday?
-                        </span>
-                        <span
-                          data-accent-color="gray"
-                          className="rt-Text rt-r-size-1"
-                        >
-                          Required
-                        </span>
-                      </div>
-                    </label>
-                    <div
-                      className="rt-TextAreaRoot rt-r-size-2 rt-variant-soft rt-r-resize-vertical w-full !min-h-[80px]"
-                      style={{
-                        height: "160px",
-                      }}
-                    >
-                      <textarea
-                        className="rt-reset rt-TextAreaInput"
-                        placeholder="Write your reply here..."
-                        style={{
-                          height: "auto",
-                        }}
-                        defaultValue={`- Refactored the user profile component
-- Fixed a bug with **timezone conversion** on the dashboard 
-- Reviewed [PR #142](https://github.com/kiwinight/standup-kiwi/issues/142) from Joseph`}
-                      />
-                    </div>
-                  </div>
-                  <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                    <label>
-                      <div className="rt-Flex rt-r-ai-center rt-r-gap-2">
-                        <span className="rt-Text rt-r-size-2 font-[var(--font-weight-semibold)]">
-                          What will you do today?
-                        </span>
-                        <span
-                          data-accent-color="gray"
-                          className="rt-Text rt-r-size-1"
-                        >
-                          Required
-                        </span>
-                      </div>
-                    </label>
-                    <div
-                      className="rt-TextAreaRoot rt-r-size-2 rt-variant-soft rt-r-resize-vertical w-full !min-h-[80px]"
-                      style={{
-                        height: "120px",
-                      }}
-                    >
-                      <textarea
-                        className="rt-reset rt-TextAreaInput"
-                        placeholder="Write your reply here..."
-                        defaultValue={`- Start implementing the onboarding flow for new users
-- ~~Set up a feature flag for beta testing~~`}
-                      />
-                    </div>
-                  </div>
-                  <div className="rt-Flex rt-r-fd-column rt-r-gap-2">
-                    <label>
-                      <div className="rt-Flex rt-r-ai-center rt-r-gap-2">
-                        <span className="rt-Text rt-r-size-2 font-[var(--font-weight-semibold)]">
-                          Do you have any blockers?
-                        </span>
-                      </div>
-                    </label>
-                    <div className="rt-TextAreaRoot rt-r-size-2 rt-variant-soft rt-r-resize-vertical w-full !min-h-[80px]">
-                      <textarea
-                        className="rt-reset rt-TextAreaInput"
-                        placeholder="Write your reply here..."
-                        defaultValue="None at the moment, but I might need API clarification from Joseph later today"
-                      />
-                    </div>
-                    <span
-                      data-accent-color="gray"
-                      className="rt-Text rt-r-size-2"
-                    >
-                      Share any challenges or obstacles that might slow down
-                      your progress
-                    </span>
-                  </div>
-                </div>
-                <div className="rt-Flex rt-r-jc-end rt-r-gap-2 rt-r-mt-5">
-                  <button
-                    data-accent-color=""
-                    type="button"
-                    className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-surface rt-high-contrast rt-Button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    data-accent-color=""
-                    type="submit"
-                    className="rt-reset rt-BaseButton rt-r-size-2 rt-variant-solid rt-high-contrast rt-Button"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function GridBackground() {
-  const GRID_SIZE = 32;
-  const OPACITY = 0.03;
-  return (
-    <Box
-      position="absolute"
-      top="0"
-      left="0"
-      right="0"
-      bottom="0"
-      style={{
-        backgroundImage: `linear-gradient(to right, rgba(0,0,0,${OPACITY}) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,${OPACITY}) 1px, transparent 1px)`,
-        pointerEvents: "none",
-        backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
-        backgroundPosition: `${GRID_SIZE - 1}px ${GRID_SIZE - 9}px`,
-      }}
-    />
-  );
-}
-
-type Props = {};
-
-function IndexContent({}: Props) {
-  const [selectedPreview, setSelectedPreview] = useState("a");
-  return (
-    <Theme className="relative" accentColor="gray">
-      <NavBar />
-      <Box
-        py={{
-          // initial: "5",
-          sm: "7",
-        }}
-        className="bg-linear-to-b from-white via-[var(--gray-1)] to-white"
-      >
-        {/* <GridBackground /> */}
-
-        <Section
-          size={{
-            initial: "3",
-            sm: "4",
-          }}
-          className="relative"
-        >
+        <div className="relative">
           <Container
             size={{
               initial: "4",
               sm: "3",
+            }}
+            maxWidth={{
+              sm: "1248px",
             }}
             px={{
               initial: "4",
@@ -543,134 +84,1336 @@ function IndexContent({}: Props) {
                   sm: "center",
                 }}
               >
-                The standup board <br className="hidden sm:block" />
-                for teams and solo experts
+                The standup tool that
+                <br className="hidden sm:block" />
+                <Text className="italic" weight="bold">
+                  {" "}
+                  actually works
+                </Text>
               </Heading>
-
+              <Flex gap="2" wrap="wrap" justify="center">
+                <Badge size="2">
+                  <LayoutGridIcon size={15} strokeWidth={1.5} />
+                  Organized Board
+                </Badge>
+                <Badge size="2">
+                  <ClockFadingIcon size={15} strokeWidth={1.5} />
+                  Shorter Meetings
+                </Badge>
+                <Badge size="2">
+                  <GithubIcon size={15} strokeWidth={1.5} />
+                  Open Source
+                </Badge>
+              </Flex>
               <Text
                 size={{
-                  initial: "4",
-                  // initial: "3",
-                  // sm: "4",
+                  initial: "3",
                 }}
-                color="gray"
                 align={{
                   initial: "center",
                   sm: "center",
                 }}
               >
-                Standup Kiwi is an open-source tool for sharing and recording
-                daily standups
-                <br className="hidden sm:block" />— async or live — in a calm,
-                clear, and effortless way.
+                Skip the endless meetings and scattered chat threads.
+                <br className="hidden sm:block" /> Standup Kiwi gives you a
+                simple, organized board to share and record daily updates
+                <br className="hidden sm:block" />— whether you work solo or
+                with a team.
               </Text>
 
               <Button
-                // className="self-start!"
                 asChild
-                className="w-full! sm:w-auto!"
                 size={{
                   initial: "3",
                   sm: "4",
                 }}
-                // color="indigo"
                 highContrast
               >
-                <a href={import.meta.env.PUBLIC_APP_URL}>Start Standup Kiwi</a>
+                <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
               </Button>
 
-              <Text size="3" color="gray" className="italic" highContrast>
-                Currently in beta — completely free to use!
-              </Text>
+              <Box mt="4" />
+
+              <Box className="[&>astro-slot>img]:max-h-[520px] [&>astro-slot>img]:max-w-none sm:[&>astro-slot>img]:w-full sm:[&>astro-slot>img]:max-h-[906px] sm:[&>astro-slot>img]:max-w-full sm:[&>astro-slot>img]:h-auto">
+                {standupKiwiResponsiveMockupImgSlot}
+              </Box>
             </Flex>
           </Container>
-        </Section>
+        </div>
+      </Section>
+    </>
+  );
+}
 
-        <Section
-          size={{
+function Problem() {
+  const problems = [
+    {
+      title: "Endless meetings...",
+      description:
+        "Daily standup meetings that drag on for 30 minutes when everyone just needs to share quick updates.",
+    },
+    {
+      title: "Lost in Slack...",
+      description:
+        "Scattered updates buried in threads that you can never find later when you need them.",
+    },
+    {
+      title: "Tool overload...",
+      description:
+        "Over-engineered tools like Jira, Notion templates, or Linear that feel like overkill for simple daily check-ins.",
+    },
+    {
+      title: "No record keeping...",
+      description:
+        "When your boss asks 'what's your team been working on?' you scramble to remember what happened last week.",
+    },
+  ];
+
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "1248px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex
+          direction="column"
+          gap={{
+            initial: "4",
+            sm: "5",
+          }}
+          align={{
+            initial: "center",
+            sm: "center",
+          }}
+        >
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+          >
+            Are you tired of...?
+          </Heading>
+
+          <Box mt="1" />
+
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "4",
+            }}
+            gap="4"
+          >
+            {problems.map((problem, index) => {
+              const isLast = index === problems.length - 1;
+
+              return (
+                <Card
+                  key={problem.title}
+                  size={{
+                    initial: "2",
+                    sm: "3",
+                  }}
+                  variant="classic"
+                  className={isLast ? "hidden! sm:block!" : ""}
+                >
+                  <Heading
+                    as="h3"
+                    size={{
+                      initial: "4",
+                      sm: "5",
+                    }}
+                    mb="2"
+                    className="italic!"
+                  >
+                    {problem.title}
+                  </Heading>
+                  <Text>{problem.description}</Text>
+                </Card>
+              );
+            })}
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function MeetStandupKiwi({
+  autumnalPeachGradientImgSlot,
+  standupKiwiBoardDemoImgSlot,
+}: {
+  autumnalPeachGradientImgSlot: never;
+  standupKiwiBoardDemoImgSlot: never;
+}) {
+  const benefits = [
+    {
+      title: (
+        <>
+          Turn 30-minute meetings
+          <br className="hidden sm:block" /> into focused 5-minute standups
+        </>
+      ),
+      description:
+        "Prepare your updates beforehand, then share the board during your standup. Everyone comes prepared, making meetings shorter and more focused. Or skip the meeting entirely. It's your choice.",
+    },
+    {
+      title: (
+        <>
+          Everything organized in one place
+          <br className="hidden sm:block" />
+        </>
+      ),
+      description:
+        "No more scrolling through weeks of Slack messages to find that one update you need. All your team's progress lives in clean, organized cards with a clear browsable history.",
+    },
+    {
+      title: (
+        <>
+          Simple and focused - built just for standups
+          <br className="hidden sm:block" />
+        </>
+      ),
+      description:
+        "Unlike Jira, Notion templates, or Linear, Standup Kiwi does one thing really well: daily standups. No complex project management features you don't need, no overwhelming setup process, just clean daily updates.",
+    },
+    {
+      title: (
+        <>
+          Never lose track of what your team accomplished
+          <br className="hidden sm:block" />
+        </>
+      ),
+      description:
+        "When your boss asks 'what's your team been working on?' you'll have a clear, browsable history instead of scrambling to remember. Perfect for performance reviews, progress reports, and onboarding new team members.",
+    },
+  ];
+
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth="992px"
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex
+          direction="column"
+          gap={{
+            initial: "4",
+            sm: "5",
+          }}
+          align="center"
+        >
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            Meet Standup Kiwi —
+            <br />
+            Turn dragging meetings into quick sync
+          </Heading>
+          <Text align="center">
+            Get your time back, keep your team aligned, and always know what's
+            happening.
+            <br />
+            No more scrambling for answers when your boss asks for updates.
+          </Text>
+
+          <Box mt="4" />
+        </Flex>
+      </Container>
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "1248px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Grid
+          columns={{
             initial: "1",
             sm: "2",
           }}
-          className="relative"
+          gap="4"
         >
-          <Container
+          <Card
+            className="sm:col-span-2 pb-0! overflow-hidden relative"
             size={{
-              initial: "4",
-              sm: "4",
-            }}
-            px={{
-              initial: "4",
+              initial: "2",
+              sm: "5",
             }}
           >
-            <Flex
-              direction="column"
-              gap={{
-                initial: "4",
-                sm: "5",
-              }}
-              align={{
-                initial: "center",
-                sm: "center",
-              }}
-            >
-              <SegmentedControl.Root
-                className="w-full sm:max-w-[296px]"
-                defaultValue={selectedPreview}
-                onValueChange={setSelectedPreview}
-                radius="full"
-              >
-                <SegmentedControl.Item value="a">
-                  <Flex align="center" gap="2">
-                    <BoxModelIcon className="w-[15px] sm:w-[18px] h-[15px] sm:h-[18px]" />
-                    Board
-                  </Flex>
-                </SegmentedControl.Item>
-                <SegmentedControl.Item value="b">
-                  <Flex align="center" gap="2">
-                    <Pencil2Icon className="w-[15px] sm:w-[18px] h-[15px] sm:h-[18px]" />
-                    Editor
-                  </Flex>
-                </SegmentedControl.Item>
-              </SegmentedControl.Root>
+            <Box className="absolute inset-0">
+              <Box className="w-full h-full [&>astro-slot]:w-full [&>astro-slot]:h-full [&>astro-slot>img]:w-full [&>astro-slot>img]:h-full [&>astro-slot>img]:object-cover [&>astro-slot>img]:object-center">
+                {autumnalPeachGradientImgSlot}
+              </Box>
+              <Box className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.85),rgba(255,255,255,0.85))]" />
+            </Box>
 
-              <Text
+            <div className="relative">
+              <Inset side="top">
+                <Box
+                  pl={{
+                    initial: "40%",
+                    sm: "9",
+                  }}
+                  pt={{
+                    initial: "52%",
+                    sm: "9",
+                  }}
+                  pr={{
+                    sm: "9",
+                  }}
+                  pb="0"
+                >
+                  <Box className="[&>astro-slot>img]:aspect-[3/4] [&>astro-slot>img]:scale-200 [&>astro-slot>img]:object-cover [&>astro-slot>img]:object-left sm:[&>astro-slot>img]:aspect-[2/1] sm:[&>astro-slot>img]:scale-100 sm:[&>astro-slot>img]:object-top">
+                    {standupKiwiBoardDemoImgSlot}
+                  </Box>
+                </Box>
+              </Inset>
+            </div>
+          </Card>
+          {benefits.map((benefit, index) => {
+            const isLast = index === benefits.length - 1;
+
+            return (
+              <Card
+                key={benefit.description}
+                variant="classic"
+                size={{ initial: "2", sm: "5" }}
+                className={isLast ? "hidden! sm:block!" : ""}
+              >
+                <Flex direction="column" gap="3">
+                  <Heading
+                    as="h3"
+                    size={{
+                      initial: "4",
+                      sm: "5",
+                    }}
+                  >
+                    {benefit.title}
+                  </Heading>
+                  <Text>{benefit.description}</Text>
+                </Flex>
+              </Card>
+            );
+          })}
+        </Grid>
+      </Container>
+    </Section>
+  );
+}
+
+function HowItWorks() {
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Apply playback rate to both videos
+    if (mobileVideoRef.current) {
+      mobileVideoRef.current.playbackRate = 0.75;
+    }
+    if (desktopVideoRef.current) {
+      desktopVideoRef.current.playbackRate = 0.75;
+    }
+  }, []);
+
+  // Mobile video viewport observer
+  useEffect(() => {
+    const video = mobileVideoRef.current;
+    if (!video) return;
+
+    const isVideoVisible = () => window.innerWidth <= 767;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch((error) => {
+              console.log("Mobile video autoplay prevented:", error);
+            });
+          } else {
+            video.pause();
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "0px",
+      }
+    );
+
+    // Setup observer and media query listener
+    if (isVideoVisible()) {
+      observer.observe(video);
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const handleMediaChange = () => {
+      if (isVideoVisible()) {
+        observer.observe(video);
+      } else {
+        observer.unobserve(video);
+        video.pause();
+      }
+    };
+
+    mediaQuery.addListener(handleMediaChange);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeListener(handleMediaChange);
+    };
+  }, []);
+
+  // Desktop video viewport observer
+  useEffect(() => {
+    const video = desktopVideoRef.current;
+    if (!video) return;
+
+    const isVideoVisible = () => window.innerWidth > 767;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch((error) => {
+              console.log("Desktop video autoplay prevented:", error);
+            });
+          } else {
+            video.pause();
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "0px",
+      }
+    );
+
+    // Setup observer and media query listener
+    if (isVideoVisible()) {
+      observer.observe(video);
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handleMediaChange = () => {
+      if (isVideoVisible()) {
+        observer.observe(video);
+      } else {
+        observer.unobserve(video);
+        video.pause();
+      }
+    };
+
+    mediaQuery.addListener(handleMediaChange);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeListener(handleMediaChange);
+    };
+  }, []);
+
+  const steps = [
+    {
+      title: "Create your board",
+      description:
+        "Set up a team or personal board in seconds. Name it whatever makes sense — 'Daily Progress,' 'Team Alpha,' or just your name. No complex setup.",
+    },
+    {
+      title: "Write your update",
+      description:
+        "Answer the classic questions: What did you do yesterday? What's planned for today? Any blockers? Use our clean markdown editor to format lists, add links, and make your updates scannable.",
+    },
+    {
+      title: "Stay organized",
+      description:
+        "Your updates become organized cards on a clean board. Browse today's updates, review past work, and never lose track of progress again. Everything is right where you need it, when you need it.",
+    },
+  ];
+
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "1248px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex direction="column" gap="4">
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            How it works
+          </Heading>
+          <Text align="center">Simple as 1-2-3</Text>
+          <Box mt="4" />
+          <Card variant="classic">
+            <Inset>
+              {/* Mobile video */}
+              <video
+                ref={mobileVideoRef}
+                className="w-full aspect-[3/4] object-cover object-top sm:hidden"
+                src={howItWorksDemo3By4}
+                loop
+                muted
+                playsInline
+                preload="auto"
+              />
+              {/* Desktop video */}
+              <video
+                ref={desktopVideoRef}
+                className="w-full aspect-[2/1] object-cover object-top hidden sm:block"
+                src={howItWorksDemo16By9}
+                loop
+                muted
+                playsInline
+                preload="auto"
+              />
+            </Inset>
+          </Card>
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "3",
+            }}
+            gap="4"
+          >
+            {steps.map((step, index) => {
+              return (
+                <Card
+                  key={step.title}
+                  variant="classic"
+                  size={{
+                    initial: "2",
+                    sm: "5",
+                  }}
+                >
+                  <Flex
+                    direction={{
+                      initial: "row",
+                      sm: "column",
+                    }}
+                    gap="3"
+                  >
+                    <Avatar
+                      fallback={index + 1}
+                      variant="soft"
+                      size={{
+                        initial: "1",
+                        sm: "2",
+                      }}
+                      radius="large"
+                    />
+                    <Flex direction="column" gap="3">
+                      <Heading
+                        as="h3"
+                        size={{
+                          initial: "4",
+                          sm: "5",
+                        }}
+                      >
+                        {step.title}
+                      </Heading>
+                      <Text>{step.description}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
+              );
+            })}
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function WhoItsPerfectFor() {
+  const targets = [
+    {
+      title: "Small teams, startups, distributed companies",
+      description: (
+        <>
+          <ul className="flex flex-col gap-1">
+            <li>
+              <Text>Keep everyone informed without interrupting deep work</Text>
+            </li>
+
+            <li>
+              <Text>Create a browsable history of team progress</Text>
+            </li>
+
+            <li>
+              <Text>Onboard new members with context from day one</Text>
+            </li>
+
+            <li>
+              <Text>
+                Make time-zone distributed meetings work with prepared updates
+              </Text>
+            </li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      title: "Developers, designers, writers, consultants",
+      description: (
+        <>
+          <ul className="flex flex-col gap-1">
+            <li>
+              <Text>Start each day with clarity and purpose</Text>
+            </li>
+            <li>
+              <Text>Track your progress over time</Text>
+            </li>
+            <li>
+              <Text>Never lose track of what you were working on</Text>
+            </li>
+            <li>
+              <Text>Build a portfolio of your daily achievements</Text>
+            </li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      title: "Maintainers, contributors, volunteer teams",
+      description: (
+        <>
+          <ul className="flex flex-col gap-1">
+            {" "}
+            <li>
+              <Text>Self-host with complete control over your data</Text>
+            </li>
+            <li>
+              <Text>
+                Coordinate across continents without scheduling conflicts
+              </Text>
+            </li>
+            <li>
+              <Text>Document contributions and progress transparently</Text>
+            </li>
+            <li>
+              <Text>Keep contributors engaged with visible momentum</Text>
+            </li>
+          </ul>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "1248px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex direction="column" gap="8">
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            Who it's perfect for
+          </Heading>
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "3",
+            }}
+            gap="4"
+          >
+            {targets.map((target, index) => {
+              const isLast = index === targets.length - 1;
+              return (
+                <Card
+                  key={target.title}
+                  variant="classic"
+                  size={{ initial: "2", sm: "5" }}
+                  className={isLast ? "hidden! sm:block!" : ""}
+                >
+                  <Flex direction="column" gap="3">
+                    <Heading
+                      as="h3"
+                      size={{
+                        initial: "4",
+                        sm: "5",
+                      }}
+                    >
+                      {target.title}
+                    </Heading>
+                    <Box>{target.description}</Box>
+                  </Flex>
+                </Card>
+              );
+            })}
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function OpenSource() {
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "992px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex direction="column" gap="8">
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            Open source you can trust
+          </Heading>
+
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "2",
+            }}
+            gap="4"
+          >
+            <Card variant="classic" size={{ initial: "2", sm: "5" }}>
+              <Flex direction="column" gap="3">
+                <Heading
+                  as="h3"
+                  size={{
+                    initial: "4",
+                    sm: "5",
+                  }}
+                >
+                  Your Data, Your Rules
+                </Heading>
+                <ul className="flex flex-col gap-1">
+                  <li>
+                    <Text>
+                      Complete transparency - see exactly how your data is
+                      handled
+                    </Text>
+                  </li>
+                  <li>
+                    <Text>
+                      Self-hosting option - keep everything on your own servers
+                    </Text>
+                  </li>
+                  <li>
+                    <Text>No vendor lock-in - export your data anytime</Text>
+                  </li>
+                  <li>
+                    <Text>
+                      Community-driven - shaped by real users like you
+                    </Text>
+                  </li>
+                </ul>
+              </Flex>
+            </Card>
+            <Card variant="classic" size={{ initial: "2", sm: "5" }}>
+              <Flex direction="column" gap="3">
+                <Heading
+                  as="h3"
+                  size={{
+                    initial: "4",
+                    sm: "5",
+                  }}
+                >
+                  Built in the Open
+                </Heading>
+                <ul className="flex flex-col gap-1">
+                  <li>
+                    <Text>
+                      Open source on GitHub - help us build something great
+                      together
+                    </Text>
+                  </li>
+                  <li>
+                    <Text>Active development with regular updates</Text>
+                  </li>
+                  <li>
+                    <Text>
+                      Community support for issues and feature requests
+                    </Text>
+                  </li>
+                  <li>
+                    <Text>Getting started guide with setup instructions</Text>
+                  </li>
+                </ul>
+                <Text align="center"></Text>
+              </Flex>
+            </Card>
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function Pricing() {
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "992px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex direction="column" gap="8">
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            Pricing
+          </Heading>
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "2",
+            }}
+            gap="4"
+          >
+            <Card variant="classic" size={{ initial: "2", sm: "5" }}>
+              <Flex direction="column" gap="3" height="100%">
+                <Heading
+                  as="h3"
+                  size={{
+                    initial: "4",
+                    sm: "5",
+                  }}
+                >
+                  Self-hosting
+                </Heading>
+                <Text>
+                  Deploy on your servers. Complete data control, always free
+                  forever.
+                </Text>
+                <Text
+                  size={{
+                    initial: "6",
+                    sm: "8",
+                  }}
+                  weight="bold"
+                >
+                  Free
+                </Text>
+
+                <ul className="flex flex-col gap-1">
+                  <li>
+                    <Text>Always free forever</Text>
+                  </li>
+                  <li>
+                    <Text>Deploy on your own servers</Text>
+                  </li>
+                  <li>
+                    <Text>Complete control of your data</Text>
+                  </li>
+                  <li>
+                    <Text>Full feature access</Text>
+                  </li>
+                </ul>
+                <Box mt="1" />
+
+                <Button
+                  asChild
+                  className="w-full! sm:w-auto! bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 transition-all duration-200"
+                  size={{
+                    initial: "3",
+                  }}
+                  highContrast
+                  variant="outline"
+                  mt="auto"
+                >
+                  {/* TODO: Make this link an env variable */}
+                  <a
+                    href="https://github.com/kiwinight/standup-kiwi"
+                    target="_blank"
+                  >
+                    View documentation
+                    <ExternalLinkIcon width={18} height={18} />
+                  </a>
+                </Button>
+              </Flex>
+            </Card>
+
+            <Card variant="classic" size={{ initial: "2", sm: "5" }}>
+              <Flex direction="column" gap="3" height="100%">
+                <Heading
+                  as="h3"
+                  size={{
+                    initial: "4",
+                    sm: "5",
+                  }}
+                >
+                  Managed service
+                </Heading>
+                <Text>
+                  Fully hosted with zero setup. All features included, automatic
+                  updates.
+                </Text>
+
+                <Flex direction="column" gap="" align="baseline">
+                  <Text
+                    size={{
+                      initial: "6",
+                      sm: "8",
+                    }}
+                    color="gray"
+                    weight="bold"
+                    className="line-through"
+                  >
+                    $2
+                  </Text>
+                  <Text color="gray" size="2" className="italic line-through">
+                    per user on each board, when paying monthly
+                  </Text>
+                </Flex>
+
+                <Flex direction="column" gap="">
+                  <Text
+                    size={{
+                      initial: "6",
+                      sm: "8",
+                    }}
+                    weight="bold"
+                  >
+                    Free
+                  </Text>
+
+                  <Text size="2" className="italic">
+                    Limited-time launch offer for early adopters
+                  </Text>
+                </Flex>
+
+                <ul className="flex flex-col gap-1">
+                  <li>
+                    <Text>Hosted at standupkiwi.com</Text>
+                  </li>
+                  <li>
+                    <Text>Zero setup required</Text>
+                  </li>
+                  <li>
+                    <Text>All features included</Text>
+                  </li>
+                </ul>
+                <Box mt="1" />
+                <Button
+                  asChild
+                  className="w-full! sm:w-auto! bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200"
+                  size={{
+                    initial: "3",
+                  }}
+                  highContrast
+                  mt="auto"
+                >
+                  <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
+                </Button>
+              </Flex>
+            </Card>
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+const FAQ_ITEMS = [
+  {
+    question: "Is it really free?",
+    answer:
+      "Yes! Everything is free right now. Self-hosting will always stay free, and our managed service will introduce pricing much later with advance notice and data migration support.",
+  },
+  {
+    question: "Can my team use it now?",
+    answer:
+      "[TODO: we already have a shared board feature.]Team collaboration features are in beta. Individual team members can create personal boards immediately, and we're rolling out shared team boards soon.",
+  },
+  {
+    question: "How is this different from just using Slack?",
+    answer:
+      "[TODO: this is too much] Slack is great for quick conversations, but ~terrible~ for organized daily updates. Standup Kiwi creates a clean, searchable history of your work that you can actually use.",
+  },
+  {
+    question: "Do I need to know how to code to self-host?",
+    answer:
+      "[TODO: no one click..] Basic server knowledge helps, but we're working on one-click deployment options. Most users are happy with our hosted version.",
+  },
+  {
+    question: "What if I don't like it?",
+    answer:
+      "No problem! Your data is yours—export it anytime. No contracts, no hassle.",
+  },
+];
+
+function FAQ() {
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "992px",
+        }}
+        px={{
+          initial: "4",
+        }}
+      >
+        <Flex direction="column" gap="8">
+          <Heading as="h2" size="8" align="center">
+            Questions? Answers
+          </Heading>
+          <Card variant="classic" size="3" className="py-3!">
+            <AccordionPrimitive.Root type="multiple">
+              {FAQ_ITEMS.map((item, index) => {
+                return (
+                  <AccordionPrimitive.Item
+                    key={item.question}
+                    value={`item-${index + 1}`}
+                    asChild
+                  >
+                    <Box className="border-b last:border-b-0 border-[var(--gray-6)]">
+                      <AccordionPrimitive.Trigger className="group p-[var(--space-5)] w-full cursor-pointer">
+                        <Flex align="center" justify="between">
+                          <Text size="5" weight="bold">
+                            {item.question}
+                          </Text>
+                          <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
+                        </Flex>
+                      </AccordionPrimitive.Trigger>
+                      <AccordionPrimitive.Content className="p-[var(--space-5)] pt-0 w-full">
+                        <Text as="p" size="3">
+                          {item.answer}
+                        </Text>
+                      </AccordionPrimitive.Content>
+                    </Box>
+                  </AccordionPrimitive.Item>
+                );
+              })}
+            </AccordionPrimitive.Root>
+          </Card>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function Roadmap() {
+  const itmes = [
+    {
+      title: "Yesterday context recall",
+      description:
+        "What did I do yesterday again? Auto-fill from your previous updates",
+    },
+    {
+      title: "Today suggestion engine",
+      description:
+        "Get smart suggestions for today's update based on your work patterns",
+    },
+    {
+      title: "Daily team digest",
+      description:
+        "See what everyone's working on today (not just for managers!)",
+    },
+    {
+      title: "AI weekly digest",
+      description:
+        "Auto-generated personal and team summaries with insights and trends",
+    },
+    {
+      title: "Desktop and mobile apps",
+      description: "Native desktop and mobile apps for a seamless experience.",
+    },
+    {
+      title: "And more...!",
+      description:
+        "Your feedback shapes our priorities. What would help you most?",
+    },
+  ];
+
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+    >
+      <Container
+        size={{
+          initial: "4",
+          sm: "4",
+        }}
+        maxWidth={{
+          sm: "1248px",
+        }}
+        px={{
+          initial: "4",
+        }}
+        style={{ position: "relative", zIndex: 1 }}
+      >
+        <Flex direction="column" gap="4">
+          <Heading
+            as="h2"
+            size={{
+              initial: "7",
+              sm: "8",
+            }}
+            align="center"
+          >
+            What's coming next
+          </Heading>
+          <Text align="center">
+            We're just getting started. Here's what we're working on based on
+            real user feedback:
+          </Text>
+          <Box mt="4" />
+          <Grid
+            columns={{
+              initial: "1",
+              sm: "3",
+            }}
+            gap="4"
+            gapY="4"
+          >
+            {itmes.map((item, index) => {
+              const isHiddenOnMobile = index < 2;
+
+              return (
+                <Card
+                  key={item.title}
+                  size={{
+                    initial: "2",
+                    sm: "3",
+                  }}
+                  variant="classic"
+                  className={isHiddenOnMobile ? "hidden! sm:block!" : ""}
+                >
+                  <Flex direction="column" gap="3">
+                    <Heading
+                      as="h3"
+                      size={{
+                        initial: "4",
+                        sm: "5",
+                      }}
+                    >
+                      {item.title}
+                    </Heading>
+                    <Text>{item.description}</Text>
+                  </Flex>
+                </Card>
+              );
+            })}
+          </Grid>
+        </Flex>
+      </Container>
+    </Section>
+  );
+}
+
+function FinalCTA({
+  goodVibesGradientImgSlot,
+}: {
+  goodVibesGradientImgSlot: never;
+}) {
+  return (
+    <Section
+      size={{
+        initial: "3",
+        sm: "4",
+      }}
+      className="overflow-hidden relative"
+    >
+      <Box className="absolute inset-0">
+        <Box className="w-full h-full [&>astro-slot]:w-full [&>astro-slot]:h-full [&>astro-slot>img]:w-full [&>astro-slot>img]:h-full [&>astro-slot>img]:object-cover [&>astro-slot>img]:object-center">
+          {goodVibesGradientImgSlot}
+        </Box>
+        <Box className="absolute inset-0 bg-[linear-gradient(var(--color-background),rgba(255,255,255,0.85)_0%)]" />
+      </Box>
+
+      <div className="relative">
+        <Container
+          size={{
+            initial: "4",
+            sm: "4",
+          }}
+          maxWidth={{
+            sm: "1248px",
+          }}
+        >
+          <Box
+            p={{
+              initial: "6",
+              sm: "9",
+            }}
+            px={{
+              initial: "0",
+              sm: "9",
+            }}
+          >
+            <Flex direction="column" gap="4">
+              <Heading
+                as="h2"
                 size={{
-                  initial: "2",
-                  sm: "3",
+                  initial: "7",
+                  sm: "8",
                 }}
                 align="center"
               >
-                {selectedPreview === "a" && (
-                  <>
-                    Catch up on today's and past standups with calm, clear cards
-                    on a board. <br className="hidden sm:block" /> Organize them
-                    by team, project, or personal boards.
-                  </>
-                )}
-                {selectedPreview === "b" && (
-                  <>
-                    Write and edit your standups in a clean, markdown-supported
-                    format. <br className="hidden sm:block" /> Use lists, bold,
-                    and italics to keep your updates clear and easy to scan.
-                  </>
-                )}
-              </Text>
-
-              <Card
-                className="pointer-events-none select-none w-full"
-                inert
-                size={{
-                  initial: "1",
-                  sm: "5",
-                }}
-              >
-                {selectedPreview === "a" && <PreviewA />}
-                {selectedPreview === "b" && <PreviewB />}
-              </Card>
+                Ready to transform your standups?
+              </Heading>
+              <Text align="center">Set up your standup board in seconds</Text>
+              <Box mt="4" />
+              <Flex justify="center">
+                <Button asChild highContrast size="4">
+                  <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
+                </Button>
+              </Flex>
             </Flex>
-          </Container>
-        </Section>
-      </Box>
+          </Box>
+        </Container>
+      </div>
+    </Section>
+  );
+}
+
+function IndexContent(props: any) {
+  const {
+    goodVibesGradientImg,
+    autumnalPeachGradientImg,
+    standupKiwiResponsiveMockupImg,
+    standupKiwiBoardDemoImg,
+  } = props as Record<string, never>;
+
+  return (
+    <Theme
+      className="relative"
+      accentColor="gray"
+      grayColor="mauve"
+      hasBackground
+    >
+      <NavBar />
+      <Hero
+        goodVibesGradientImgSlot={goodVibesGradientImg}
+        standupKiwiResponsiveMockupImgSlot={standupKiwiResponsiveMockupImg}
+      />
+      <Problem />
+      <MeetStandupKiwi
+        autumnalPeachGradientImgSlot={autumnalPeachGradientImg}
+        standupKiwiBoardDemoImgSlot={standupKiwiBoardDemoImg}
+      />
+      <HowItWorks />
+      <WhoItsPerfectFor />
+      <OpenSource />
+      <Pricing />
+      {/* TODO: Restore FAQ when the contents are ready */}
+      {/* <FAQ /> */}
+      <FinalCTA goodVibesGradientImgSlot={goodVibesGradientImg} />
+      <Roadmap />
+      {/* TODO: add footer */}
     </Theme>
   );
 }

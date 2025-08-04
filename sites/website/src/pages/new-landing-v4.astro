@@ -1,0 +1,1011 @@
+---
+import "@radix-ui/themes/styles.css";
+import "../styles/global.css";
+import BaseHead from "../components/base-head.astro";
+import ContentHead from "../components/content-head.astro";
+import { SITE_DESCRIPTION } from "../constants.ts";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead />
+    <ContentHead
+      title="The standup tool that actually works"
+      description={SITE_DESCRIPTION}
+    />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  </head>
+
+  <body class="bg-white">
+    <!-- Navigation -->
+    <nav
+      class="fixed top-0 w-full bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-600 rounded"
+            >
+            </div>
+            <span class="text-xl font-semibold text-gray-900">Standup Kiwi</span
+            >
+          </div>
+          <div class="hidden md:flex items-center space-x-8">
+            <a
+              href="#features"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Features</a
+            >
+            <a
+              href="#pricing"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Pricing</a
+            >
+            <a
+              href="#docs"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Docs</a
+            >
+            <button
+              class="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 bg-gradient-to-b from-gray-50 to-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center max-w-4xl mx-auto">
+          <div
+            class="inline-flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-8"
+          >
+            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            Open source • Currently in beta • Join the community
+          </div>
+
+          <h1
+            class="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight"
+          >
+            The standup tool that <br /><span class="text-gray-600"
+              >actually works</span
+            >
+          </h1>
+
+          <p
+            class="text-xl lg:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto"
+          >
+            Skip the endless meetings and scattered chat threads. Standup Kiwi
+            gives you a simple, organized way to share daily updates — whether
+            you work solo or with a team.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <button
+              class="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Get Started Free
+            </button>
+            <button
+              class="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors"
+              onclick="alert('This would open an interactive demo showing how teams use Standup Kiwi: creating boards, writing daily updates, and browsing team progress. The demo includes sample data from a fictional development team to showcase real-world usage patterns.')"
+            >
+              View Demo
+            </button>
+          </div>
+
+          <!-- Auto-playing Demo Video Placeholder - UNCHANGED -->
+          <div class="relative max-w-5xl mx-auto">
+            <div
+              class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+            >
+              <div
+                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center space-x-3"
+              >
+                <div class="flex space-x-2">
+                  <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+                <div class="text-sm text-gray-500">app.standupkiwi.com</div>
+              </div>
+              <div
+                class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"
+              >
+                <div class="text-center">
+                  <div
+                    class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-8 h-8 text-gray-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                  <p class="text-gray-600 font-medium">
+                    Auto-playing Demo Video
+                  </p>
+                  <p class="text-sm text-gray-500 mt-1">
+                    Embedded video showing actual product usage - board view,
+                    writing an update, browsing history
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem Section - REDESIGNED -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            The Problem We All Face
+          </h2>
+          <h3 class="text-3xl lg:text-4xl font-bold text-red-600 mb-6">
+            Are you tired of...?
+          </h3>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <!-- Problem 1: Time Waste -->
+          <div class="group hover:scale-105 transition-transform duration-300">
+            <div
+              class="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-8 border border-red-200 h-full"
+            >
+              <div class="flex items-start space-x-6 mb-6">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                  >
+                    <i data-lucide="clock" class="w-8 h-8"></i>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-red-900 mb-3">
+                    Daily standup meetings that drag on for 30 minutes
+                  </h4>
+                  <p class="text-red-700">
+                    when everyone just needs to share quick updates?
+                  </p>
+                </div>
+              </div>
+              <!-- Visual representation -->
+              <div class="bg-white rounded-lg p-4 border border-red-200">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm font-medium text-red-800"
+                    >Time Distribution</span
+                  >
+                </div>
+                <div class="flex h-8 rounded-lg overflow-hidden">
+                  <div
+                    class="bg-red-500 flex-1 flex items-center justify-center text-white text-xs font-medium"
+                  >
+                    30 min meeting
+                  </div>
+                  <div
+                    class="bg-green-500 w-1/6 flex items-center justify-center text-white text-xs font-medium"
+                  >
+                    5m
+                  </div>
+                </div>
+                <p class="text-xs text-red-600 mt-2">
+                  Only 5 minutes of actual value in a 30-minute meeting
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 2: Scattered Information -->
+          <div class="group hover:scale-105 transition-transform duration-300">
+            <div
+              class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 border border-orange-200 h-full"
+            >
+              <div class="flex items-start space-x-6 mb-6">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                  >
+                    <i data-lucide="message-square-more" class="w-8 h-8"></i>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-orange-900 mb-3">
+                    Scattered updates buried in Slack threads
+                  </h4>
+                  <p class="text-orange-700">that you can never find later?</p>
+                </div>
+              </div>
+              <!-- Visual representation -->
+              <div class="bg-white rounded-lg p-4 border border-orange-200">
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                  <div
+                    class="h-6 bg-orange-200 rounded flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="message-circle"
+                      class="w-3 h-3 text-orange-600"></i>
+                  </div>
+                  <div
+                    class="h-6 bg-orange-200 rounded flex items-center justify-center"
+                  >
+                    <i data-lucide="mail" class="w-3 h-3 text-orange-600"></i>
+                  </div>
+                  <div
+                    class="h-6 bg-orange-200 rounded flex items-center justify-center"
+                  >
+                    <i data-lucide="file-text" class="w-3 h-3 text-orange-600"
+                    ></i>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center justify-center text-orange-600 mb-2"
+                >
+                  <i data-lucide="search" class="w-5 h-5"></i>
+                </div>
+                <p class="text-xs text-orange-600 text-center">
+                  Information scattered across platforms
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 3: Tool Complexity -->
+          <div class="group hover:scale-105 transition-transform duration-300">
+            <div
+              class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 border border-purple-200 h-full"
+            >
+              <div class="flex items-start space-x-6 mb-6">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                  >
+                    <i data-lucide="settings" class="w-8 h-8"></i>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-purple-900 mb-3">
+                    Over-engineered tools like Jira, Notion templates, or Linear
+                  </h4>
+                  <p class="text-purple-700">
+                    that feel like overkill for simple daily check-ins?
+                  </p>
+                </div>
+              </div>
+              <!-- Visual comparison -->
+              <div class="bg-white rounded-lg p-4 border border-purple-200">
+                <div class="flex justify-between items-center mb-3">
+                  <div class="text-center">
+                    <div
+                      class="w-12 h-8 bg-purple-300 rounded mb-1 flex items-center justify-center"
+                    >
+                      <i data-lucide="zap" class="w-4 h-4 text-purple-700"></i>
+                    </div>
+                    <p class="text-xs text-purple-600">Complex</p>
+                  </div>
+                  <div class="flex-1 flex items-center justify-center">
+                    <i data-lucide="arrow-right" class="w-6 h-6 text-purple-500"
+                    ></i>
+                  </div>
+                  <div class="text-center">
+                    <div
+                      class="w-12 h-8 bg-green-300 rounded mb-1 flex items-center justify-center"
+                    >
+                      <i data-lucide="circle" class="w-4 h-4 text-green-700"
+                      ></i>
+                    </div>
+                    <p class="text-xs text-green-600">Simple</p>
+                  </div>
+                </div>
+                <p class="text-xs text-purple-600 text-center">
+                  Simplification for daily standups
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 4: Lost Context -->
+          <div class="group hover:scale-105 transition-transform duration-300">
+            <div
+              class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 border border-blue-200 h-full"
+            >
+              <div class="flex items-start space-x-6 mb-6">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                  >
+                    <i data-lucide="help-circle" class="w-8 h-8"></i>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-xl font-bold text-blue-900 mb-3">
+                    No record so when your boss asks
+                  </h4>
+                  <p class="text-blue-700">
+                    "what's your team been working on?" you scramble to
+                    remember?
+                  </p>
+                </div>
+              </div>
+              <!-- Visual representation -->
+              <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center space-x-2">
+                    <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                    <span class="text-xs text-blue-800">Manager</span>
+                  </div>
+                  <i
+                    data-lucide="message-square-quote"
+                    class="w-4 h-4 text-blue-500"></i>
+                </div>
+                <div class="flex justify-center mb-2">
+                  <div class="flex space-x-1">
+                    <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
+                    <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
+                    <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
+                  </div>
+                </div>
+                <p class="text-xs text-blue-600 text-center">
+                  Scattered, incomplete memories
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <p class="text-xl text-gray-600 font-medium italic max-w-3xl mx-auto">
+            You're not alone. Thousands of developers, designers, and remote
+            workers waste hours every week on broken standup processes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solution Overview -->
+    <section
+      class="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white"
+    >
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold mb-8">Meet Standup Kiwi</h2>
+          <p class="text-2xl font-bold mb-8">
+            The lightweight standup tool that actually works.
+          </p>
+          <p class="text-xl text-gray-300 max-w-4xl mx-auto">
+            Standup Kiwi is designed for one thing: making daily standups
+            effortless and meaningful. No complex features you don't need. No
+            meetings that drag on. Just clean, organized updates that help you
+            and your team stay in sync.
+          </p>
+        </div>
+
+        <div class="mb-16">
+          <h3 class="text-2xl font-bold mb-8 text-center">The difference:</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="eye" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">
+                Scan everyone's updates in 2 minutes
+              </h4>
+              <p class="text-gray-400">
+                instead of sitting through 30-minute meetings
+              </p>
+            </div>
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="folder" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">
+                Everything in one place
+              </h4>
+              <p class="text-gray-400">no more digging through Slack threads</p>
+            </div>
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="target" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">Simple and focused</h4>
+              <p class="text-gray-400">
+                built just for standups, not project management
+              </p>
+            </div>
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="trending-up" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">
+                Team progress at your fingertips
+              </h4>
+              <p class="text-gray-400">
+                never scramble when asked "what's your team working on?"
+              </p>
+            </div>
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="layout-grid" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">Clean visual layout</h4>
+              <p class="text-gray-400">
+                see the whole team's progress at a glance
+              </p>
+            </div>
+            <div class="text-center group">
+              <div
+                class="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+              </div>
+              <h4 class="text-lg font-semibold mb-2">
+                Your data, your control
+              </h4>
+              <p class="text-gray-400">open source and self-hostable</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works - REDESIGNED -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            How It Works
+          </h2>
+          <p class="text-2xl font-bold text-gray-900 mb-4">Simple as 1-2-3</p>
+        </div>
+
+        <div class="relative">
+          <!-- Connection line -->
+          <div
+            class="hidden lg:block absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-4xl"
+          >
+            <div
+              class="h-0.5 bg-gradient-to-r from-blue-200 via-green-200 to-purple-200"
+            >
+            </div>
+          </div>
+
+          <div class="grid lg:grid-cols-3 gap-12 relative">
+            <!-- Step 1 -->
+            <div class="text-center group">
+              <div class="relative mb-8">
+                <div
+                  class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-lg group-hover:scale-110 transition-transform"
+                >
+                  1
+                </div>
+
+                <!-- Visual mockup -->
+                <div
+                  class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 border border-blue-200 mb-6"
+                >
+                  <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center space-x-3 mb-4">
+                      <i data-lucide="plus-circle" class="w-6 h-6 text-blue-600"
+                      ></i>
+                      <span class="font-medium text-gray-900"
+                        >Create New Board</span
+                      >
+                    </div>
+                    <div class="space-y-3">
+                      <div class="h-3 bg-blue-100 rounded w-3/4"></div>
+                      <div class="h-3 bg-blue-100 rounded w-1/2"></div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                      <span class="text-xs text-blue-600">Setup time:</span>
+                      <div class="flex items-center space-x-1">
+                        <i data-lucide="clock" class="w-3 h-3 text-green-600"
+                        ></i>
+                        <span class="text-xs font-medium text-green-600"
+                          >2 minutes</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                Create Your Board
+              </h3>
+              <p class="text-gray-600">
+                Set up a personal board or team workspace in seconds. Name it
+                whatever makes sense—"Daily Progress," "Team Alpha," or just
+                your name. No complex setup, no admin approval needed.
+              </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="text-center group">
+              <div class="relative mb-8">
+                <div
+                  class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-lg group-hover:scale-110 transition-transform"
+                >
+                  2
+                </div>
+
+                <!-- Visual mockup -->
+                <div
+                  class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border border-green-200 mb-6"
+                >
+                  <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center space-x-3 mb-4">
+                      <i data-lucide="edit-3" class="w-6 h-6 text-green-600"
+                      ></i>
+                      <span class="font-medium text-gray-900">Daily Update</span
+                      >
+                    </div>
+                    <div class="text-left space-y-3">
+                      <div class="text-xs font-medium text-gray-700 mb-1">
+                        Yesterday:
+                      </div>
+                      <div class="h-2 bg-green-100 rounded w-full"></div>
+                      <div class="h-2 bg-green-100 rounded w-4/5"></div>
+                      <div class="text-xs font-medium text-gray-700 mb-1 mt-3">
+                        Today:
+                      </div>
+                      <div class="h-2 bg-green-100 rounded w-3/4"></div>
+                      <div class="h-2 bg-green-100 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                Write Your Update
+              </h3>
+              <p class="text-gray-600">
+                Answer the classic questions: What did you do yesterday? What's
+                planned for today? Any blockers? Use our clean markdown editor
+                to format lists, add links, and make your updates scannable.
+              </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="text-center group">
+              <div class="relative mb-8">
+                <div
+                  class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-xl font-bold shadow-lg group-hover:scale-110 transition-transform"
+                >
+                  3
+                </div>
+
+                <!-- Visual mockup -->
+                <div
+                  class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 border border-purple-200 mb-6"
+                >
+                  <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center space-x-3 mb-4">
+                      <i
+                        data-lucide="layout-dashboard"
+                        class="w-6 h-6 text-purple-600"></i>
+                      <span class="font-medium text-gray-900">Team Board</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div
+                        class="h-12 bg-purple-100 rounded flex items-center justify-center"
+                      >
+                        <i
+                          data-lucide="calendar"
+                          class="w-4 h-4 text-purple-600"></i>
+                      </div>
+                      <div
+                        class="h-12 bg-purple-100 rounded flex items-center justify-center"
+                      >
+                        <i
+                          data-lucide="calendar"
+                          class="w-4 h-4 text-purple-600"></i>
+                      </div>
+                      <div
+                        class="h-12 bg-purple-100 rounded flex items-center justify-center"
+                      >
+                        <i
+                          data-lucide="calendar"
+                          class="w-4 h-4 text-purple-600"></i>
+                      </div>
+                      <div
+                        class="h-12 bg-purple-100 rounded flex items-center justify-center"
+                      >
+                        <i
+                          data-lucide="calendar"
+                          class="w-4 h-4 text-purple-600"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                Stay Organized
+              </h3>
+              <p class="text-gray-600">
+                Your updates become organized cards on a clean board. Browse
+                today's updates, review past work, and never lose track of
+                progress again. Everything is right where you need it, when you
+                need it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real Example -->
+        <div class="mt-16 max-w-4xl mx-auto">
+          <div
+            class="bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-2xl p-8 text-center"
+          >
+            <div class="flex items-center justify-center mb-4">
+              <i data-lucide="quote" class="w-8 h-8 text-blue-600 mr-3"></i>
+              <h4 class="text-xl font-bold text-gray-900">Real Example</h4>
+            </div>
+            <blockquote class="text-lg text-gray-700 italic mb-4">
+              "Every morning, I grab my coffee and spend 5 minutes updating my
+              personal board. It's become my favorite way to start the day—I
+              feel more organized and way less stressed about forgetting
+              important tasks."
+            </blockquote>
+            <p class="text-sm text-gray-600 mb-4">—Alex, Product Engineer</p>
+            <p class="text-lg font-medium text-gray-900 italic">
+              Try it once, and you'll never go back to chaotic standup meetings.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who It's Perfect For - REDESIGNED -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Who It's Perfect For
+          </h2>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-12">
+          <!-- Remote Teams -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
+          >
+            <!-- Header with gradient background -->
+            <div
+              class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 mb-6 text-white text-center"
+            >
+              <div
+                class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <i data-lucide="globe" class="w-8 h-8 text-white"></i>
+              </div>
+              <h3 class="text-2xl font-semibold mb-2">Remote Teams</h3>
+              <p class="text-blue-100">
+                Small teams, startups, distributed companies
+              </p>
+            </div>
+
+            <ul class="space-y-4 mb-6">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Replace time-zone nightmare meetings with async updates</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Keep everyone informed without interrupting deep work</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Create a browsable history of team progress</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Onboard new members with context from day one</span
+                >
+              </li>
+            </ul>
+
+            <!-- Visual representation -->
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div class="flex items-center justify-center space-x-4 mb-3">
+                <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-orange-400 rounded-full"></div>
+                </div>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-blue-600"></i>
+                <div
+                  class="w-8 h-6 bg-blue-600 rounded flex items-center justify-center"
+                >
+                  <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+                </div>
+              </div>
+              <p class="text-xs text-blue-700 text-center">
+                Global team → Unified dashboard
+              </p>
+            </div>
+          </div>
+
+          <!-- Solo Professionals -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
+          >
+            <!-- Header with gradient background -->
+            <div
+              class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 mb-6 text-white text-center"
+            >
+              <div
+                class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <i data-lucide="user" class="w-8 h-8 text-white"></i>
+              </div>
+              <h3 class="text-2xl font-semibold mb-2">Solo Professionals</h3>
+              <p class="text-green-100">
+                Developers, designers, writers, consultants
+              </p>
+            </div>
+
+            <ul class="space-y-4 mb-6">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Start each day with clarity and purpose</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700">Track your progress over time</span>
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Never lose track of what you were working on</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Build a portfolio of your daily achievements</span
+                >
+              </li>
+            </ul>
+
+            <!-- Quote -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-start space-x-3">
+                <i
+                  data-lucide="quote"
+                  class="w-5 h-5 text-green-600 mt-1 flex-shrink-0"></i>
+                <div>
+                  <blockquote class="text-sm text-green-800 italic mb-2">
+                    "I use Standup Kiwi every morning with my coffee. It's
+                    become my favorite way to organize my day."
+                  </blockquote>
+                  <p class="text-xs text-green-600">—Alex, Product Engineer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Open Source Communities -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
+          >
+            <!-- Header with gradient background -->
+            <div
+              class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 mb-6 text-white text-center"
+            >
+              <div
+                class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <i data-lucide="git-branch" class="w-8 h-8 text-white"></i>
+              </div>
+              <h3 class="text-2xl font-semibold mb-2">
+                Open Source Communities
+              </h3>
+              <p class="text-purple-100">
+                Maintainers, contributors, volunteer teams
+              </p>
+            </div>
+
+            <ul class="space-y-4 mb-6">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Coordinate across continents without scheduling conflicts</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Document contributions and progress transparently</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Keep volunteers engaged with visible momentum</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
+                >
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <span class="text-gray-700"
+                  >Self-host with complete control over your data</span
+                >
+              </li>
+            </ul>
+
+            <!-- Visual representation -->
+            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <div class="grid grid-cols-7 gap-1 mb-2">
+                <!-- Contribution graph simulation -->
+                <div class="h-3 bg-purple-200 rounded-sm"></div>
+                <div class="h-3 bg-purple-400 rounded-sm"></div>
+                <div class="h-3 bg-purple-200 rounded-sm"></div>
+                <div class="h-3 bg-purple-600 rounded-sm"></div>
+                <div class="h-3 bg-purple-200 rounded-sm"></div>
+                <div class="h-3 bg-purple-400 rounded-sm"></div>
+                <div class="h-3 bg-purple-200 rounded-sm"></div>
+              </div>
+              <p class="text-xs text-purple-700 text-center">
+                Transparent progress tracking
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section
+      class="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white"
+    >
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <div class="mb-8">
+          <i data-lucide="rocket" class="w-16 h-16 mx-auto text-white mb-6"></i>
+        </div>
+
+        <h2 class="text-4xl lg:text-5xl font-bold mb-8">
+          Ready to Transform Your Standups?
+        </h2>
+        <p class="text-2xl font-bold mb-4">
+          Join the beta and help shape the future of standups
+        </p>
+        <p class="text-xl font-bold mb-12">
+          Set up your standup board in seconds
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <button
+            class="bg-white text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
+          >
+            <span>Get Started Free</span>
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <p class="text-gray-400 mb-12">
+          No credit card required • No setup needed • Start immediately
+        </p>
+
+        <div class="border-t border-gray-800 pt-12">
+          <div
+            class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-8"
+          >
+            <p class="text-xl font-bold text-white">Still have questions?</p>
+          </div>
+          <div
+            class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8"
+          >
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+            >
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>View the documentation</span>
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+            >
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              <span>Join our community</span>
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+            >
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              <span>Contact support</span>
+            </a>
+          </div>
+          <p class="text-gray-500 mt-8">
+            Built with love by developers, for developers. Open source forever.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Initialize Lucide icons
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
+
