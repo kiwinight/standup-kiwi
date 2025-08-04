@@ -20,3 +20,12 @@
 
   --color-background: var(--accent-1);
 }
+
+@theme {
+  /* --breakpoint-initial: 0px; */
+  --breakpoint-xs: 520px;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1640px;
+}
