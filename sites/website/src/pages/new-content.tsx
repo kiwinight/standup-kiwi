@@ -32,7 +32,7 @@ function Hero() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-blue-50/70 to-violet-50/80"
+      className="bg-gradient-to-b from-white via-blue-50/50 to-blue-50/60"
     >
       <Container
         size={{
@@ -149,7 +149,7 @@ function Problem() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/80 via-blue-50/50 to-white"
+      className="bg-gradient-to-b from-blue-50/60 via-blue-50/70 to-violet-50/60"
     >
       <Container
         size={{
@@ -268,7 +268,7 @@ function MeetStandupKiwi() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-blue-50/35 to-violet-50/25"
+      className="bg-gradient-to-b from-violet-50/60 via-blue-50/65 to-violet-50/50"
     >
       <Container
         size={{
@@ -490,7 +490,7 @@ function HowItWorks() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/25 via-blue-50/20 to-white"
+      className="bg-gradient-to-b from-violet-50/50 via-blue-50/55 to-violet-50/65"
     >
       <Container
         size={{
@@ -617,7 +617,7 @@ function WhoItsPerfectFor() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-violet-50/25 to-blue-50/30"
+      className="bg-gradient-to-b from-violet-50/65 via-blue-50/45 to-violet-50/70"
     >
       <Container
         size={{
@@ -771,7 +771,7 @@ function OpenSource() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-blue-50/30 via-white to-violet-50/25"
+      className="bg-gradient-to-b from-violet-50/70 via-blue-50/50 to-white"
     >
       <Container
         size={{
@@ -869,7 +869,7 @@ function Pricing() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/25 via-blue-50/20 to-white"
+      className="bg-gradient-to-b from-white via-blue-50/40 to-blue-50/50"
     >
       <Container
         size={{
@@ -1022,7 +1022,7 @@ function FAQ() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-blue-50/25 to-violet-50/30"
+      className="bg-gradient-to-b from-blue-50/50 via-blue-50/60 to-violet-50/60"
     >
       <Container
         size={{
@@ -1080,7 +1080,7 @@ function Roadmap() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/30 via-blue-50/25 to-white"
+      className="bg-gradient-to-b from-violet-50/60 via-blue-50/65 to-violet-50/70"
     >
       <Container
         size={{
@@ -1208,7 +1208,7 @@ function FinalCTA() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-violet-50/35 to-blue-50/40"
+      className="bg-gradient-to-b from-violet-50/70 via-violet-50/80 to-blue-50/70"
     >
       <Container
         size={{
@@ -1239,6 +1239,7 @@ function FinalCTA() {
           </Flex>
         </Flex>
       </Container>
+      <Box mt="80px" />
     </Section>
   );
 }
@@ -1257,13 +1258,6 @@ function NewContent() {
       <FAQ />
       <Roadmap />
       <FinalCTA />
-      <Section
-        size={{
-          initial: "3",
-          sm: "4",
-        }}
-        className=""
-      />
     </Theme>
   );
 }
