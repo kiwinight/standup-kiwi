@@ -1,0 +1,1245 @@
+---
+import "../styles/global.css";
+import BaseHead from "../components/base-head.astro";
+import ContentHead from "../components/content-head.astro";
+import { SITE_DESCRIPTION } from "../constants.ts";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead />
+    <ContentHead
+      title="Standup Kiwi - Professional Standup Management"
+      description={SITE_DESCRIPTION}
+    />
+  </head>
+
+  <body class="bg-white">
+    <!-- Navigation -->
+    <nav
+      class="fixed top-0 w-full bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-600 rounded"
+            >
+            </div>
+            <span class="text-xl font-semibold text-gray-900">Standup Kiwi</span
+            >
+          </div>
+          <div class="hidden md:flex items-center space-x-8">
+            <a
+              href="#features"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Features</a
+            >
+            <a
+              href="#pricing"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Pricing</a
+            >
+            <a
+              href="#docs"
+              class="text-gray-600 hover:text-gray-900 transition-colors"
+              >Docs</a
+            >
+            <button
+              class="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 bg-gradient-to-b from-gray-50 to-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center max-w-4xl mx-auto">
+          <div
+            class="inline-flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-8"
+          >
+            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            Open source • Currently in beta
+          </div>
+
+          <h1
+            class="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight"
+          >
+            The standup tool that <br /><span class="text-gray-600"
+              >actually works</span
+            >
+          </h1>
+
+          <p
+            class="text-xl lg:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto"
+          >
+            Skip the endless meetings and scattered chat threads. Standup Kiwi
+            gives you a simple, organized way to share daily updates — whether
+            you work solo or with a team.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <button
+              class="bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Start Free Trial
+            </button>
+            <button
+              class="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors"
+            >
+              View Demo
+            </button>
+          </div>
+
+          <!-- Product Demo Mockup -->
+          <div class="relative max-w-5xl mx-auto">
+            <div
+              class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+            >
+              <div
+                class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center space-x-3"
+              >
+                <div class="flex space-x-2">
+                  <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+                <div class="text-sm text-gray-500">app.standupkiwi.com</div>
+              </div>
+              <div
+                class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"
+              >
+                <div class="text-center">
+                  <div
+                    class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-8 h-8 text-gray-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                  <p class="text-gray-600 font-medium">
+                    Interactive Product Demo
+                  </p>
+                  <p class="text-sm text-gray-500 mt-1">
+                    See how teams use Standup Kiwi daily
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating trust indicators -->
+            <div
+              class="absolute -bottom-6 left-8 bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3"
+            >
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-6 h-6 bg-green-100 rounded flex items-center justify-center"
+                >
+                  <svg
+                    class="w-4 h-4 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-sm font-medium text-gray-700"
+                  >2,400+ teams</span
+                >
+              </div>
+            </div>
+
+            <div
+              class="absolute -bottom-6 right-8 bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3"
+            >
+              <div class="flex items-center space-x-2">
+                <div
+                  class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center"
+                >
+                  <svg
+                    class="w-4 h-4 text-blue-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                    ></path>
+                  </svg>
+                </div>
+                <span class="text-sm font-medium text-gray-700"
+                  >4.8/5 rating</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem Statement -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            The daily standup dilemma
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Teams worldwide lose hours every week to broken standup processes.
+            Sound familiar?
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Problem 1: Time Waste -->
+          <div
+            class="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <!-- Asset: Clock with frustrated developer illustration -->
+              <div
+                class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                30-minute meetings
+              </h3>
+              <p class="text-gray-600">for 5 minutes of actual updates</p>
+            </div>
+            <div class="text-sm text-gray-500">
+              <strong>Asset needed:</strong> Illustration of a clock showing 30 minutes
+              with a small "5 min" section highlighted, surrounded by frustrated
+              team members in a video call
+            </div>
+          </div>
+
+          <!-- Problem 2: Information Scatter -->
+          <div
+            class="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <!-- Asset: Scattered documents/messages illustration -->
+              <div
+                class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-orange-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 11H5m14-4H3m16 8H7m12 4H9"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                Scattered updates
+              </h3>
+              <p class="text-gray-600">buried in endless Slack threads</p>
+            </div>
+            <div class="text-sm text-gray-500">
+              <strong>Asset needed:</strong> Isometric view of multiple chat bubbles,
+              documents, and message threads scattered across different platforms
+              (Slack, email, etc.) with a person searching through them
+            </div>
+          </div>
+
+          <!-- Problem 3: Tool Complexity -->
+          <div
+            class="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <!-- Asset: Complex interface with confused user -->
+              <div
+                class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                Over-engineered tools
+              </h3>
+              <p class="text-gray-600">like Jira for simple check-ins</p>
+            </div>
+            <div class="text-sm text-gray-500">
+              <strong>Asset needed:</strong> Split-screen showing a complex project
+              management interface (left) vs. a simple, clean standup form (right),
+              with arrows showing the dramatic simplification
+            </div>
+          </div>
+
+          <!-- Problem 4: Lost Context -->
+          <div
+            class="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <!-- Asset: Person looking confused with question marks -->
+              <div
+                class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                No record
+              </h3>
+              <p class="text-gray-600">
+                scrambling when asked "what's your team working on?"
+              </p>
+            </div>
+            <div class="text-sm text-gray-500">
+              <strong>Asset needed:</strong> Scene of a manager asking a team lead
+              about progress, with thought bubbles showing scattered, incomplete
+              memories instead of organized information
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solution Overview -->
+    <section class="py-20 bg-gray-900 text-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 class="text-4xl lg:text-5xl font-bold mb-8">
+              Meet <span class="text-gray-300">Standup Kiwi</span>
+            </h2>
+            <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+              A lightweight standup tool designed for one thing: making daily
+              standups effortless and meaningful. No complex features you don't
+              need. No meetings that drag on.
+            </p>
+
+            <div class="space-y-6">
+              <div class="flex items-start space-x-4">
+                <div
+                  class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-green-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">
+                    Scan everyone's updates in 2 minutes
+                  </h3>
+                  <p class="text-gray-400">
+                    instead of sitting through 30-minute meetings
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-4">
+                <div
+                  class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-blue-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">
+                    Everything in one place
+                  </h3>
+                  <p class="text-gray-400">
+                    no more digging through Slack threads
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-4">
+                <div
+                  class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-purple-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold mb-2">
+                    Your data, your control
+                  </h3>
+                  <p class="text-gray-400">open source and self-hostable</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative">
+            <!-- Asset: Clean dashboard mockup -->
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+              <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-gray-900 font-medium">Team Dashboard</h3>
+                  <div class="flex space-x-2">
+                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                    <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="p-6 space-y-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <div class="w-24 h-4 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="w-full h-3 bg-gray-200 rounded"></div>
+                    <div class="w-3/4 h-3 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-8 h-8 bg-green-500 rounded-full"></div>
+                    <div>
+                      <div class="w-24 h-4 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="w-full h-3 bg-gray-200 rounded"></div>
+                    <div class="w-2/3 h-3 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-sm text-gray-400 mt-4 text-center">
+              <strong>Asset needed:</strong> Professional dashboard mockup showing
+              clean standup cards with team member avatars, progress indicators,
+              and organized daily updates in a calm, scannable layout
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Simple as 1-2-3
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Get your team aligned in minutes, not hours
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-12">
+          <!-- Step 1 -->
+          <div class="text-center">
+            <div class="mb-8">
+              <div
+                class="w-20 h-20 bg-gray-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold"
+              >
+                1
+              </div>
+              <div
+                class="bg-gray-50 rounded-2xl p-8 aspect-square flex items-center justify-center"
+              >
+                <!-- Asset: Board creation interface -->
+                <div class="text-center">
+                  <div
+                    class="w-16 h-16 bg-blue-100 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-8 h-8 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-gray-600">Create Board</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 mt-4">
+                <strong>Asset needed:</strong> Interface mockup showing board creation
+                form with team name input, simple setup options, and "2 minutes to
+                setup" timer
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              Create Your Board
+            </h3>
+            <p class="text-gray-600">
+              Set up a personal board or team workspace in seconds. No complex
+              setup, no admin approval needed.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="text-center">
+            <div class="mb-8">
+              <div
+                class="w-20 h-20 bg-gray-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold"
+              >
+                2
+              </div>
+              <div
+                class="bg-gray-50 rounded-2xl p-8 aspect-square flex items-center justify-center"
+              >
+                <!-- Asset: Writing interface -->
+                <div class="text-center">
+                  <div
+                    class="w-16 h-16 bg-green-100 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-8 h-8 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-gray-600">Write Update</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 mt-4">
+                <strong>Asset needed:</strong> Clean markdown editor interface showing
+                the classic standup questions with smart auto-suggestions and formatting
+                tools
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              Write Your Update
+            </h3>
+            <p class="text-gray-600">
+              Answer the classic questions with our clean markdown editor. Make
+              your updates scannable and meaningful.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="text-center">
+            <div class="mb-8">
+              <div
+                class="w-20 h-20 bg-gray-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold"
+              >
+                3
+              </div>
+              <div
+                class="bg-gray-50 rounded-2xl p-8 aspect-square flex items-center justify-center"
+              >
+                <!-- Asset: Organized board view -->
+                <div class="text-center">
+                  <div
+                    class="w-16 h-16 bg-purple-100 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-8 h-8 text-purple-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0V5a2 2 0 012-2h2a2 2 0 002-2"
+                      ></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-gray-600">Stay Organized</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 mt-4">
+                <strong>Asset needed:</strong> Board view showing organized standup
+                cards arranged by date, with clear visual hierarchy and easy navigation
+                through historical updates
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              Stay Organized
+            </h3>
+            <p class="text-gray-600">
+              Your updates become organized cards on a clean board. Never lose
+              track of progress again.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Target Audiences -->
+    <section class="py-20 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Built for modern teams
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Whether you're a solo professional or managing distributed teams
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-12">
+          <!-- Remote Teams -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <div
+                class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6"
+              >
+                <svg
+                  class="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-semibold text-gray-900 mb-4">
+                Remote Teams
+              </h3>
+              <p class="text-gray-600 mb-6">
+                Small teams, startups, distributed companies
+              </p>
+            </div>
+
+            <ul class="space-y-3">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Replace time-zone nightmare meetings with async updates</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Keep everyone informed without interrupting deep work</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Create a browsable history of team progress</span
+                >
+              </li>
+            </ul>
+
+            <div class="text-xs text-gray-500 mt-6">
+              <strong>Asset needed:</strong> Illustration of a world map with team
+              members in different time zones, each with their own standup card,
+              all feeding into a central organized dashboard
+            </div>
+          </div>
+
+          <!-- Solo Professionals -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <div
+                class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mb-6"
+              >
+                <svg
+                  class="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-semibold text-gray-900 mb-4">
+                Solo Professionals
+              </h3>
+              <p class="text-gray-600 mb-6">
+                Developers, designers, writers, consultants
+              </p>
+            </div>
+
+            <ul class="space-y-3">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Start each day with clarity and purpose</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Track your progress over time</span>
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Build a portfolio of your daily achievements</span
+                >
+              </li>
+            </ul>
+
+            <div class="text-xs text-gray-500 mt-6">
+              <strong>Asset needed:</strong> Scene of a professional at a clean desk
+              with coffee, looking at their personal dashboard showing a timeline
+              of accomplishments and clear daily goals
+            </div>
+          </div>
+
+          <!-- Open Source -->
+          <div
+            class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow"
+          >
+            <div class="mb-6">
+              <div
+                class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-6"
+              >
+                <svg
+                  class="w-8 h-8 text-purple-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+                    clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-semibold text-gray-900 mb-4">
+                Open Source
+              </h3>
+              <p class="text-gray-600 mb-6">
+                Maintainers, contributors, volunteer teams
+              </p>
+            </div>
+
+            <ul class="space-y-3">
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Coordinate across continents without scheduling conflicts</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Document contributions and progress transparently</span
+                >
+              </li>
+              <li class="flex items-start space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700"
+                  >Self-host with complete control over your data</span
+                >
+              </li>
+            </ul>
+
+            <div class="text-xs text-gray-500 mt-6">
+              <strong>Asset needed:</strong> GitHub-style contribution graph combined
+              with global collaboration indicators, showing transparent progress
+              tracking across an open source project
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 bg-white" id="pricing">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Simple, transparent pricing
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Two options, both free for now. Build your standup habits today,
+            worry about pricing later.
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <!-- Managed Service -->
+          <div
+            class="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-gray-300 transition-colors"
+          >
+            <div class="text-center mb-8">
+              <div
+                class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+                Managed Service
+              </h3>
+              <p class="text-gray-600">Hosted and maintained for you</p>
+            </div>
+
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Hosted at standupkiwi.com</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Zero setup required</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">All features included</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-yellow-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-500 italic"
+                  >Future: $1/user/month per board</span
+                >
+              </li>
+            </ul>
+
+            <button
+              class="w-full bg-gray-900 text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Get Started Free
+            </button>
+          </div>
+
+          <!-- Self-Hosting -->
+          <div
+            class="bg-white border-2 border-green-200 rounded-2xl p-8 hover:border-green-300 transition-colors relative"
+          >
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <span
+                class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-medium"
+              >
+                Always Free
+              </span>
+            </div>
+
+            <div class="text-center mb-8">
+              <div
+                class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+                Self-Hosting
+              </h3>
+              <p class="text-gray-600">Deploy on your own infrastructure</p>
+            </div>
+
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Deploy on your own servers</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Complete control of your data</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700">Full feature access</span>
+              </li>
+              <li class="flex items-center space-x-3">
+                <div
+                  class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    class="w-3 h-3 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <span class="text-green-700 font-medium"
+                  >Always free forever</span
+                >
+              </li>
+            </ul>
+
+            <button
+              class="w-full border-2 border-green-500 text-green-700 py-4 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+            >
+              View Documentation
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-20 bg-gray-900 text-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <h2 class="text-4xl lg:text-5xl font-bold mb-8">
+          Ready to transform your standups?
+        </h2>
+        <p class="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          Join thousands of teams who've already made the switch to organized,
+          efficient standups.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <button
+            class="bg-white text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Start Free Trial
+          </button>
+          <button
+            class="border border-gray-600 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors"
+          >
+            Schedule Demo
+          </button>
+        </div>
+
+        <p class="text-gray-400 mb-12">
+          No credit card required • No setup needed • Start immediately
+        </p>
+
+        <div class="border-t border-gray-800 pt-12">
+          <div
+            class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8"
+          >
+            <a href="#" class="text-gray-400 hover:text-white transition-colors"
+              >View Documentation</a
+            >
+            <a href="#" class="text-gray-400 hover:text-white transition-colors"
+              >Join Community</a
+            >
+            <a href="#" class="text-gray-400 hover:text-white transition-colors"
+              >Contact Support</a
+            >
+          </div>
+          <p class="text-gray-500 mt-8">
+            Built with ❤️ by developers, for developers. Open source forever.
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
