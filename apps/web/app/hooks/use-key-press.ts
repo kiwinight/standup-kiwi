@@ -18,7 +18,15 @@ function parseKeySpec(keySpec: string): {
   altKey?: boolean;
 } {
   const parts = keySpec.split("+");
-  const result: any = {};
+  const result: {
+    key: string;
+    ctrlKey?: boolean;
+    metaKey?: boolean;
+    shiftKey?: boolean;
+    altKey?: boolean;
+  } = {
+    key: "", // Will be set when we find the actual key
+  };
 
   for (const part of parts) {
     const normalizedPart = part.toLowerCase();
@@ -95,7 +103,8 @@ export function useKeyPress(
   useEffect(() => {
     if (!target) return;
 
-    const handler = (event: KeyboardEvent) => {
+    const handler = (evt: Event) => {
+      const event = evt as KeyboardEvent;
       const keys = Array.isArray(key) ? key : [key];
 
       // Check if any of the specified keys match
@@ -107,7 +116,7 @@ export function useKeyPress(
       }
     };
 
-    const targetElement = target as any;
+    const targetElement = target as EventTarget;
     targetElement.addEventListener(event, handler, eventOptions);
 
     return () => {
