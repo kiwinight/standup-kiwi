@@ -32,7 +32,7 @@ function Hero() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-linear-to-b from-white via-blue-50/60 to-violet-50/70 relative overflow-hidden"
+      className="bg-gradient-to-b from-white via-blue-50/70 to-violet-50/80"
     >
       <Container
         size={{
@@ -115,7 +115,7 @@ function Hero() {
           <Button
             // className="self-start!"
             asChild
-            className="w-full! sm:w-auto!"
+            // className="w-full! sm:w-auto! bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200 shadow-lg"
             size={{
               initial: "3",
               sm: "4",
@@ -149,7 +149,7 @@ function Problem() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-linear-to-b from-violet-50/70 via-blue-50/40 to-white"
+      className="bg-gradient-to-b from-violet-50/80 via-blue-50/50 to-white"
     >
       <Container
         size={{
@@ -268,7 +268,7 @@ function MeetStandupKiwi() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-white via-blue-50/35 to-violet-50/25"
     >
       <Container
         size={{
@@ -345,7 +345,11 @@ function MeetStandupKiwi() {
             }}
             gap="4"
           >
-            <Card size="5">
+            <Card
+              variant="classic"
+              size="5"
+              // className=" ring-1 ring-gray-200/50"
+            >
               <Flex direction="column" gap="3">
                 {/* <ScanTextIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
@@ -372,7 +376,11 @@ function MeetStandupKiwi() {
                 />
               </Flex>
             </Card>
-            <Card size="5">
+            <Card
+              variant="classic"
+              size="5"
+              // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/50"
+            >
               <Flex direction="column" gap="3">
                 {/* <MapPinCheckInsideIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
@@ -394,7 +402,11 @@ function MeetStandupKiwi() {
                 />
               </Flex>
             </Card>
-            <Card size="5">
+            <Card
+              variant="classic"
+              size="5"
+              // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring-gray-200/50"
+            >
               <Flex direction="column" gap="3">
                 {/* <FocusIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
@@ -416,7 +428,11 @@ function MeetStandupKiwi() {
                 />
               </Flex>
             </Card>
-            <Card size="5">
+            <Card
+              variant="classic"
+              size="5"
+              // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/50"
+            >
               <Flex direction="column" gap="3">
                 {/* <SquareDashedIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
@@ -474,7 +490,7 @@ function HowItWorks() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-violet-50/25 via-blue-50/20 to-white"
     >
       <Container
         size={{
@@ -497,7 +513,7 @@ function HowItWorks() {
           </Text>
           <Box mt="4" />
           <Grid columns="2" gap="4">
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <Avatar
                   // highContrast
@@ -524,7 +540,7 @@ function HowItWorks() {
                 />
               </Flex>
             </Card>
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <Avatar
                   // highContrast
@@ -552,7 +568,7 @@ function HowItWorks() {
               </Flex>
             </Card>
 
-            <Card size="5" className="col-span-2">
+            <Card variant="classic" size="5" className="col-span-2">
               <Grid columns="2" gap="4">
                 <Flex
                   direction="column"
@@ -601,7 +617,7 @@ function WhoItsPerfectFor() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-white via-violet-50/25 to-blue-50/30"
     >
       <Container
         size={{
@@ -621,7 +637,7 @@ function WhoItsPerfectFor() {
             Who it's perfect for
           </Heading>
           <Grid columns="3" gap="4">
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <BoxesIcon size="32" strokeWidth={1.25} />
                 <Heading as="h3" size="5">
@@ -659,7 +675,7 @@ function WhoItsPerfectFor() {
                 /> */}
               </Flex>
             </Card>
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <KeyboardIcon size="32" strokeWidth={1.25} />
                 <Heading as="h3" size="5">
@@ -696,7 +712,7 @@ function WhoItsPerfectFor() {
               </Flex>
             </Card>
 
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Grid columns="1" gap="4">
                 <Flex direction="column" gap="3">
                   {/* <div
@@ -755,7 +771,7 @@ function OpenSource() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-blue-50/30 via-white to-violet-50/25"
     >
       <Container
         size={{
@@ -777,7 +793,7 @@ function OpenSource() {
           </Heading>
 
           <Grid columns="2" gap="4">
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 {/* <BoxesIcon size="32" strokeWidth={1.25} /> */}
                 <Heading as="h3" size="5">
@@ -808,7 +824,7 @@ function OpenSource() {
                 </ul>
               </Flex>
             </Card>
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   Built in the Open
@@ -853,7 +869,7 @@ function Pricing() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-violet-50/25 via-blue-50/20 to-white"
     >
       <Container
         size={{
@@ -872,7 +888,7 @@ function Pricing() {
             Pricing
           </Heading>
           <Grid columns="2" gap="4">
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3" height="100%">
                 <Heading as="h3" size="5">
                   Self-Hosting
@@ -903,7 +919,7 @@ function Pricing() {
 
                 <Button
                   asChild
-                  className="w-full! sm:w-auto!"
+                  className="w-full! sm:w-auto! bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 transition-all duration-200"
                   size={{
                     initial: "3",
                     // sm: "4",
@@ -920,7 +936,7 @@ function Pricing() {
               </Flex>
             </Card>
 
-            <Card size="5">
+            <Card variant="classic" size="5">
               <Flex direction="column" gap="3" height="100%">
                 <Heading as="h3" size="5">
                   Managed Service
@@ -952,7 +968,7 @@ function Pricing() {
                 <Box mt="1" />
                 <Button
                   asChild
-                  className="w-full! sm:w-auto!"
+                  className="w-full! sm:w-auto! bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200"
                   size={{
                     initial: "3",
                     // sm: "4",
@@ -1000,74 +1016,13 @@ const FAQ_ITEMS = [
 ];
 
 function FAQ() {
-  function Accordion({
-    ...props
-  }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
-    return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
-  }
-
-  function AccordionItem({
-    className,
-    ...props
-  }: React.ComponentProps<typeof AccordionPrimitive.Item>) {
-    return (
-      <AccordionPrimitive.Item
-        data-slot="accordion-item"
-        className={cn("border-b last:border-b-0", className)}
-        {...props}
-      />
-    );
-  }
-
-  function AccordionTrigger({
-    className,
-    children,
-    ...props
-  }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
-    return (
-      <AccordionPrimitive.Header className="flex">
-        <AccordionPrimitive.Trigger
-          data-slot="accordion-trigger"
-          className={cn(
-            "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-lefttransition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
-            className
-          )}
-          {...props}
-        >
-          <Text size="5" weight="bold">
-            {children}
-          </Text>
-          <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
-        </AccordionPrimitive.Trigger>
-      </AccordionPrimitive.Header>
-    );
-  }
-
-  function AccordionContent({
-    className,
-    children,
-    ...props
-  }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
-    return (
-      <AccordionPrimitive.Content
-        data-slot="accordion-content"
-        className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden"
-        {...props}
-      >
-        <div className={cn("pt-0 pb-4", className)}>
-          <Text color="gray">{children}</Text>
-        </div>
-      </AccordionPrimitive.Content>
-    );
-  }
-
   return (
     <Section
       size={{
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-white via-blue-50/25 to-violet-50/30"
     >
       <Container
         size={{
@@ -1085,29 +1040,33 @@ function FAQ() {
           <Heading as="h2" size="8" align="center">
             Questions? Answers
           </Heading>
-          <Accordion type="multiple">
-            {FAQ_ITEMS.map((item, index) => {
-              return (
-                <AccordionPrimitive.Item value={`item-${index + 1}`} asChild>
-                  <Box className="border-b last:border-b-0 border-[var(--gray-6)]">
-                    <AccordionPrimitive.Trigger className="group p-[var(--space-5)] w-full cursor-pointer">
-                      <Flex align="center" justify="between">
-                        <Text size="5" weight="bold">
-                          {item.question}
+          {/* <Box className="bg-gradient-to-br from-white to-gray-50/40 rounded-lg shadow-sm ring-1 ring-gray-200/50 p-2"> */}
+          <Card variant="classic" size="3" className="py-3!">
+            <AccordionPrimitive.Root type="multiple">
+              {FAQ_ITEMS.map((item, index) => {
+                return (
+                  <AccordionPrimitive.Item value={`item-${index + 1}`} asChild>
+                    <Box className="border-b last:border-b-0 border-[var(--gray-6)]">
+                      <AccordionPrimitive.Trigger className="group p-[var(--space-5)] w-full cursor-pointer">
+                        <Flex align="center" justify="between">
+                          <Text size="5" weight="bold">
+                            {item.question}
+                          </Text>
+                          <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
+                        </Flex>
+                      </AccordionPrimitive.Trigger>
+                      <AccordionPrimitive.Content className="p-[var(--space-5)] pt-0 w-full">
+                        <Text as="p" size="3" color="gray">
+                          {item.answer}
                         </Text>
-                        <ChevronDownIcon className="group-data-[state=open]:rotate-180" />
-                      </Flex>
-                    </AccordionPrimitive.Trigger>
-                    <AccordionPrimitive.Content className="p-[var(--space-5)] pt-0 w-full">
-                      <Text as="p" size="3" color="gray">
-                        {item.answer}
-                      </Text>
-                    </AccordionPrimitive.Content>
-                  </Box>
-                </AccordionPrimitive.Item>
-              );
-            })}
-          </Accordion>
+                      </AccordionPrimitive.Content>
+                    </Box>
+                  </AccordionPrimitive.Item>
+                );
+              })}
+            </AccordionPrimitive.Root>
+          </Card>
+          {/* </Box> */}
         </Flex>
       </Container>
     </Section>
@@ -1121,7 +1080,7 @@ function Roadmap() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-violet-50/30 via-blue-50/25 to-white"
     >
       <Container
         size={{
@@ -1130,8 +1089,8 @@ function Roadmap() {
         }}
         maxWidth={{
           // sm: "768px",
-          sm: "992px",
-          // sm: "1248px",
+          // sm: "992px",
+          sm: "1248px",
         }}
         px={{
           initial: "4",
@@ -1146,8 +1105,12 @@ function Roadmap() {
             real user feedback:
           </Text>
           <Box mt="4" />
-          <Grid columns="3" gap="4" gapY="8">
-            <Card size="5" variant="ghost">
+          <Grid columns="3" gap="4" gapY="4">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   Yesterday context recall
@@ -1158,7 +1121,11 @@ function Roadmap() {
                 </Text>
               </Flex>
             </Card>
-            <Card size="5" variant="ghost">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   Today suggestion engine
@@ -1169,7 +1136,11 @@ function Roadmap() {
                 </Text>
               </Flex>
             </Card>
-            <Card size="5" variant="ghost">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   Daily team digest
@@ -1179,7 +1150,11 @@ function Roadmap() {
                 </Text>
               </Flex>
             </Card>
-            <Card size="5" variant="ghost" className="">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   AI weekly digest
@@ -1190,7 +1165,11 @@ function Roadmap() {
                 </Text>
               </Flex>
             </Card>
-            <Card size="5" variant="ghost" className="">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring/-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   Desktop and mobile apps
@@ -1200,7 +1179,11 @@ function Roadmap() {
                 </Text>
               </Flex>
             </Card>
-            <Card size="5" variant="ghost" className="">
+            <Card
+              size="5"
+              variant="classic"
+              // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
+            >
               <Flex direction="column" gap="3">
                 <Heading as="h3" size="5">
                   And more...!
@@ -1225,7 +1208,7 @@ function FinalCTA() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-white"
+      className="bg-gradient-to-b from-white via-violet-50/35 to-blue-50/40"
     >
       <Container
         size={{
@@ -1245,8 +1228,13 @@ function FinalCTA() {
           </Text>
           <Box mt="4" />
           <Flex justify="center">
-            <Button highContrast size="4">
-              Get started free
+            <Button
+              asChild
+              highContrast
+              size="4"
+              className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
             </Button>
           </Flex>
         </Flex>
@@ -1259,23 +1247,23 @@ function NewContent() {
   return (
     <Theme className="relative" accentColor="gray">
       <NavBar />
-      <Box
-        py={{
-          // initial: "5",
-          sm: "7",
+      <Hero />
+      <Problem />
+      <MeetStandupKiwi />
+      <HowItWorks />
+      <WhoItsPerfectFor />
+      <OpenSource />
+      <Pricing />
+      <FAQ />
+      <Roadmap />
+      <FinalCTA />
+      <Section
+        size={{
+          initial: "3",
+          sm: "4",
         }}
-      >
-        <Hero />
-        <Problem />
-        <MeetStandupKiwi />
-        <HowItWorks />
-        <WhoItsPerfectFor />
-        <OpenSource />
-        <Pricing />
-        <FAQ />
-        <Roadmap />
-        <FinalCTA />
-      </Box>
+        className=""
+      />
     </Theme>
   );
 }
