@@ -15,61 +15,271 @@ import { DateTime } from "luxon";
 import type { loader } from "./board-settings-collaborators-route";
 import type { ActionType as RegenerateInvitationActionType } from "../regenerate-board-invitation/regenerate-board-invitation";
 import { useToast } from "~/hooks/use-toast";
+import type { Invitation } from "~/types";
 
-// TODO: Refactoring suggestions
-// TODO 1: Extract Multiple Components
-//   - InvitationLinkField: Handle the text field with copy functionality
-//   - InvitationActions: Manage Copy/Settings buttons separately
-//   - InvitationExpiration: Display expiration text
-//   - InvitationSettingsDialog: The entire dialog could be its own component
+function InvitationLinkTextFieldSkeleton() {
+  return (
+    <Skeleton className="flex-1">
+      <TextField.Root className="flex-1" />
+    </Skeleton>
+  );
+}
 
-// TODO 2: Create Custom Hooks
-//   - useInvitationActions: Handle regeneration logic, toast notifications, and fetcher state
-//   - useClipboard: Extract the copy-to-clipboard functionality
-//   - useInvitationUrl: Generate and manage the invitation URL
-//   - useDateCalculation: Extract shared date calculation logic
+function CopyButtonSkeleton() {
+  return (
+    <Button variant="soft" highContrast disabled>
+      Copy
+    </Button>
+  );
+}
 
-// TODO 5: Extract Form Logic
-//   - Custom hook for form state (useInvitationForm)
-//   - Separate validation logic
-//   - Extract form submission handler
+function SettingsButtonSkeleton() {
+  return (
+    <Button variant="soft" highContrast disabled>
+      Settings
+    </Button>
+  );
+}
 
-// TODO 6: Create Reusable Loading Components
-//   - InvitationFieldSkeleton
-//   - InvitationButtonSkeleton
-//   - InvitationTextSkeleton
+function ExpirationTextSkeleton() {
+  return (
+    <Skeleton className="">
+      <Text size="1" color="gray" mt="2">
+        Expires in 30 day
+      </Text>
+    </Skeleton>
+  );
+}
 
-// TODO 7: Reduce Inline Functions
-//   - Extract handleCopy, handleFocus, handleSettingsOpen to custom hooks
-//   - Move dialog submission logic to the dialog component
+function InvitationDialogContentSkeleton() {
+  return null;
+}
 
-// TODO 8: Simplify State Management
-//   - Dialog open/close state should be in the dialog component
-//   - Fetcher state handling should be in a custom hook
-//   - Toast notifications should be abstracted
+function InvitationLinkTextField({
+  invitation,
+}: {
+  invitation: Invitation | null;
+}) {
+  const { baseUrl } = useLoaderData<typeof loader>();
+  const regenerateInvitationFetcher =
+    useFetcher<RegenerateInvitationActionType>({
+      key: "regenerate-invitation",
+    });
 
-// TODO 9: Better Error Boundaries
-//   - Clipboard operations error handling
-//   - Data loading failures error handling
-//   - Form submission errors error handling
+  return regenerateInvitationFetcher.state !== "idle" ? (
+    <InvitationLinkTextFieldSkeleton />
+  ) : (
+    <TextField.Root
+      className="flex-1"
+      value={`${baseUrl}/invitations/${invitation?.token}`}
+      readOnly
+    >
+      <TextField.Slot>
+        <Link2Icon />
+      </TextField.Slot>
+    </TextField.Root>
+  );
+}
 
-// TODO 10: Type Safety Improvements
-//   - Replace 'any' types with proper interfaces
-//   - Create shared types for invitation data
-//   - Use React Router 7's typed route patterns
+function CopyButton({ invitation }: { invitation: Invitation | null }) {
+  const { baseUrl } = useLoaderData<typeof loader>();
+  const { toast } = useToast();
+  const regenerateInvitationFetcher =
+    useFetcher<RegenerateInvitationActionType>({
+      key: "regenerate-invitation",
+    });
 
-// TODO 11: Improve Toast Messages
-//   - Toast copy texts are not user-friendly (especially error messages)
-//   - Create user-friendly error message mapping
-//   - Make success messages more concise and actionable
+  return (
+    <Button
+      variant="soft"
+      highContrast
+      disabled={regenerateInvitationFetcher.state !== "idle"}
+      onClick={async () => {
+        try {
+          const url = `${baseUrl}/invitations/${invitation?.token}`;
+          await navigator.clipboard.writeText(url);
+          toast.success("Invitation link copied to clipboard");
+        } catch (err) {
+          console.error("Failed to copy to clipboard:", err);
+          toast.error("Failed to copy invitation link");
+        }
+      }}
+    >
+      Copy
+    </Button>
+  );
+}
+
+function SettingsButton() {
+  const regenerateInvitationFetcher =
+    useFetcher<RegenerateInvitationActionType>({
+      key: "regenerate-invitation",
+    });
+
+  return (
+    <Dialog.Trigger>
+      <Button
+        variant="soft"
+        highContrast
+        disabled={regenerateInvitationFetcher.state !== "idle"}
+      >
+        Settings
+      </Button>
+    </Dialog.Trigger>
+  );
+}
+
+function ExpirationText({
+  invitation,
+  timezone,
+}: {
+  invitation: Invitation | null;
+  timezone: string | undefined;
+}) {
+  const regenerateInvitationFetcher =
+    useFetcher<RegenerateInvitationActionType>({
+      key: "regenerate-invitation",
+    });
+
+  return regenerateInvitationFetcher.state !== "idle" ? (
+    <ExpirationTextSkeleton />
+  ) : (
+    <Text size="1" color="gray" mt="2">
+      Expires in{" "}
+      {invitation?.expiresAt && timezone
+        ? formatDaysFromNow(
+            calculateDaysFromNow(invitation.expiresAt, timezone)
+          )
+        : "Unknown"}
+    </Text>
+  );
+}
 
 type Props = {};
 
 interface InvitationDialogContentProps {
-  invitation: any;
+  invitation: Invitation | null;
   timezone: string | undefined;
-  boardId: string | undefined;
+  boardId: number;
   onClose: () => void;
+}
+
+function InvitationDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: { invitation: Invitation | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  const { ensureInvitationPromise } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={fallback}>
+      <Await resolve={ensureInvitationPromise}>
+        {(invitation) => {
+          return children({ invitation });
+        }}
+      </Await>
+    </Suspense>
+  );
+}
+
+function InvitationLinkTextFieldDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: { invitation: Invitation | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  return (
+    <InvitationDataLoader fallback={fallback}>
+      {({ invitation }) => children({ invitation })}
+    </InvitationDataLoader>
+  );
+}
+
+function CopyButtonDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: { invitation: Invitation | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  return (
+    <InvitationDataLoader fallback={fallback}>
+      {({ invitation }) => children({ invitation })}
+    </InvitationDataLoader>
+  );
+}
+
+function SettingsButtonDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: { invitation: Invitation | null }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  return (
+    <InvitationDataLoader fallback={fallback}>
+      {({ invitation }) => children({ invitation })}
+    </InvitationDataLoader>
+  );
+}
+
+function ExpirationTextDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: {
+    invitation: Invitation | null;
+    timezone: string | undefined;
+  }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  const { boardPromise } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={fallback}>
+      <Await resolve={boardPromise}>
+        {(board) => {
+          const timezone = board?.timezone;
+          return (
+            <InvitationDataLoader fallback={fallback}>
+              {({ invitation }) => children({ invitation, timezone })}
+            </InvitationDataLoader>
+          );
+        }}
+      </Await>
+    </Suspense>
+  );
+}
+
+function InvitationDialogContentDataLoader({
+  children,
+  fallback,
+}: {
+  children: (data: {
+    invitation: Invitation | null;
+    timezone: string | undefined;
+  }) => React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  const { boardPromise } = useLoaderData<typeof loader>();
+
+  return (
+    <Suspense fallback={fallback}>
+      <Await resolve={boardPromise}>
+        {(board) => {
+          const timezone = board?.timezone;
+          return (
+            <InvitationDataLoader fallback={fallback}>
+              {({ invitation }) => children({ invitation, timezone })}
+            </InvitationDataLoader>
+          );
+        }}
+      </Await>
+    </Suspense>
+  );
 }
 
 function InvitationDialogContent({
@@ -208,9 +418,7 @@ function getDaysFromNowForForm(dateString: string, timezone: string): number {
 }
 
 function InviteCollaboratorsSetting({}: Props) {
-  const { ensureInvitationPromise, boardPromise, baseUrl } =
-    useLoaderData<typeof loader>();
-  const { boardId } = useParams();
+  const boardId = parseInt(useParams().boardId!, 10);
   const { toast } = useToast();
 
   const regenerateInvitationFetcher =
@@ -258,159 +466,53 @@ function InviteCollaboratorsSetting({}: Props) {
           </Text>
 
           <Flex gap="3" mt="2">
-            <Suspense
-              fallback={
-                <Skeleton className="flex-1">
-                  <TextField.Root className="flex-1" />
-                </Skeleton>
-              }
+            <InvitationLinkTextFieldDataLoader
+              fallback={<InvitationLinkTextFieldSkeleton />}
             >
-              <Await resolve={ensureInvitationPromise}>
-                {(invitation) => {
-                  return regenerateInvitationFetcher.state !== "idle" ? (
-                    <Skeleton className="flex-1">
-                      <TextField.Root className="flex-1" />
-                    </Skeleton>
-                  ) : (
-                    <TextField.Root
-                      className="flex-1"
-                      value={`${baseUrl}/invitations/${invitation?.token}`}
-                      readOnly
-                      // onChange={() => null}
-                    >
-                      <TextField.Slot>
-                        <Link2Icon />
-                      </TextField.Slot>
-                    </TextField.Root>
-                  );
-                }}
-              </Await>
-            </Suspense>
+              {({ invitation }) => (
+                <InvitationLinkTextField invitation={invitation} />
+              )}
+            </InvitationLinkTextFieldDataLoader>
 
-            <Suspense
-              fallback={
-                <Button variant="soft" highContrast disabled>
-                  Copy
-                </Button>
-              }
-            >
-              <Await resolve={ensureInvitationPromise}>
-                {(invitation) => (
-                  <Button
-                    variant="soft"
-                    highContrast
-                    disabled={regenerateInvitationFetcher.state !== "idle"}
-                    onClick={async () => {
-                      try {
-                        const url = `${baseUrl}/invitations/${invitation?.token}`;
-                        await navigator.clipboard.writeText(url);
-                        toast.success("Invitation link copied to clipboard");
-                      } catch (err) {
-                        console.error("Failed to copy to clipboard:", err);
-                        toast.error("Failed to copy invitation link");
-                      }
-                    }}
-                  >
-                    Copy
-                  </Button>
-                )}
-              </Await>
-            </Suspense>
+            <CopyButtonDataLoader fallback={<CopyButtonSkeleton />}>
+              {({ invitation }) => <CopyButton invitation={invitation} />}
+            </CopyButtonDataLoader>
 
             <Dialog.Root
               open={isInvitationLinkSettingsOpen}
               onOpenChange={setIsInvitationLinkSettingsOpen}
             >
-              <Suspense
-                fallback={
-                  <Button variant="soft" highContrast disabled>
-                    Settings
-                  </Button>
-                }
-              >
-                <Await resolve={ensureInvitationPromise}>
-                  {() => (
-                    <Dialog.Trigger>
-                      <Button
-                        variant="soft"
-                        highContrast
-                        disabled={regenerateInvitationFetcher.state !== "idle"}
-                      >
-                        Settings
-                      </Button>
-                    </Dialog.Trigger>
-                  )}
-                </Await>
-              </Suspense>
+              <SettingsButtonDataLoader fallback={<SettingsButtonSkeleton />}>
+                {() => <SettingsButton />}
+              </SettingsButtonDataLoader>
               <Dialog.Content
                 size={{
                   initial: "3",
                   sm: "4",
                 }}
               >
-                <Await resolve={boardPromise}>
-                  {(board) => {
-                    const timezone = board?.timezone;
-                    return (
-                      <Await resolve={ensureInvitationPromise}>
-                        {(invitation) => (
-                          <InvitationDialogContent
-                            invitation={invitation}
-                            timezone={timezone}
-                            boardId={boardId}
-                            onClose={() =>
-                              setIsInvitationLinkSettingsOpen(false)
-                            }
-                          />
-                        )}
-                      </Await>
-                    );
-                  }}
-                </Await>
+                <InvitationDialogContentDataLoader
+                  fallback={<InvitationDialogContentSkeleton />}
+                >
+                  {({ invitation, timezone }) => (
+                    <InvitationDialogContent
+                      invitation={invitation}
+                      timezone={timezone}
+                      boardId={boardId}
+                      onClose={() => setIsInvitationLinkSettingsOpen(false)}
+                    />
+                  )}
+                </InvitationDialogContentDataLoader>
               </Dialog.Content>
             </Dialog.Root>
           </Flex>
+
           <Flex>
-            <Suspense
-              fallback={
-                <Skeleton className="">
-                  <Text size="1" color="gray" mt="2">
-                    Expires in 30 day
-                  </Text>
-                </Skeleton>
-              }
-            >
-              <Await resolve={boardPromise}>
-                {(board) => {
-                  const timezone = board?.timezone; // e.g. "America/New_York"
-                  return (
-                    <Await resolve={ensureInvitationPromise}>
-                      {(invitation) => {
-                        return regenerateInvitationFetcher.state !== "idle" ? (
-                          <Skeleton className="">
-                            <Text size="1" color="gray" mt="2">
-                              Expires in 30 days
-                            </Text>
-                          </Skeleton>
-                        ) : (
-                          <Text size="1" color="gray" mt="2">
-                            Expires in{" "}
-                            {invitation?.expiresAt && timezone
-                              ? formatDaysFromNow(
-                                  calculateDaysFromNow(
-                                    invitation.expiresAt,
-                                    timezone
-                                  )
-                                )
-                              : "Unknown"}
-                          </Text>
-                        );
-                      }}
-                    </Await>
-                  );
-                }}
-              </Await>
-            </Suspense>
+            <ExpirationTextDataLoader fallback={<ExpirationTextSkeleton />}>
+              {({ invitation, timezone }) => (
+                <ExpirationText invitation={invitation} timezone={timezone} />
+              )}
+            </ExpirationTextDataLoader>
           </Flex>
         </>
       </Flex>

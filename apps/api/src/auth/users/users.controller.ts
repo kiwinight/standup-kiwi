@@ -19,17 +19,26 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  getMe(@Req() request: AuthenticatedRequest) {
-    const userId = request.userId;
-    return this.usersService.get(userId);
+  async getMe(@Req() request: AuthenticatedRequest) {
+    try {
+      const userId = request.userId;
+      return await this.usersService.get(userId);
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   @UseGuards(AuthGuard)
   @Get('me/boards')
-  getMyBoards(@Req() request: AuthenticatedRequest): Promise<Board[]> {
-    const userId = request.userId;
-    // TODO: handle error case
-    return this.usersService.getBoardsOfUser(userId);
+  async getMyBoards(@Req() request: AuthenticatedRequest): Promise<Board[]> {
+    try {
+      const userId = request.userId;
+      return await this.usersService.getBoardsOfUser(userId);
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   @UseGuards(AuthGuard)

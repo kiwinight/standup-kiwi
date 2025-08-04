@@ -37,7 +37,6 @@ export default [
     ),
   ]),
 
-  route("/access", "routes/access-route/access-route.tsx"), // TODO: Remove this when access to /access is not needed
   route("/invitations/:token", "routes/invitation-route/invitation-route.tsx"),
 
   // action only routes

@@ -8,8 +8,8 @@ import {
   serial,
   primaryKey,
   jsonb,
-  AnyPgColumn,
   pgEnum,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 
 // TODO: add owner role

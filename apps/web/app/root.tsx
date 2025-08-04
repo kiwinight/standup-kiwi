@@ -203,7 +203,12 @@ export default function App() {
 
   return (
     <Theme
+      // TODO: support full theme customization to users
       accentColor="gray"
+      grayColor="mauve"
+      hasBackground
+      panelBackground="translucent"
+      scaling="100%"
       {...(colorScheme !== null ? { appearance: colorScheme } : {})}
     >
       <Outlet />
