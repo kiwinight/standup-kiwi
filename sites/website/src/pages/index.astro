@@ -6,6 +6,12 @@ import IndexContent from "./index-content.tsx";
 import BaseHead from "../components/base-head.astro";
 import ContentHead from "../components/content-head.astro";
 import { SITE_DESCRIPTION } from "../constants.ts";
+import { Image } from "astro:assets";
+
+import goodVibesGradient from "../assets/overview/good-vibes-gradient.png";
+import autumnalPeachGradient from "../assets/overview/autumnal-peach-gradient.png";
+import standupKiwiResponsiveMockup from "../assets/overview/standup-kiwi-responsive-mockup.png";
+import standupKiwiBoardDemo from "../assets/overview/standup-kiwi-board-demo.png";
 ---
 
 <html lang="en">
@@ -18,6 +24,41 @@ import { SITE_DESCRIPTION } from "../constants.ts";
   </head>
 
   <body>
-    <IndexContent client:load />
+    <IndexContent client:visible>
+      <Image
+        slot="good-vibes-gradient-img"
+        src={goodVibesGradient}
+        alt="Good vibes gradient"
+        quality={1}
+        width={2560}
+        format="webp"
+      />
+      <Image
+        slot="autumnal-peach-gradient-img"
+        src={autumnalPeachGradient}
+        alt="Autumnal peach gradient"
+        quality={1}
+        width={1248}
+        format="webp"
+      />
+      <Image
+        slot="standup-kiwi-responsive-mockup-img"
+        src={standupKiwiResponsiveMockup}
+        alt="Standup Kiwi"
+        quality={100}
+        width={1248}
+        format="webp"
+      />
+
+      <Image
+        slot="standup-kiwi-board-demo-img"
+        src={standupKiwiBoardDemo}
+        alt="Standup Kiwi"
+        quality={100}
+        width={1208}
+        height={906}
+        format="webp"
+      />
+    </IndexContent>
   </body>
 </html>
