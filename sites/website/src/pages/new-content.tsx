@@ -8,10 +8,12 @@ import {
   Flex,
   Grid,
   Heading,
+  Inset,
   Section,
   Text,
   Theme,
 } from "@radix-ui/themes";
+import { useEffect, useRef } from "react";
 
 import { NavBar } from "../components/nav-bar";
 import { ChevronDownIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
@@ -32,7 +34,24 @@ function Hero() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-blue-50/50 to-blue-50/60"
+      pt="calc(80px * var(--scaling) * 1.5)"
+      style={{
+        // backgroundImage:
+        //   "radial-gradient(circle 800px at 700px 200px, var(--purple-2), transparent),radial-gradient(circle 600px at calc(100% - 300px) 300px, var(--blue-3), transparent),radial-gradient(circle 800px at right center, var(--sky-3), transparent),radial-gradient(circle 800px at right bottom, var(--sky-1), transparent),radial-gradient(circle 800px at calc(50% - 600px) calc(100% - 100px), var(--pink-3), var(--pink-1), transparent)",
+        // backgroundImage: `radial-gradient(circle 1000px at center 66.66%, var(--pink-2), transparent),
+        // 			radial-gradient(circle 1000px at 10% 80%, var(--violet-2), var(--purple-2), transparent),
+        // 			radial-gradient(circle 600px at right 40%, var(--blue-2), transparent),
+        // 			radial-gradient(circle 800px at right 60%, var(--sky-2), transparent),
+        // 			radial-gradient(circle 800px at right bottom, var(--iris-3), transparent)`,
+
+        backgroundImage:
+          "linear-gradient(var(--color-background), rgba(255, 255, 255, 0.85) 50%), url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fblossom-2-preview.png&w=3840&q=75')",
+
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+      // className="bg-white"f
     >
       <Container
         size={{
@@ -40,7 +59,11 @@ function Hero() {
           sm: "3",
           // sm: "4",
         }}
-        maxWidth="992px"
+        maxWidth={{
+          // sm: '992px',
+          sm: "1248px",
+          // sm: "1608px",
+        }}
         px={{
           initial: "4",
         }}
@@ -79,15 +102,15 @@ function Hero() {
             </Text>
           </Heading>
           <Flex gap="2">
-            <Badge size="2" color="gray">
+            <Badge size="2">
               <LayoutGridIcon size={15} strokeWidth={1.5} />
               Organized Board
             </Badge>
-            <Badge size="2" color="gray">
+            <Badge size="2">
               <ClockFadingIcon size={15} strokeWidth={1.5} />
               Shorter Meetings
             </Badge>
-            <Badge size="2" color="gray">
+            <Badge size="2">
               <GithubIcon size={15} strokeWidth={1.5} />
               Open Source
             </Badge>
@@ -98,7 +121,6 @@ function Hero() {
               // initial: "3",
               // sm: "4",
             }}
-            color="gray"
             align={{
               initial: "center",
               sm: "center",
@@ -130,10 +152,13 @@ function Hero() {
 
           <Box>
             <img
-              src="/image.png"
-              style={{
-                filter: "grayscale(100%) blur(2px)",
-              }}
+              // src="https://obsidian.md/images/screenshot-1.0-hero-combo.png"
+              src="/hero-light-devices.png"
+              style={
+                {
+                  // filter: "grayscale(100%) blur(2px)",
+                }
+              }
             />
           </Box>
         </Flex>
@@ -149,7 +174,7 @@ function Problem() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-blue-50/60 via-blue-50/70 to-violet-50/60"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -192,33 +217,33 @@ function Problem() {
             }}
             gap="4"
           >
-            <Card size="5" className="" variant="ghost">
+            <Card size="3" variant="classic" className="">
               {/* <Badge color="red" size="1" mb="3">
               30+ min wasted
             </Badge> */}
               <Heading as="h3" size="5" mb="2" className="italic!">
                 Endless meetings...
               </Heading>
-              <Text color="gray">
+              <Text>
                 Daily standup meetings that drag on for 30 minutes when everyone
                 just needs to share quick updates.
               </Text>
             </Card>
 
-            <Card size="5" className="" variant="ghost">
+            <Card size="3" variant="classic" className="">
               {/* <Badge color="orange" size="1" mb="3">
               Never found
             </Badge> */}
               <Heading as="h3" size="5" mb="2" className="italic!">
                 Lost in Slack...
               </Heading>
-              <Text color="gray">
+              <Text>
                 Scattered updates buried in threads that you can never find
                 later when you need them.
               </Text>
             </Card>
 
-            <Card size="5" className="" variant="ghost">
+            <Card size="3" variant="classic" className="">
               <Flex
                 // className="h-full items-center"
                 direction="column"
@@ -233,8 +258,8 @@ function Problem() {
                   Tool overload...
                 </Heading>
                 <Text
-                  color="gray"
-                  // align="center"
+
+                // align="center"
                 >
                   Over-engineered tools like Jira, Notion templates, or Linear
                   that feel like overkill for simple daily check-ins.
@@ -242,14 +267,14 @@ function Problem() {
               </Flex>
             </Card>
 
-            <Card size="5" className="" variant="ghost">
-              {/* <Badge color="gray" size="1" mb="3">
+            <Card size="3" variant="classic" className="">
+              {/* <Badge  size="1" mb="3">
               Always scrambling
             </Badge> */}
               <Heading as="h3" size="5" mb="2" className="italic!">
                 No record keeping...
               </Heading>
-              <Text color="gray">
+              <Text>
                 When your boss asks "what's your team been working on?" you
                 scramble to remember what happened last week.
               </Text>
@@ -268,7 +293,7 @@ function MeetStandupKiwi() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/60 via-blue-50/65 to-violet-50/50"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -289,18 +314,15 @@ function MeetStandupKiwi() {
           align="center"
         >
           <Heading as="h2" size="8" align="center">
-            Meet Standup Kiwi,
+            Meet Standup Kiwi—
             <br />
-            The lightweight standup tool that actually works.
+            Turn dragging meetings into quick sync
           </Heading>
-          <Text color="gray" align="center">
-            Standup Kiwi is designed for one thing: making daily standups
-            effortless and meaningful.
+          <Text align="center">
+            Get your time back, keep your team aligned, and always know what's
+            happening.
             <br />
-            No complex features you don't need. No meetings that drag on.
-            <br />
-            Just clean, organized updates that help you and your team stay in
-            sync.
+            No more scrambling for answers when your boss asks for updates.
           </Text>
 
           <Box mt="4" />
@@ -344,7 +366,76 @@ function MeetStandupKiwi() {
               sm: "2",
             }}
             gap="4"
+            // gapY="0"
           >
+            {/* <Box className="col-span-4">
+              <img
+                src="https://obsidian.md/images/sync-share.png"
+                alt="Example of Obsidian Help site powered by Obsidian Publish"
+                className="mb-[-12%]  rounded-xl shadow-2xl ring-1 ring-black/20"
+              ></img>
+              <div className="relative" aria-hidden="true">
+                <div className="absolute -inset-x-20 bottom-0 bg-gradient-to-t from-primary pt-[7%]"></div>
+              </div>
+            </Box> */}
+            {/* <div className="col-span-2 relative">
+              <img
+                // src="https://obsidian.md/images/sync-share.png"
+                src="/as-solution.png"
+                // alt="Example of Obsidian Help site powered by Obsidian Publish"
+                className=" w-full h-auto object-cover object-top aspect-[2/1]"
+                // className="rounded-xl w-full h-auto"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-white via-5% to-transparent to-20% pointer-events-none"></div>
+            </div> */}
+            <Card
+              // className="col-span-2 pb-0!"
+              className="col-span-2 pb-0!"
+              size={{
+                sm: "5",
+              }}
+              // style={{
+              //   backgroundImage:
+              //     "url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fgood-vibes-preview.png&w=3840&q=75')",
+              //   backgroundSize: "cover",
+              //   backgroundPosition: "center",
+              //   backgroundRepeat: "no-repeat",
+              //   // backdropFilter: "none",
+              //   // backgroundColor: "transparent",
+              //   // "::before": {
+              //   //   backdropFilter: "none",
+              //   //   backgroundColor: "transparent",
+              //   // },
+              // }}
+            >
+              <Inset
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fautumnal-peach-preview.png&w=3840&q=75')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                side="top"
+              >
+                <Box p="9" pb="0">
+                  <img
+                    // src="https://obsidian.md/images/sync-share.png"
+                    src="/as-solution-v2.png"
+                    // alt="Example of Obsidian Help site powered by Obsidian Publish"
+                    className=" w-full h-auto object-cover object-top aspect-[2/1]"
+                    // className="rounded-xl w-full h-auto"
+                  />
+                </Box>
+              </Inset>
+              {/* <img
+                // src="https://obsidian.md/images/sync-share.png"
+                src="/as-solution.png"
+                // alt="Example of Obsidian Help site powered by Obsidian Publish"
+                className=" w-full h-auto object-cover object-top aspect-[2/1]"
+                // className="rounded-xl w-full h-auto"
+              /> */}
+            </Card>
             <Card
               variant="classic"
               size="5"
@@ -353,27 +444,26 @@ function MeetStandupKiwi() {
               <Flex direction="column" gap="3">
                 {/* <ScanTextIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
-                  Replace 30-minute meetings
+                  Turn 30-minute meetings
                   <br className="hidden sm:block" />
-                  with 5-minute updates
+                  into focused 5-minute standups
                 </Heading>
-                <Text size="1" color="red">
-                  (TODO: either replace or focus on meetings)
+                <Text>
+                  Prepare your updates beforehand, then share the board during
+                  your standup. Everyone comes prepared, making meetings shorter
+                  and more focused. Or skip the meeting entirely. It's your
+                  choice.
                 </Text>
-                <Text color="gray">
-                  Skip the scheduling conflicts and time zone nightmares. Write
-                  your update when it's convenient, read everyone else's when
-                  you need to. No more sitting through meetings where you're
-                  only interested in 5 minutes of content.
-                </Text>
-                <Box mt="4" />
-                <img
-                  src="/image.png"
+                {/* <Box mt="4" /> */}
+                {/* <img
+                  src="https://obsidian.md/images/sync-settings.png"
                   className="w-full"
-                  style={{
-                    filter: "grayscale(100%) blur(2px)",
-                  }}
-                />
+                  style={
+                    {
+                      // filter: "grayscale(100%) blur(2px)",
+                    }
+                  }
+                /> */}
               </Flex>
             </Card>
             <Card
@@ -386,20 +476,21 @@ function MeetStandupKiwi() {
                 <Heading as="h3" size="5">
                   Everything organized in one place
                 </Heading>
-                <Text color="gray">
-                  No more digging through endless Slack threads or trying to
-                  remember "what channel was that update in?" All your team's
-                  progress lives in clean, organized cards with a clear
-                  browsable history.
+                <Text>
+                  No more scrolling through weeks of Slack messages to find that
+                  one update you need. All your team's progress lives in clean,
+                  organized cards with a clear browsable history.
                 </Text>
-                <Box mt="4" />
-                <img
-                  src="/image.png"
+                {/* <Box mt="4" /> */}
+                {/* <img
+                  src="https://obsidian.md/images/sync-diff.png"
                   className="w-full"
-                  style={{
-                    filter: "grayscale(100%) blur(2px)",
-                  }}
-                />
+                  style={
+                    {
+                      // filter: "grayscale(100%) blur(2px)",
+                    }
+                  }
+                /> */}
               </Flex>
             </Card>
             <Card
@@ -412,20 +503,22 @@ function MeetStandupKiwi() {
                 <Heading as="h3" size="5">
                   Simple and focused - built just for standups
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Unlike Jira, Notion templates, or Linear, Standup Kiwi does
                   one thing really well: daily standups. No complex project
                   management features you don't need, no overwhelming setup
                   process, just clean daily updates.
                 </Text>
-                <Box mt="4" />
-                <img
-                  src="/image.png"
+                {/* <Box mt="4" /> */}
+                {/* <img
+                  src="https://obsidian.md/images/sync-share.png"
                   className="w-full"
-                  style={{
-                    filter: "grayscale(100%) blur(2px)",
-                  }}
-                />
+                  style={
+                    {
+                      // filter: "grayscale(100%) blur(2px)",
+                    }
+                  }
+                /> */}
               </Flex>
             </Card>
             <Card
@@ -438,29 +531,30 @@ function MeetStandupKiwi() {
                 <Heading as="h3" size="5">
                   Never lose track of what your team accomplished
                 </Heading>
-                <Text color="gray">
+                <Text>
                   When your boss asks "what's your team been working on this
                   week?" you'll have a clear, browsable history instead of
                   scrambling to remember. Perfect for performance reviews,
                   progress reports, and onboarding new team members.
                 </Text>
-                <Box mt="4" />
-                <img
+                {/* <Box mt="4" /> */}
+                {/* <img
                   src="/image.png"
                   className="w-full"
                   style={{
                     filter: "grayscale(100%) blur(2px)",
                   }}
-                />
+                /> */}
               </Flex>
             </Card>
+
             {/* <Card size="5">
               <Flex direction="column" gap="3">
                 <SquareDashedIcon size="32" strokeWidth={1.5} />
                 <Heading as="h3" size="4">
                   Your data, your control - open source and self-hostable
                 </Heading>
-                <Text color="gray">
+                <Text >
                   Built transparently in the open with no vendor lock-in. Keep
                   everything on your own servers if you want, or use our hosted
                   version. Either way, your standup data belongs to you, not
@@ -484,13 +578,21 @@ function MeetStandupKiwi() {
 }
 
 function HowItWorks() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.75;
+    }
+  }, []);
+
   return (
     <Section
       size={{
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/50 via-blue-50/55 to-violet-50/65"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -508,11 +610,41 @@ function HowItWorks() {
           <Heading as="h2" size="8" align="center">
             How it works
           </Heading>
-          <Text color="gray" align="center">
-            Simple as 1-2-3
-          </Text>
+          <Text align="center">Simple as 1-2-3</Text>
           <Box mt="4" />
-          <Grid columns="2" gap="4">
+          <Card variant="classic">
+            <Inset>
+              <video
+                ref={videoRef}
+                // src="/video.mp4"
+                className="w-full aspect-[2/1] object-cover object-top"
+                autoPlay
+                loop
+                muted
+                // style={{
+                //   filter: "grayscale(100%)",
+                // }}
+              >
+                <source
+                  // src="https://a.slack-edge.com/0cedc3b/marketing/img/homepage/true-prospects/hero-revamp/animation/hero@2x.ko-KR.webm"
+                  // type="video/webm"
+                  // src="/how-it-works.mp4"
+                  // src="/how-it-works-v2.mp4"
+                  // src="/how-it-works-v3.mp4"
+                  // src="/how-it-works-v4.mp4"
+                  // src="/how-it-works-v5.mp4"
+                  src="/how-it-works-1080p-30fps-web.mp4"
+                  // src="/how-it-works-v7.mp4"
+                  type="video/mp4"
+                />
+              </video>
+            </Inset>
+          </Card>
+          <Grid
+            // columns="2"
+            columns="3"
+            gap="4"
+          >
             <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
                 <Avatar
@@ -525,19 +657,19 @@ function HowItWorks() {
                 <Heading as="h3" size="5">
                   Create your board
                 </Heading>
-                <Text color="gray">
-                  Set up a personal board or team workspace in seconds. Name it
-                  whatever makes sense—"Daily Progress," "Team Alpha," or just
-                  your name. No complex setup, no admin approval needed.
+                <Text>
+                  Set up a team or personal board in seconds. Name it whatever
+                  makes sense — "Daily Progress," "Team Alpha," or just your
+                  name. No complex setup.
                 </Text>
-                <Box mt="4" />
+                {/* <Box mt="4" /> */}
 
-                <img
+                {/* <img
                   src="/image.png"
                   style={{
                     filter: "grayscale(100%) blur(2px)",
                   }}
-                />
+                /> */}
               </Flex>
             </Card>
             <Card variant="classic" size="5">
@@ -552,24 +684,32 @@ function HowItWorks() {
                 <Heading as="h3" size="5">
                   Write Your Update
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Answer the classic questions: What did you do yesterday?
                   What's planned for today? Any blockers? Use our clean markdown
                   editor to format lists, add links, and make your updates
                   scannable.
                 </Text>
-                <Box mt="4" />
-                <img
+                {/* <Box mt="4" /> */}
+                {/* <img
                   src="/image.png"
                   style={{
                     filter: "grayscale(100%) blur(2px)",
                   }}
-                />
+                /> */}
               </Flex>
             </Card>
 
-            <Card variant="classic" size="5" className="col-span-2">
-              <Grid columns="2" gap="4">
+            <Card
+              variant="classic"
+              size="5"
+              // className="col-span-2"
+            >
+              <Grid
+                // columns="2"
+                columns="1"
+                gap="4"
+              >
                 <Flex
                   direction="column"
                   gap="3"
@@ -586,21 +726,21 @@ function HowItWorks() {
                   <Heading as="h3" size="5">
                     Stay Organized
                   </Heading>
-                  <Text color="gray">
+                  <Text>
                     Your updates become organized cards on a clean board. Browse
                     today's updates, review past work, and never lose track of
                     progress again. Everything is right where you need it, when
                     you need it.
                   </Text>
                 </Flex>
-                <Flex>
+                {/* <Flex>
                   <img
                     src="/image.png"
                     style={{
                       filter: "grayscale(100%) blur(2px)",
                     }}
                   />
-                </Flex>
+                </Flex> */}
               </Grid>
             </Card>
           </Grid>
@@ -617,7 +757,7 @@ function WhoItsPerfectFor() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/65 via-blue-50/45 to-violet-50/70"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -639,29 +779,29 @@ function WhoItsPerfectFor() {
           <Grid columns="3" gap="4">
             <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
-                <BoxesIcon size="32" strokeWidth={1.25} />
+                {/* <BoxesIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
                   Small teams, startups, distributed companies
                 </Heading>
-                <ul className="list-disc">
+                <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">
-                      Replace time-zone nightmare meetings with async updates
-                    </Text>
-                  </li>
-                  <li>
-                    <Text color="gray">
+                    <Text>
                       Keep everyone informed without interrupting deep work
                     </Text>
                   </li>
+
                   <li>
-                    <Text color="gray">
-                      Create a browsable history of team progress
-                    </Text>
+                    <Text>Create a browsable history of team progress</Text>
                   </li>
+
                   <li>
-                    <Text color="gray">
-                      Onboard new members with context from day one
+                    <Text>Onboard new members with context from day one</Text>
+                  </li>
+
+                  <li>
+                    <Text>
+                      Make time-zone distributed meetings work with prepared
+                      updates
                     </Text>
                   </li>
                 </ul>
@@ -677,31 +817,25 @@ function WhoItsPerfectFor() {
             </Card>
             <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
-                <KeyboardIcon size="32" strokeWidth={1.25} />
+                {/* <KeyboardIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
                   Developers, designers, writers, consultants
                 </Heading>
-                <ul className="list-disc">
+                <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">
-                      Start each day with clarity and purpose
-                    </Text>
+                    <Text>Start each day with clarity and purpose</Text>
                   </li>
                   <li>
-                    <Text color="gray">Track your progress over time</Text>
+                    <Text>Track your progress over time</Text>
                   </li>
                   <li>
-                    <Text color="gray">
-                      Never lose track of what you were working on
-                    </Text>
+                    <Text>Never lose track of what you were working on</Text>
                   </li>
                   <li>
-                    <Text color="gray">
-                      Build a portfolio of your daily achievements
-                    </Text>
+                    <Text>Build a portfolio of your daily achievements</Text>
                   </li>
                 </ul>
-                <Text color="gray" align="center"></Text>
+                <Text align="center"></Text>
                 {/* <Box mt="4" />
                 <img
                   src="/image.png"
@@ -719,30 +853,31 @@ function WhoItsPerfectFor() {
                     dangerouslySetInnerHTML={{ __html: siGithub.svg }}
                     className="w-8 h-8"
                   /> */}
-                  <GitHubLogoIcon width="32" height="32" strokeWidth={1.25} />
+                  {/* <GitHubLogoIcon width="32" height="32" strokeWidth={1.5} /> */}
                   <Heading as="h3" size="5">
                     Maintainers, contributors, volunteer teams
                   </Heading>
-                  <ul className="list-disc">
+                  <ul className="flex flex-col gap-1">
+                    {" "}
                     <li>
-                      <Text color="gray">
+                      <Text>
+                        Self-host with complete control over your data
+                      </Text>
+                    </li>
+                    <li>
+                      <Text>
                         Coordinate across continents without scheduling
                         conflicts
                       </Text>
                     </li>
                     <li>
-                      <Text color="gray">
+                      <Text>
                         Document contributions and progress transparently
                       </Text>
                     </li>
                     <li>
-                      <Text color="gray">
-                        Keep volunteers engaged with visible momentum
-                      </Text>
-                    </li>
-                    <li>
-                      <Text color="gray">
-                        Self-host with complete control over your data
+                      <Text>
+                        Keep contributors engaged with visible momentum
                       </Text>
                     </li>
                   </ul>
@@ -771,7 +906,7 @@ function OpenSource() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/70 via-blue-50/50 to-white"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -789,35 +924,34 @@ function OpenSource() {
       >
         <Flex direction="column" gap="8">
           <Heading as="h2" size="8" align="center">
-            Open Source You Can Trust
+            {/* Open Source You Can Trust */}
+            Open source you can trust
           </Heading>
 
           <Grid columns="2" gap="4">
             <Card variant="classic" size="5">
               <Flex direction="column" gap="3">
-                {/* <BoxesIcon size="32" strokeWidth={1.25} /> */}
+                {/* <BoxesIcon size="32" strokeWidth={1.5} /> */}
                 <Heading as="h3" size="5">
                   Your Data, Your Rules
                 </Heading>
-                <ul className="list-disc">
+                <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">
+                    <Text>
                       Complete transparency - see exactly how your data is
                       handled
                     </Text>
                   </li>
                   <li>
-                    <Text color="gray">
+                    <Text>
                       Self-hosting option - keep everything on your own servers
                     </Text>
                   </li>
                   <li>
-                    <Text color="gray">
-                      No vendor lock-in - export your data anytime
-                    </Text>
+                    <Text>No vendor lock-in - export your data anytime</Text>
                   </li>
                   <li>
-                    <Text color="gray">
+                    <Text>
                       Community-driven - shaped by real users like you
                     </Text>
                   </li>
@@ -829,30 +963,26 @@ function OpenSource() {
                 <Heading as="h3" size="5">
                   Built in the Open
                 </Heading>
-                <ul className="list-disc">
+                <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">
+                    <Text>
                       Open source on GitHub - help us build something great
                       together
                     </Text>
                   </li>
                   <li>
-                    <Text color="gray">
-                      Active development with regular updates
-                    </Text>
+                    <Text>Active development with regular updates</Text>
                   </li>
                   <li>
-                    <Text color="gray">
+                    <Text>
                       Community support for issues and feature requests
                     </Text>
                   </li>
                   <li>
-                    <Text color="gray">
-                      Getting started guide with setup instructions
-                    </Text>
+                    <Text>Getting started guide with setup instructions</Text>
                   </li>
                 </ul>
-                <Text color="gray" align="center"></Text>
+                <Text align="center"></Text>
               </Flex>
             </Card>
           </Grid>
@@ -869,7 +999,7 @@ function Pricing() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-white via-blue-50/40 to-blue-50/50"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -893,7 +1023,7 @@ function Pricing() {
                 <Heading as="h3" size="5">
                   Self-Hosting
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Deploy on your servers. Complete data control, always free
                   forever.
                 </Text>
@@ -903,16 +1033,16 @@ function Pricing() {
 
                 <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">Always free forever</Text>
+                    <Text>Always free forever</Text>
                   </li>
                   <li>
-                    <Text color="gray">Deploy on your own servers</Text>
+                    <Text>Deploy on your own servers</Text>
                   </li>
                   <li>
-                    <Text color="gray">Complete control of your data</Text>
+                    <Text>Complete control of your data</Text>
                   </li>
                   <li>
-                    <Text color="gray">Full feature access</Text>
+                    <Text>Full feature access</Text>
                   </li>
                 </ul>
                 <Box mt="1" />
@@ -941,7 +1071,7 @@ function Pricing() {
                 <Heading as="h3" size="5">
                   Managed Service
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Fully hosted with zero setup. All features included, automatic
                   updates.
                 </Text>
@@ -949,20 +1079,20 @@ function Pricing() {
                   Free
                 </Text>
 
-                <Text color="gray" size="2" className="italic">
+                <Text size="2" className="italic">
                   (After early beta period (12+ months), it would be
                   $1/user/month per board.)
                 </Text>
 
                 <ul className="flex flex-col gap-1">
                   <li>
-                    <Text color="gray">Hosted at standupkiwi.com</Text>
+                    <Text>Hosted at standupkiwi.com</Text>
                   </li>
                   <li>
-                    <Text color="gray">Zero setup required</Text>
+                    <Text>Zero setup required</Text>
                   </li>
                   <li>
-                    <Text color="gray">All features included</Text>
+                    <Text>All features included</Text>
                   </li>
                 </ul>
                 <Box mt="1" />
@@ -1022,7 +1152,7 @@ function FAQ() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-blue-50/50 via-blue-50/60 to-violet-50/60"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -1056,7 +1186,7 @@ function FAQ() {
                         </Flex>
                       </AccordionPrimitive.Trigger>
                       <AccordionPrimitive.Content className="p-[var(--space-5)] pt-0 w-full">
-                        <Text as="p" size="3" color="gray">
+                        <Text as="p" size="3">
                           {item.answer}
                         </Text>
                       </AccordionPrimitive.Content>
@@ -1080,7 +1210,7 @@ function Roadmap() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/60 via-blue-50/65 to-violet-50/70"
+      // className="bg-white"
     >
       <Container
         size={{
@@ -1095,19 +1225,20 @@ function Roadmap() {
         px={{
           initial: "4",
         }}
+        style={{ position: "relative", zIndex: 1 }}
       >
         <Flex direction="column" gap="4">
           <Heading as="h2" size="8" align="center">
             What's coming next
           </Heading>
-          <Text color="gray" align="center">
+          <Text align="center">
             We're just getting started. Here's what we're working on based on
             real user feedback:
           </Text>
           <Box mt="4" />
           <Grid columns="3" gap="4" gapY="4">
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring-gray-200/30"
             >
@@ -1115,14 +1246,14 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   Yesterday context recall
                 </Heading>
-                <Text color="gray">
+                <Text>
                   "What did I do yesterday again?" Auto-fill from your previous
                   updates
                 </Text>
               </Flex>
             </Card>
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
             >
@@ -1130,14 +1261,14 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   Today suggestion engine
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Get smart suggestions for today's update based on your work
                   patterns
                 </Text>
               </Flex>
             </Card>
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring-gray-200/30"
             >
@@ -1145,13 +1276,13 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   Daily team digest
                 </Heading>
-                <Text color="gray">
+                <Text>
                   See what everyone's working on today (not just for managers!)
                 </Text>
               </Flex>
             </Card>
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
             >
@@ -1159,14 +1290,14 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   AI weekly digest
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Auto-generated personal and team summaries with insights and
                   trends
                 </Text>
               </Flex>
             </Card>
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-blue-50/30 shadow-sm ring-1 ring/-gray-200/30"
             >
@@ -1174,13 +1305,13 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   Desktop and mobile apps
                 </Heading>
-                <Text color="gray">
+                <Text>
                   Native desktop and mobile apps for a seamless experience.
                 </Text>
               </Flex>
             </Card>
             <Card
-              size="5"
+              size="3"
               variant="classic"
               // className="bg-gradient-to-br from-white to-violet-50/30 shadow-sm ring-1 ring-gray-200/30"
             >
@@ -1188,9 +1319,8 @@ function Roadmap() {
                 <Heading as="h3" size="5">
                   And more...!
                 </Heading>
-                <Text color="gray">
-                  We're just getting started. Your feedback shapes our
-                  priorities. What would help you most?
+                <Text>
+                  Your feedback shapes our priorities. What would help you most?
                 </Text>
               </Flex>
             </Card>
@@ -1208,7 +1338,21 @@ function FinalCTA() {
         initial: "3",
         sm: "4",
       }}
-      className="bg-gradient-to-b from-violet-50/70 via-violet-50/80 to-blue-50/70"
+      // pb="calc(80px * var(--scaling) * 2)"
+      // className="bg-white"
+      style={{
+        // backgroundImage:
+        //   "radial-gradient(circle 800px at 700px 200px, var(--purple-2), transparent),radial-gradient(circle 600px at calc(100% - 300px) 300px, var(--blue-3), transparent),radial-gradient(circle 800px at right center, var(--sky-3), transparent),radial-gradient(circle 800px at right bottom, var(--sky-1), transparent),radial-gradient(circle 800px at calc(50% - 600px) calc(100% - 100px), var(--pink-3), var(--pink-1), transparent)",
+        // backgroundImage:
+        //   "radial-gradient(circle 800px at 700px 200px, var(--purple-5), transparent),radial-gradient(circle 600px at calc(100% - 300px) 800px, var(--plum-4), transparent),radial-gradient(circle 800px at right 60%, var(--iris-4), transparent),radial-gradient(circle 800px at right bottom, var(--iris-2), transparent),radial-gradient(circle 800px at calc(50% - 600px) calc(100% - 50px), var(--pink-4), var(--pink-2), transparent)",
+        // backgroundImage:
+        //   "linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9)), url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fgood-vibes-preview.png&w=3840&q=75')",
+        backgroundImage:
+          "linear-gradient(var(--color-background), rgba(255, 255, 255, 0.9) 25%), url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fgood-vibes-preview.png&w=3840&q=75')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       <Container
         size={{
@@ -1216,37 +1360,57 @@ function FinalCTA() {
           sm: "4",
         }}
         maxWidth={{
-          sm: "992px",
+          // sm: "992px",
+          sm: "1248px",
         }}
       >
-        <Flex direction="column" gap="4">
-          <Heading as="h2" size="8" align="center">
-            Ready to transform your standups?
-          </Heading>
-          <Text color="gray" align="center">
-            Set up your standup board in seconds
-          </Text>
-          <Box mt="4" />
-          <Flex justify="center">
-            <Button
-              asChild
-              highContrast
-              size="4"
-              className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
-            </Button>
+        {/* <Card size="5" className="pb-0!"> */}
+        {/* <Inset
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('https://www.raycast.com/_next/image?url=https%3A%2F%2Fmisc-assets.raycast.com%2Fwallpapers%2Fgood-vibes-preview.png&w=3840&q=75')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+            side="top"
+          > */}
+        <Box p="9">
+          <Flex direction="column" gap="4" p="9">
+            {/* <Box mt="8" /> */}
+            <Heading as="h2" size="8" align="center">
+              Ready to transform your standups?
+            </Heading>
+            <Text align="center">Set up your standup board in seconds</Text>
+            <Box mt="4" />
+            <Flex justify="center">
+              <Button
+                asChild
+                highContrast
+                size="4"
+                // className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <a href={import.meta.env.PUBLIC_APP_URL}>Get started free</a>
+              </Button>
+            </Flex>
+            {/* <Box mt="8" /> */}
           </Flex>
-        </Flex>
+        </Box>
+        {/* </Inset> */}
+        {/* </Card> */}
       </Container>
-      <Box mt="80px" />
     </Section>
   );
 }
 
 function NewContent() {
   return (
-    <Theme className="relative" accentColor="gray">
+    <Theme
+      className="relative"
+      accentColor="gray"
+      grayColor="mauve"
+      hasBackground
+    >
       <NavBar />
       <Hero />
       <Problem />
@@ -1255,7 +1419,7 @@ function NewContent() {
       <WhoItsPerfectFor />
       <OpenSource />
       <Pricing />
-      <FAQ />
+      {/* <FAQ /> */}
       <Roadmap />
       <FinalCTA />
     </Theme>

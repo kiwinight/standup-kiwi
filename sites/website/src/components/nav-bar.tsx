@@ -18,7 +18,7 @@ export function NavBar() {
     <Flex
       position="sticky"
       height="56px"
-      className="px-4 z-10 bg-white"
+      className="px-4 z-10 bg-(--color-background)"
       top="0"
     >
       <Grid
