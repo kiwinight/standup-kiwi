@@ -22,22 +22,7 @@ AI that saves time, not wastes it. No buzzwords, just useful features that make 
 
 **Value**: 매일 3-5분 절약, 업데이트 작성 시작점 제공
 
-### 2. Smart Search & Timeline
-
-**Problem**: 과거 스탠드업 찾기 어려움 (60% 사용자, 주 1-2회)
-**Solution**: 강력한 검색과 시간순 히스토리 뷰
-
-**Features:**
-
-- 키워드 검색: "API 관련 작업" → 관련 모든 업데이트
-- 프로젝트별 타임라인 뷰
-- "이 이슈 언제 시작했지?" 빠른 답변
-- 태그 자동 추출 및 필터링
-- 팀원별, 날짜별 필터
-
-**Value**: 컨텍스트 복구 시간 80% 단축
-
-### 3. Today Suggestion Engine
+### 2. Today Suggestion Engine
 
 **Problem**: "오늘 뭐 쓸까?" 글쓰기 부담 (80% 사용자, 매일)
 **Solution**: 개인 패턴 기반 스마트 제안
@@ -52,26 +37,26 @@ AI that saves time, not wastes it. No buzzwords, just useful features that make 
 
 **Value**: 업데이트 작성 시간 50% 단축
 
-### 4. Team Summary Dashboard
+### 3. Daily Team Digest
 
 **Problem**: 팀 전체 상황 파악 어려움 (50% 사용자, 주 2-3회)
-**Solution**: 모든 팀원이 볼 수 있는 팀 현황 대시보드
+**Solution**: 모든 팀원이 볼 수 있는 **일간 팀 요약**
 
 **Features:**
 
-- "This week Team Alpha worked on..." 자동 요약
-- 프로젝트 진행률 시각화
-- 블로커 현황: "API 이슈가 3번째 등장"
-- 팀 워크로드 밸런스 체크
+- **일간 상황 위주**: "Today Team Alpha is working on..." 자동 요약
+- 오늘 프로젝트 진행 상황
+- 현재 블로커 현황: "API 이슈가 3일째 지속"
+- 오늘 팀 워크로드 밸런스 체크
 - 협업 컨텍스트: "Sarah가 비슷한 이슈 해결했음"
 - 매니저뿐 아니라 모든 팀원 접근 가능
 
 **Value**: 팀 동기화 시간 70% 단축, 협업 효율성 증대
 
-### 5. AI Weekly Digest
+### 4. AI Weekly Digest
 
 **Problem**: 주간/월간 회고와 리포팅 부담
-**Solution**: 개인/팀 주간 요약 자동 생성
+**Solution**: 개인/팀 **주간 회고 & 트렌드 분석** 자동 생성
 
 **Personal Digest:**
 
@@ -82,12 +67,12 @@ AI that saves time, not wastes it. No buzzwords, just useful features that make 
 
 **Team Digest:**
 
-- "팀 포커스: API 개발 (60% 업데이트)"
-- 크로스팀 협업 현황
-- 팀 속도 트렌드 분석
-- 반복 이슈 패턴 감지
+- **트렌드 분석 위주**: "팀 포커스: API 개발 (60% 업데이트)"
+- 지난 주간 크로스팀 협업 현황
+- 팀 속도 트렌드 분석 (주 단위 비교)
+- 반복 이슈 패턴 감지 (장기적 관점)
 
-**Value**: 회고/리포팅 자동화, 인사이트 제공
+**Value**: 회고/리포팅 자동화, 장기적 인사이트 제공
 
 ---
 
@@ -152,6 +137,25 @@ AI that saves time, not wastes it. No buzzwords, just useful features that make 
 - 관련 이슈/PR 자동 링크
 
 **Value**: 온보딩 시간 60% 단축, 컨텍스트 스위칭 효율화
+
+---
+
+## 💡 Additional Ideas (Future Consideration)
+
+### Smart Search & Timeline
+
+**Problem**: 과거 스탠드업 찾기 어려움 (60% 사용자, 주 1-2회)
+**Solution**: 강력한 검색과 시간순 히스토리 뷰
+
+**Features:**
+
+- 키워드 검색: "API 관련 작업" → 관련 모든 업데이트
+- 프로젝트별 타임라인 뷰
+- "이 이슈 언제 시작했지?" 빠른 답변
+- 태그 자동 추출 및 필터링
+- 팀원별, 날짜별 필터
+
+**Value**: 컨텍스트 복구 시간 80% 단축
 
 ---
 
@@ -237,10 +241,9 @@ AI that saves time, not wastes it. No buzzwords, just useful features that make 
 ### Phase 1: Core User Pain Points (Do First)
 
 1. **Yesterday Context Recall** - 매일 겪는 "어제 뭐했더라?" 해결 (90% 사용자)
-2. **Smart Search & Timeline** - 과거 기록 찾기 어려움 해결 (60% 사용자, 주 1-2회)
-3. **Today Suggestion Engine** - "오늘 뭐 쓸까?" 고민 제거 (80% 사용자)
-4. **Team Summary Dashboard** - 팀 전체 상황 파악 (매니저뿐 아니라 모든 팀원용, 50% 사용자)
-5. **AI Weekly Digest** - 개인/팀 주간 요약 자동 생성 (시간 절약 니즈)
+2. **Today Suggestion Engine** - "오늘 뭐 쓸까?" 고민 제거 (80% 사용자)
+3. **Daily Team Digest** - 일간 팀 현황 파악 (매니저뿐 아니라 모든 팀원용, 50% 사용자)
+4. **AI Weekly Digest** - 주간 회고 & 트렌드 분석 자동 생성 (시간 절약 니즈)
 
 ### Phase 2: Advanced Intelligence (Plan Carefully)
 

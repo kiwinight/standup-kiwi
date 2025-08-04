@@ -4,19 +4,19 @@
 
 ### Headline
 
-**Finally, a standup tool that doesn't waste your time**
+**The standup tool that actually works**
 
 ### Subheadline
 
-Skip the endless meetings and scattered chat threads. Standup Kiwi gives you a simple, organized way to share daily updates—whether you work solo or with a team.
+Skip the endless meetings and scattered chat threads. Standup Kiwi gives you a simple, organized way to share daily updates — whether you work solo or with a team.
 
 ### Primary CTA
 
-**Start Your First Standup** (Free)
+**Get Started Free**
 
-### Secondary CTA
+### Auto-playing Demo Video
 
-**See How It Works** (Demo)
+_[Embedded video player showing actual product usage - board view, writing an update, browsing history]_
 
 ### Social Proof Snippet
 
@@ -30,29 +30,28 @@ Skip the endless meetings and scattered chat threads. Standup Kiwi gives you a s
 
 **Are you tired of...?**
 
-- **15-minute standup meetings** that could have been a 2-minute update?
+- **Daily standup meetings** that drag on for 30 minutes when everyone just needs to share quick updates?
 - **Scattered updates** buried in Slack threads that you can never find later?
-- **Heavy project management tools** like Jira that feel like overkill for simple daily check-ins?
-- **Starting your day** wondering "what was I working on again?"
+- **Over-engineered tools** like Jira, Notion templates, or Linear that feel like overkill for simple daily check-ins?
+- **No record** so when your boss asks "what's your team been working on?" you scramble to remember?
 
 _You're not alone. Thousands of developers, designers, and remote workers waste hours every week on broken standup processes._
 
 ---
 
-## ✨ Solution Section
-
-### Meet Standup Kiwi
+## ✨ Meet Standup Kiwi
 
 **The lightweight standup tool that actually works.**
 
 Standup Kiwi is designed for one thing: making daily standups effortless and meaningful. No complex features you don't need. No meetings that drag on. Just clean, organized updates that help you and your team stay in sync.
 
-**Built for modern work:**
+**The difference:**
 
-- ⚡ **5-minute daily routine** instead of long meetings
-- 📝 **Markdown support** for clear, formatted updates
-- 🏠 **Work from anywhere** - fully async-friendly
-- 📋 **Organized history** - find past updates instantly
+- 👀 **Scan everyone's updates in 2 minutes** instead of sitting through 30-minute meetings
+- 📋 **Everything in one place** - no more digging through Slack threads
+- 🎯 **Simple and focused** - built just for standups, not project management
+- 📋 **Team progress at your fingertips** - never scramble when asked "what's your team working on?"
+- 📊 **Clean visual layout** - see the whole team's progress at a glance
 - 🔓 **Your data, your control** - open source and self-hostable
 
 ---
@@ -68,7 +67,7 @@ Set up a personal board or team workspace in seconds. Name it whatever makes sen
 Answer the classic questions: What did you do yesterday? What's planned for today? Any blockers? Use our clean markdown editor to format lists, add links, and make your updates scannable.
 
 **3. Stay Organized**
-Your updates become organized cards on a clean board. Browse today's updates, search past work, and never lose track of progress again. Everything is right where you need it, when you need it.
+Your updates become organized cards on a clean board. Browse today's updates, review past work, and never lose track of progress again. Everything is right where you need it, when you need it.
 
 ### Real Example
 
@@ -80,6 +79,15 @@ _Try it once, and you'll never go back to chaotic standup meetings._
 
 ## 👥 Who It's Perfect For
 
+### Remote Teams
+
+**Small teams, startups, distributed companies**
+
+- Replace time-zone nightmare meetings with async updates
+- Keep everyone informed without interrupting deep work
+- Create a browsable history of team progress
+- Onboard new members with context from day one
+
 ### Solo Professionals
 
 **Developers, designers, writers, consultants**
@@ -90,15 +98,6 @@ _Try it once, and you'll never go back to chaotic standup meetings._
 - Build a portfolio of your daily achievements
 
 _"I use Standup Kiwi every morning with my coffee. It's become my favorite way to organize my day."_ —Alex, Product Engineer
-
-### Remote Teams
-
-**Small teams, startups, distributed companies**
-
-- Replace time-zone nightmare meetings with async updates
-- Keep everyone informed without interrupting deep work
-- Create a searchable history of team progress
-- Onboard new members with context from day one
 
 ### Open Source Communities
 
@@ -168,49 +167,47 @@ _"I use Standup Kiwi every morning with my coffee. It's become my favorite way t
 
 ### Built in the Open
 
-- 📈 **500+ GitHub stars** and growing
+- 📈 **Open source on GitHub** - help us build something great together
 - 🛠️ **Active development** with regular updates
 - 🐛 **Community support** for issues and feature requests
-- 📖 **Full documentation** for setup and customization
+- 📖 **Getting started guide** with setup instructions
 
 ---
 
-## 💰 Simple, Fair Pricing
+## 💰 Pricing
 
-### Start Free, Upgrade When Ready
+### Two Options, Both Free for Now
 
-**Free Forever**
+**🌐 Managed Service**
 
-- Personal boards
-- Unlimited standups
-- Markdown support
-- Self-hosting option
-- **Perfect for solo use**
+- Hosted at standupkiwi.com
+- Zero setup required
+- All features included
+- _Future: $1/user/month per board (much later)_
 
-**Team Plan** _(Coming Soon)_
+**🏠 Self-Hosting**
 
-- Everything in Free
-- Team boards with collaboration
-- Advanced sharing options
-- Priority support
-- **$5/user/month**
+- Deploy on your own servers
+- Complete control of your data
+- Full feature access
+- _Always free forever_
 
-**Enterprise** _(On Request)_
+### When Pricing Changes
 
-- Custom deployment
-- SSO integration
-- Advanced security
-- Dedicated support
-- **Let's talk**
+We'll introduce managed service pricing much later (12+ months) with:
 
-_No hidden fees. No per-standup charges. No surprises._
+- 📢 **Plenty of advance notice**
+- 🔄 **Free data migration help**
+- 🎁 **30-day free trial for new users**
+
+_Focus on building great standup habits today. Worry about pricing much later._
 
 ---
 
 ## 🙋‍♀️ Frequently Asked Questions
 
 **Q: Is it really free?**
-A: Yes! Personal use is free forever. We'll introduce paid team features later, but individual users can always use Standup Kiwi for free.
+A: Yes! Everything is free right now. Self-hosting will always stay free, and our managed service will introduce pricing much later with advance notice and data migration support.
 
 **Q: Can my team use it now?**  
 A: Team collaboration features are in beta. Individual team members can create personal boards immediately, and we're rolling out shared team boards soon.
@@ -230,13 +227,12 @@ A: No problem! Your data is yours—export it anytime. No contracts, no hassle.
 
 We're just getting started. Here's what we're working on based on real user feedback:
 
-- **Yesterday Context Helper** - "What did I do yesterday again?" Auto-fill from your previous updates
-- **Smart Search & History** - Find that old standup about the API issue in seconds
-- **Writing Assistant** - Get suggestions for today's update based on your patterns
-- **Team Overview Dashboard** - See what everyone's working on (not just for managers!)
-- **Weekly Digest** - Auto-generated summaries of your progress and team highlights
+- **Yesterday Context Recall** - "What did I do yesterday again?" Auto-fill from your previous updates
+- **Today Suggestion Engine** - Get smart suggestions for today's update based on your work patterns
+- **Daily Team Digest** - See what everyone's working on today (not just for managers!)
+- **AI Weekly Digest** - Auto-generated personal and team summaries with insights and trends
 
-**Coming later**: Voice recording, mobile apps, and more advanced team insights.
+**Coming later**: Blocker tracking & resolution, collaboration analysis, smart search & timeline, voice recording, and more advanced team insights.
 
 _Your feedback shapes our priorities. What would help you most?_
 
@@ -246,7 +242,7 @@ _Your feedback shapes our priorities. What would help you most?_
 
 ### Join the beta and help shape the future of standups
 
-**Start your first standup in under 60 seconds**
+**Set up your standup board in seconds**
 
 [**Get Started Free →**](https://app.standupkiwi.com)
 
