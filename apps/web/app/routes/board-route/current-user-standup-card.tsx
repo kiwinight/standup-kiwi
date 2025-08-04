@@ -511,7 +511,10 @@ function CurrentUserStandupCard() {
       return;
     }
 
-    if (target.tagName.includes("TEXTAREA")) {
+    if (
+      target.isContentEditable ||
+      ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+    ) {
       return;
     }
 
