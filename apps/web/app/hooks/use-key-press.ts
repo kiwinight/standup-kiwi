@@ -57,20 +57,17 @@ function matchesKeySpec(event: KeyboardEvent, keySpec: string): boolean {
     return false;
   }
 
-  // Check modifier keys (only if specified in the spec)
-  if (spec.ctrlKey !== undefined && event.ctrlKey !== spec.ctrlKey) {
+  // Ensure modifiers match exactly. If not in spec, they must be false.
+  if (event.ctrlKey !== (spec.ctrlKey ?? false)) {
     return false;
   }
-
-  if (spec.metaKey !== undefined && event.metaKey !== spec.metaKey) {
+  if (event.metaKey !== (spec.metaKey ?? false)) {
     return false;
   }
-
-  if (spec.shiftKey !== undefined && event.shiftKey !== spec.shiftKey) {
+  if (event.shiftKey !== (spec.shiftKey ?? false)) {
     return false;
   }
-
-  if (spec.altKey !== undefined && event.altKey !== spec.altKey) {
+  if (event.altKey !== (spec.altKey ?? false)) {
     return false;
   }
 

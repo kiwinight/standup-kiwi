@@ -76,7 +76,9 @@ function BoardsMenuItems({
 }: {
   currentUserBoards: (Board & { collaboratorsCount: number })[];
 }) {
-  const boardId = parseInt(useParams().boardId!, 10);
+  // const boardId = parseInt(useParams().boardId!, 10);
+  const params = useParams();
+  const boardId = params.boardId ? parseInt(params.boardId, 10) : null;
 
   if (!currentUserBoards) {
     return null;
