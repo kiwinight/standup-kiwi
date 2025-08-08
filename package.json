@@ -7,7 +7,6 @@
   "private": false,
   "scripts": {
     "dev:web": "pnpm --filter standup-kiwi-web dev",
-    "dev:api": "pnpm --filter standup-kiwi-api dev",
-    "dev:website": "pnpm --filter standup-kiwi-website dev"
+    "dev:api": "pnpm --filter standup-kiwi-api dev"
   }
 }
