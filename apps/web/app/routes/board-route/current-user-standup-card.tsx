@@ -205,18 +205,21 @@ function CardContentUI({
     };
   }
 
-  useEffect(() => {
-    if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
-      const { error } = createStandupFetcher.data;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-        setIsEditing(true);
-      } else {
-        toast.success("Your standup has been saved");
+  useEffect(
+    function handleCreateStandupResponse() {
+      if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
+        const { error } = createStandupFetcher.data;
+        if (error) {
+          toast.error(error);
+          console.error(error);
+          setIsEditing(true);
+        } else {
+          toast.success("Your standup has been saved");
+        }
       }
-    }
-  }, [createStandupFetcher.state, createStandupFetcher.data]);
+    },
+    [createStandupFetcher.state, createStandupFetcher.data]
+  );
 
   if (updateStandupFetcher.data) {
     const standup = updateStandupFetcher.data?.standup;
@@ -239,18 +242,21 @@ function CardContentUI({
     }
   }
 
-  useEffect(() => {
-    if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
-      const error = updateStandupFetcher.data.error;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-        setIsEditing(true);
-      } else {
-        toast.success("Your standup has been saved");
+  useEffect(
+    function handleUpdateStandupResponse() {
+      if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
+        const error = updateStandupFetcher.data.error;
+        if (error) {
+          toast.error(error);
+          console.error(error);
+          setIsEditing(true);
+        } else {
+          toast.success("Your standup has been saved");
+        }
       }
-    }
-  }, [updateStandupFetcher.state, updateStandupFetcher.data]);
+    },
+    [updateStandupFetcher.state, updateStandupFetcher.data]
+  );
 
   const [isEditing, setIsEditing] = useState(!Boolean(currentUserTodayStandup));
 
