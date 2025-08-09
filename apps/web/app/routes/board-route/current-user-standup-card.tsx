@@ -254,6 +254,15 @@ function CardContentUI({
 
   const [isEditing, setIsEditing] = useState(!Boolean(currentUserTodayStandup));
 
+  useEffect(
+    function switchToEditingModeWhenNoStandup() {
+      if (!currentUserTodayStandup) {
+        setIsEditing(true);
+      }
+    },
+    [currentUserTodayStandup]
+  );
+
   function handleDynamicFormCancel() {
     setIsEditing(false);
   }
@@ -344,9 +353,14 @@ function CardContentUI({
         <Flex direction="column" gap="5">
           <Flex direction="column" gap="5">
             {schema.fields.map((field) => {
+              if (!currentUserTodayStandup) {
+                return null;
+              }
+
               const value = (
-                currentUserTodayStandup?.formData as DynamicFormValues
+                currentUserTodayStandup.formData as DynamicFormValues
               )[field.name];
+
               if (!value) {
                 return null;
               }
