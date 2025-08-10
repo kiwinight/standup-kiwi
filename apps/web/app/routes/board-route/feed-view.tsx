@@ -180,9 +180,7 @@ function FeedViewUI({
                   </Callout.Root>
                 )} */}
 
-              {isToday && currentUser && (
-                <CurrentUserStandupCard key="current-user-standup-card" />
-              )}
+              {isToday && currentUser && <CurrentUserStandupCard />}
 
               {/* Show all other standups in single column */}
               {groupStandups.map((standup) => {
