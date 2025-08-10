@@ -205,18 +205,21 @@ function CardContentUI({
     };
   }
 
-  useEffect(() => {
-    if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
-      const { error } = createStandupFetcher.data;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-        setIsEditing(true);
-      } else {
-        toast.success("Your standup has been saved");
+  useEffect(
+    function handleCreateStandupResponse() {
+      if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
+        const { error } = createStandupFetcher.data;
+        if (error) {
+          toast.error(error);
+          console.error(error);
+          setIsEditing(true);
+        } else {
+          toast.success("Your standup has been saved");
+        }
       }
-    }
-  }, [createStandupFetcher.state, createStandupFetcher.data]);
+    },
+    [createStandupFetcher.state, createStandupFetcher.data]
+  );
 
   if (updateStandupFetcher.data) {
     const standup = updateStandupFetcher.data?.standup;
@@ -239,20 +242,32 @@ function CardContentUI({
     }
   }
 
-  useEffect(() => {
-    if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
-      const error = updateStandupFetcher.data.error;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-        setIsEditing(true);
-      } else {
-        toast.success("Your standup has been saved");
+  useEffect(
+    function handleUpdateStandupResponse() {
+      if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
+        const error = updateStandupFetcher.data.error;
+        if (error) {
+          toast.error(error);
+          console.error(error);
+          setIsEditing(true);
+        } else {
+          toast.success("Your standup has been saved");
+        }
       }
-    }
-  }, [updateStandupFetcher.state, updateStandupFetcher.data]);
+    },
+    [updateStandupFetcher.state, updateStandupFetcher.data]
+  );
 
   const [isEditing, setIsEditing] = useState(!Boolean(currentUserTodayStandup));
+
+  useEffect(
+    function switchToEditingModeWhenNoStandup() {
+      if (!currentUserTodayStandup) {
+        setIsEditing(true);
+      }
+    },
+    [currentUserTodayStandup]
+  );
 
   function handleDynamicFormCancel() {
     setIsEditing(false);
@@ -344,9 +359,14 @@ function CardContentUI({
         <Flex direction="column" gap="5">
           <Flex direction="column" gap="5">
             {schema.fields.map((field) => {
+              if (!currentUserTodayStandup) {
+                return null;
+              }
+
               const value = (
-                currentUserTodayStandup?.formData as DynamicFormValues
+                currentUserTodayStandup.formData as DynamicFormValues
               )[field.name];
+
               if (!value) {
                 return null;
               }
