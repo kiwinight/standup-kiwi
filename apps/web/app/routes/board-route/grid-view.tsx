@@ -267,9 +267,7 @@ function GridViewUI({
                 </>
               )} */}
 
-              {isToday && currentUser && (
-                <CurrentUserStandupCard key="current-user-standup-card" />
-              )}
+              {isToday && currentUser && <CurrentUserStandupCard />}
 
               {groupStandups.map((standup) => {
                 const user = usersMap.get(standup.userId);
