@@ -4,18 +4,18 @@ import {
   InsertBoard,
   usersToBoards,
   Board,
-  standupForms,
-  StandupForm,
 } from '../libs/db/schema';
 import { and, count, eq, sql } from 'drizzle-orm';
 import { Database, DATABASE_TOKEN } from 'src/db/db.module';
 import { UpdateBoardDto } from 'src/boards/dto/update-board.dto';
+import { StandupFormsService } from './standup-forms/standup-forms.service';
 
 @Injectable()
 export class BoardsService {
   constructor(
     @Inject(DATABASE_TOKEN)
     private readonly db: Database,
+    private readonly standupFormsService: StandupFormsService,
   ) {}
 
   create({
@@ -53,9 +53,9 @@ export class BoardsService {
       timezone,
     });
 
+    // TODO: use transaction for setup method to ensure atomicity
     await this.associateUser(result.id, userId);
-
-    await this.createDefaultForm(result.id);
+    await this.standupFormsService.createDefault(result.id);
 
     return result;
   }
@@ -76,52 +76,6 @@ export class BoardsService {
     });
   }
 
-  private async createDefaultForm(boardId: number): Promise<void> {
-    const schema = {
-      // title: "Today's Standup",
-      fields: [
-        {
-          name: 'yesterday',
-          label: 'What did you do yesterday?',
-          placeholder: 'Write your reply here...',
-          type: 'textarea',
-          required: true,
-        },
-        {
-          name: 'today',
-          label: 'What will you do today?',
-          placeholder: 'Write your reply here...',
-          type: 'textarea',
-          required: true,
-        },
-        {
-          name: 'blockers',
-          label: 'Do you have any blockers?',
-          placeholder: 'Write your reply here...',
-          description:
-            'Share any challenges or obstacles that might slow down your progress',
-          type: 'textarea',
-          required: false,
-        },
-      ],
-    };
-
-    const result = await this.db
-      .insert(standupForms)
-      .values({
-        boardId,
-        schema,
-      })
-      .returning()
-      .then((standupForms): StandupForm => standupForms[0]);
-
-    await this.db
-      .update(boards)
-      .set({
-        activeStandupFormId: result.id,
-      })
-      .where(eq(boards.id, boardId));
-  }
 
   // list() {
   //   return `This action returns all boards`;

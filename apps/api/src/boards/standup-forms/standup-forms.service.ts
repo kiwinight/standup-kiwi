@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { standupForms } from 'src/libs/db/schema';
+import { standupForms, boards } from 'src/libs/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { DATABASE_TOKEN } from 'src/db/db.module';
 import { Database } from 'src/db/db.module';
+import { DEFAULT_STANDUP_FORM_SCHEMA } from './constants';
 
 @Injectable()
 export class StandupFormsService {
@@ -11,9 +12,25 @@ export class StandupFormsService {
     private readonly db: Database,
   ) {}
 
-  // create(createStandupFormDto: CreateStandupFormDto) {
-  //   return 'This action adds a new standupForm';
-  // }
+  createActive(boardId: number, schema: object) {
+    return this.db.transaction(async (tx) => {
+      const [standupForm] = await tx
+        .insert(standupForms)
+        .values({ boardId, schema })
+        .returning();
+
+      await tx
+        .update(boards)
+        .set({ activeStandupFormId: standupForm.id })
+        .where(eq(boards.id, boardId));
+
+      return standupForm;
+    });
+  }
+
+  createDefault(boardId: number) {
+    return this.createActive(boardId, DEFAULT_STANDUP_FORM_SCHEMA);
+  }
 
   // findAll() {
   //   return `This action returns all standupForms`;
