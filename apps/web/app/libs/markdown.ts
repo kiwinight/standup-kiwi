@@ -37,8 +37,11 @@ function restoreMarkdownHeadingSyntax(html: string): string {
 }
 
 export function parseMarkdownToHtml(text: string) {
+  // Convert single newlines to hard breaks (better UX for non-markdown users)
+  const processedText = text.replace(/\n/g, '  \n');
+
   return restoreMarkdownHeadingSyntax(
-    micromark(text, {
+    micromark(processedText, {
       extensions: [gfmTaskListItem(), gfmAutolinkLiteral(), gfmStrikethrough()],
       htmlExtensions: [
         gfmTaskListItemHtml(),
