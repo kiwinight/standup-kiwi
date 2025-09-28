@@ -5,7 +5,9 @@ import { z } from "zod";
 import { useImperativeHandle, useEffect, useRef, type Ref } from "react";
 import type { ComponentProps } from "react";
 
-function AutoSizeTextArea({ ...props }: ComponentProps<typeof TextArea>) {
+export function AutoSizeTextArea({
+  ...props
+}: ComponentProps<typeof TextArea>) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {

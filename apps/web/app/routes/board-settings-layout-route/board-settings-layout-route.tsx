@@ -34,6 +34,7 @@ function BoardSettingsLayoutRoute({}: Route.ComponentProps) {
               >
                 <Link to={`/boards/${boardId}/settings`}>General</Link>
               </TabNav.Link>
+
               <TabNav.Link
                 asChild
                 active={
@@ -43,6 +44,16 @@ function BoardSettingsLayoutRoute({}: Route.ComponentProps) {
               >
                 <Link to={`/boards/${boardId}/settings/collaborators`}>
                   Collaborators
+                </Link>
+              </TabNav.Link>
+              <TabNav.Link
+                asChild
+                active={
+                  locationPathname === `/boards/${boardId}/settings/standups`
+                }
+              >
+                <Link to={`/boards/${boardId}/settings/standups`}>
+                  Standups
                 </Link>
               </TabNav.Link>
             </TabNav.Root>

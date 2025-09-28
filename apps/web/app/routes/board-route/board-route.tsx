@@ -49,7 +49,7 @@ export function getBoard(
   }).then((response) => response.json() as Promise<ApiData<Board>>);
 }
 
-function getStandupForm(
+export function getStandupForm(
   { standupFormId, boardId }: { standupFormId: number; boardId: number },
   { accessToken }: { accessToken: string }
 ) {

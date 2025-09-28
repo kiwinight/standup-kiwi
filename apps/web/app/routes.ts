@@ -25,6 +25,10 @@ export default [
           "/boards/:boardId/settings/collaborators",
           "routes/board-settings-collaborators-route/board-settings-collaborators-route.tsx"
         ),
+        route(
+          "/boards/:boardId/settings/standups",
+          "routes/board-settings-standups-route/board-settings-standups-route.tsx"
+        ),
       ]
     ),
   ]),
