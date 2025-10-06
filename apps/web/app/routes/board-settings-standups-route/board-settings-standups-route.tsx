@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   Card,
+  Dialog,
   Flex,
   IconButton,
   Inset,
@@ -157,6 +158,7 @@ type FieldItemProps = {
   moveFieldDown: (index: number) => void;
   duplicateField: (index: number) => void;
   removeField: (index: number) => void;
+  openEditDialog: (index: number) => void;
 };
 
 function FieldItem({
@@ -167,6 +169,7 @@ function FieldItem({
   moveFieldDown,
   duplicateField,
   removeField,
+  openEditDialog,
 }: FieldItemProps) {
   const controls = useDragControls();
 
@@ -176,6 +179,9 @@ function FieldItem({
       value={field}
       dragListener={false}
       dragControls={controls}
+      transition={{ duration: 0.2 }}
+      layout="position"
+      className="select-none"
     >
       <Card
         variant="surface"
@@ -183,7 +189,6 @@ function FieldItem({
           initial: "2",
           sm: "3",
         }}
-        style={{ position: "relative" }}
         className="group"
       >
         <Inset
@@ -201,7 +206,9 @@ function FieldItem({
               sm: "28px",
             }}
             className="hover:cursor-move"
-            onPointerDown={(e) => controls.start(e)}
+            onPointerDown={(e) => {
+              controls.start(e);
+            }}
           >
             <GripHorizontalIcon size={15} />
           </Flex>
@@ -228,12 +235,13 @@ function FieldItem({
               </Flex>
             </label>
             {field.type === "textarea" && (
-              <AutoSizeTextArea
+              <TextArea
                 variant="soft"
                 className="w-full min-h-[72px]!"
                 resize="none"
                 placeholder={field.placeholder}
                 value="" // Not allowing users to type
+                onChange={() => {}}
               />
             )}
 
@@ -244,70 +252,55 @@ function FieldItem({
             )}
           </Flex>
 
-          {/* <Inset clip="padding-box" side="bottom" pb="current" px="0"> */}
           <Inset clip="padding-box" side="x">
             <Separator size="4" />
           </Inset>
 
           <Inset clip="padding-box" side="y" pt="0" pb="0">
-            <Flex
-              justify={{
-                initial: "between",
-                sm: "end",
-              }}
-              py="4"
-            >
-              <Flex
-                gap="2"
-                display={{
-                  initial: "flex",
-                  sm: "none",
-                }}
-              >
-                <Tooltip content="Move up">
-                  <IconButton
-                    variant="soft"
-                    onClick={() => moveFieldUp(index)}
-                    disabled={index === 0}
-                  >
-                    <ArrowUpIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip content="Move down">
-                  <IconButton
-                    variant="soft"
-                    onClick={() => moveFieldDown(index)}
-                    disabled={index === totalFields - 1}
-                  >
-                    <ArrowDownIcon />
-                  </IconButton>
-                </Tooltip>
+            <Flex justify="between" py="4">
+              <Flex gap="2">
+                <Flex
+                  display={{
+                    sm: "none",
+                  }}
+                  gap="2"
+                >
+                  <Tooltip content="Move up">
+                    <IconButton
+                      variant="soft"
+                      onClick={() => moveFieldUp(index)}
+                      disabled={index === 0}
+                    >
+                      <ArrowUpIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip content="Move down">
+                    <IconButton
+                      variant="soft"
+                      onClick={() => moveFieldDown(index)}
+                      disabled={index === totalFields - 1}
+                    >
+                      <ArrowDownIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Flex>
+                <Button variant="soft" onClick={() => duplicateField(index)}>
+                  Duplicate
+                </Button>
               </Flex>
 
               <Flex gap="2">
-                <Button variant="soft">
-                  <Pencil2Icon />
+                <Button variant="soft" onClick={() => openEditDialog(index)}>
                   Edit
                 </Button>
 
-                <Tooltip content="Duplicate">
-                  <IconButton
-                    variant="soft"
-                    onClick={() => duplicateField(index)}
-                  >
-                    <CopyIcon />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip content="Remove">
-                  <IconButton
-                    variant="soft"
-                    onClick={() => removeField(index)}
-                    disabled={totalFields === 1}
-                  >
-                    <TrashIcon />
-                  </IconButton>
-                </Tooltip>
+                <Button
+                  variant="soft"
+                  onClick={() => removeField(index)}
+                  disabled={totalFields === 1}
+                >
+                  Remove
+                </Button>
               </Flex>
             </Flex>
           </Inset>
@@ -322,11 +315,29 @@ function Component({
 }: {
   boardActiveStandupForm: StandupForm | null;
 }) {
-  console.log(boardActiveStandupForm);
+  // console.log(boardActiveStandupForm);
   const initialSchema = validateDynamicFormSchema(
     boardActiveStandupForm?.schema
   );
   const [schema, setSchema] = useState(initialSchema);
+  const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(
+    null
+  );
+  const [isAddingField, setIsAddingField] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    label: "",
+    description: "",
+    type: "textarea" as const,
+    placeholder: "",
+    required: false,
+  });
+  const [initialEditFormData, setInitialEditFormData] = useState({
+    label: "",
+    description: "",
+    type: "textarea" as const,
+    placeholder: "",
+    required: false,
+  });
 
   const moveFieldUp = (index: number) => {
     if (index === 0 || !schema) return;
@@ -382,7 +393,7 @@ function Component({
       counter++;
     }
 
-    // Create the duplicated field with modified label and unique name
+    // Create the duplicated field withth modified label and unique name
     const duplicatedField = {
       ...fieldToDuplicate,
       name: newName,
@@ -412,7 +423,24 @@ function Component({
     });
   };
 
-  const addField = () => {
+  const openAddDialog = () => {
+    const initialData = {
+      label: "",
+      description: "",
+      type: "textarea" as const,
+      placeholder: "",
+      required: false,
+    };
+    setEditFormData(initialData);
+    setInitialEditFormData(initialData);
+    setIsAddingField(true);
+  };
+
+  const closeAddDialog = () => {
+    setIsAddingField(false);
+  };
+
+  const addFieldWithData = () => {
     if (!schema) return;
 
     const newFields = [...schema.fields];
@@ -427,14 +455,14 @@ function Component({
       newName = `field_${counter}`;
     }
 
-    // Create the new field with default values
+    // Create the new field with form data
     const newField = {
       name: newName,
-      label: "New Field",
-      type: "textarea" as const,
-      placeholder: "",
-      description: "",
-      required: false,
+      label: editFormData.label || "Untitled Field",
+      type: editFormData.type,
+      placeholder: editFormData.placeholder,
+      description: editFormData.description,
+      required: editFormData.required,
     };
 
     // Add the new field to the end
@@ -444,14 +472,67 @@ function Component({
       ...schema,
       fields: newFields,
     });
+
+    closeAddDialog();
   };
 
   const handleCancel = () => {
     setSchema(initialSchema);
   };
 
+  const openEditDialog = (index: number) => {
+    if (!schema) return;
+
+    const field = schema.fields[index];
+    const fieldData = {
+      label: field.label || "",
+      description: field.description || "",
+      type: field.type || "textarea",
+      placeholder: field.placeholder || "",
+      required: field.required ?? false,
+    };
+    setEditFormData(fieldData);
+    setInitialEditFormData(fieldData);
+    setEditingFieldIndex(index);
+  };
+
+  const closeEditDialog = () => {
+    setEditingFieldIndex(null);
+  };
+
+  const saveFieldEdit = () => {
+    if (!schema || editingFieldIndex === null) return;
+
+    const newFields = [...schema.fields];
+    newFields[editingFieldIndex] = {
+      ...newFields[editingFieldIndex],
+      label: editFormData.label,
+      description: editFormData.description,
+      type: editFormData.type,
+      placeholder: editFormData.placeholder,
+      required: editFormData.required,
+    };
+
+    setSchema({
+      ...schema,
+      fields: newFields,
+    });
+
+    closeEditDialog();
+  };
+
   // Check if schema has been modified
   const hasChanges = JSON.stringify(schema) !== JSON.stringify(initialSchema);
+
+  // Check if the edit form has changes
+  const hasFormChanges =
+    JSON.stringify(editFormData) !== JSON.stringify(initialEditFormData);
+
+  // For adding: disable if label is empty
+  // For editing: disable if nothing changed
+  const isSaveDisabled = isAddingField
+    ? editFormData.label.trim() === ""
+    : !hasFormChanges;
 
   if (!schema) {
     return null;
@@ -459,63 +540,164 @@ function Component({
 
   return (
     <Flex mt="5" direction="column" gap="5">
-      <Tabs.Root defaultValue="edit">
-        <Tabs.List>
-          <Tabs.Trigger value="edit">Edit</Tabs.Trigger>
-          <Tabs.Trigger value="preview">Preview</Tabs.Trigger>
-        </Tabs.List>
-
-        <Tabs.Content value="edit">
-          <Reorder.Group
-            axis="y"
-            values={schema.fields}
-            onReorder={handleReorder}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-5)",
-              listStyle: "none",
-              padding: 0,
-              marginTop: "var(--space-5)",
-            }}
-          >
-            {schema.fields.map((field, index) => (
-              <FieldItem
-                key={field.name}
-                field={field}
-                index={index}
-                totalFields={schema.fields.length}
-                moveFieldUp={moveFieldUp}
-                moveFieldDown={moveFieldDown}
-                duplicateField={duplicateField}
-                removeField={removeField}
-              />
-            ))}
-          </Reorder.Group>
-          <Flex justify="center" mt="5">
-            <Button variant="soft" onClick={addField}>
-              <PlusIcon />
-              Add field
-            </Button>
-          </Flex>
-        </Tabs.Content>
-      </Tabs.Root>
-
-      <Flex justify="end" mt="5" gap="2">
-        <Button
-          highContrast
-          size="2"
-          type="button"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={!hasChanges}
-        >
-          Discard changes
-        </Button>
-        <Button highContrast size="2" type="submit" disabled={!hasChanges}>
-          Save
+      <Reorder.Group
+        axis="y"
+        values={schema.fields}
+        onReorder={handleReorder}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-5)",
+          listStyle: "none",
+          padding: 0,
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        {schema.fields.map((field, index) => (
+          <FieldItem
+            key={field.name}
+            field={field}
+            index={index}
+            totalFields={schema.fields.length}
+            moveFieldUp={moveFieldUp}
+            moveFieldDown={moveFieldDown}
+            duplicateField={duplicateField}
+            removeField={removeField}
+            openEditDialog={openEditDialog}
+          />
+        ))}
+      </Reorder.Group>
+      <Flex justify="center" mb="5">
+        <Button variant="soft" onClick={openAddDialog}>
+          <PlusIcon />
+          Add field
         </Button>
       </Flex>
+
+      <Flex justify="between" gap="2">
+        <Flex gap="2">
+          <Button variant="soft" highContrast size="2" type="submit">
+            Preview
+          </Button>
+        </Flex>
+
+        <Flex gap="2">
+          <Button
+            highContrast
+            size="2"
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={!hasChanges}
+          >
+            Discard
+          </Button>
+
+          <Button highContrast size="2" type="submit" disabled={!hasChanges}>
+            Save
+          </Button>
+        </Flex>
+      </Flex>
+
+      <Dialog.Root
+        open={editingFieldIndex !== null || isAddingField}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeEditDialog();
+            closeAddDialog();
+          }
+        }}
+      >
+        <Dialog.Content>
+          <Dialog.Title>
+            {isAddingField ? "Add new field" : "Edit field"}
+          </Dialog.Title>
+          <Dialog.Description size="2">
+            {isAddingField
+              ? "Configure the new field properties below."
+              : "Modify the field properties below."}
+          </Dialog.Description>
+
+          <Flex direction="column" gap="5" mt="5">
+            <label>
+              <Text as="div" size="2" mb="1" className="font-semibold">
+                Label
+              </Text>
+              <TextField.Root
+                value={editFormData.label}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, label: e.target.value })
+                }
+                placeholder="Field label"
+              />
+            </label>
+
+            <label>
+              <Flex align="center" gap="2">
+                <Text size="2" className="font-semibold">
+                  Required
+                </Text>
+                <Switch
+                  checked={editFormData.required}
+                  onCheckedChange={(checked) =>
+                    setEditFormData({ ...editFormData, required: checked })
+                  }
+                />
+              </Flex>
+            </label>
+
+            <label>
+              <Text as="div" size="2" mb="1" className="font-semibold">
+                Description
+              </Text>
+              <TextArea
+                value={editFormData.description}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Optional description"
+                rows={3}
+              />
+            </label>
+
+            <label>
+              <Text as="div" size="2" mb="1" className="font-semibold">
+                Placeholder
+              </Text>
+              <TextField.Root
+                value={editFormData.placeholder}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    placeholder: e.target.value,
+                  })
+                }
+                placeholder="Placeholder text"
+              />
+            </label>
+          </Flex>
+
+          <Flex gap="3" mt="4" justify="end">
+            <Dialog.Close>
+              <Button variant="soft" color="gray">
+                Cancel
+              </Button>
+            </Dialog.Close>
+            <Dialog.Close>
+              <Button
+                onClick={isAddingField ? addFieldWithData : saveFieldEdit}
+                highContrast
+                disabled={isSaveDisabled}
+              >
+                Save
+              </Button>
+            </Dialog.Close>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </Flex>
   );
 }
