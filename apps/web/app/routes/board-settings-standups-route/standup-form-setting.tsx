@@ -370,7 +370,7 @@ function FormBuilder({
   const [draftSchema, setDraftSchema] = useState<StandupFormSchema | undefined>(
     initialSchema
   );
-  console.log(draftSchema);
+
   const [isAddingField, setIsAddingField] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
 
