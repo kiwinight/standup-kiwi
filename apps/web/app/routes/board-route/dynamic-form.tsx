@@ -5,6 +5,14 @@ import { z } from "zod";
 import { useImperativeHandle, useEffect, useRef, type Ref } from "react";
 import type { ComponentProps } from "react";
 
+// TODO: rename everything in this file - use word standup-form instead of dynamic-form
+
+export type StandupFormSchema = NonNullable<
+  ReturnType<typeof validateDynamicFormSchema>
+>;
+export type StandupFormFields = StandupFormSchema["fields"];
+export type StandupFormField = StandupFormFields[number];
+
 export function AutoSizeTextArea({
   ...props
 }: ComponentProps<typeof TextArea>) {
@@ -157,7 +165,7 @@ function DynamicForm({
           {fields.map((field) => {
             return (
               <Flex key={field.name} direction="column" gap="2">
-                <label>
+                <label htmlFor={field.name}>
                   <Flex align="center" gap="2">
                     <Text size="2" className="font-semibold">
                       {field.label}
@@ -175,6 +183,7 @@ function DynamicForm({
                     control={control}
                     render={({ field: { onChange, value } }) => (
                       <AutoSizeTextArea
+                        id={field.name}
                         variant="soft"
                         className="w-full min-h-[72px]!"
                         resize="none"
