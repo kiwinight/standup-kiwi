@@ -25,6 +25,10 @@ export default [
           "/boards/:boardId/settings/collaborators",
           "routes/board-settings-collaborators-route/board-settings-collaborators-route.tsx"
         ),
+        route(
+          "/boards/:boardId/settings/standups",
+          "routes/board-settings-standups-route/board-settings-standups-route.tsx"
+        ),
       ]
     ),
   ]),
@@ -75,6 +79,10 @@ export default [
   route(
     "/boards/:boardId/collaborators/delete",
     "routes/delete-board-collaborator-route/delete-board-collaborator-route.tsx"
+  ),
+  route(
+    "/boards/:boardId/standup-forms/create",
+    "routes/create-board-standup-form-route/create-board-standup-form-route.tsx"
   ),
   route(
     "/accept-invitation",
