@@ -15,6 +15,7 @@ import {
 import { AuthGuard, AuthenticatedRequest } from '../../auth/guards/auth.guard';
 import { PermissiveAuth } from '../../auth/decorators/permissive-auth.decorator';
 import { BoardAccessGuard } from '../guards/board-access.guard';
+import { AdminRoleGuard } from '../guards/admin-role.guard';
 import { InvitationService } from './invitation.service';
 import { RegenerateInvitationDto } from './dto/regenerate-invitation.dto';
 
@@ -57,6 +58,7 @@ export class InvitationController {
 
   // POST /boards/:boardId/invitation/regenerate - Generate new invitation (deactivate existing)
   @Post('regenerate')
+  @UseGuards(AdminRoleGuard)
   async regenerate(
     @Req() req: AuthenticatedRequest,
     @Param('boardId', ParseIntPipe) boardId: number,
