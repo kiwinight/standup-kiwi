@@ -15,6 +15,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { Board } from 'src/libs/db/schema';
 import { AuthenticatedRequest, AuthGuard } from 'src/auth/guards/auth.guard';
 import { BoardAccessGuard } from './guards/board-access.guard';
+import { AdminRoleGuard } from './guards/admin-role.guard';
 import { UsersService } from 'src/auth/users/users.service';
 import { UpdateBoardDto } from 'src/boards/dto/update-board.dto';
 
@@ -74,7 +75,7 @@ export class BoardsController {
     }
   }
 
-  @UseGuards(BoardAccessGuard)
+  @UseGuards(BoardAccessGuard, AdminRoleGuard)
   @Patch(':boardId')
   async update(
     @Param('boardId', ParseIntPipe) boardId: number,

@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { ApiError } from "~/root";
 import type { Route } from "./+types/board-settings-standups-route";
 import { getBoard, getStandupForm } from "../board-route/board-route";
+import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
 import StandupFormSetting from "./standup-form-setting";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -54,12 +55,22 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     });
   });
 
+  const collaboratorsPromise = listCollaborators(boardId, {
+    accessToken,
+  }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data;
+  });
+
   return data(
     {
       baseUrl,
       boardDataPromise,
       boardPromise,
       boardActiveStandupFormPromise,
+      collaboratorsPromise,
     },
     {
       headers: {
