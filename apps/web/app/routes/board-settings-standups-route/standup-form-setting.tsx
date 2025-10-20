@@ -1,6 +1,16 @@
-import { useLoaderData, Await, useFetcher } from "react-router";
-import { type Board, type StandupForm } from "types";
-import { Suspense, useEffect, useState } from "react";
+import {
+  useLoaderData,
+  Await,
+  useFetcher,
+  useRouteLoaderData,
+} from "react-router";
+import {
+  type Board,
+  type StandupForm,
+  type Collaborator,
+  type User,
+} from "types";
+import { Suspense, useEffect, useState, useMemo } from "react";
 import {
   Box,
   Button,
@@ -14,6 +24,7 @@ import {
   TextArea,
   TextField,
   Tooltip,
+  Callout,
   type ButtonProps,
 } from "@radix-ui/themes";
 import {
@@ -22,10 +33,16 @@ import {
   type StandupFormFields,
   type StandupFormSchema,
 } from "../board-route/dynamic-form";
-import { ArrowUpIcon, ArrowDownIcon, PlusIcon } from "@radix-ui/react-icons";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  PlusIcon,
+  InfoCircledIcon,
+} from "@radix-ui/react-icons";
 import { GripHorizontalIcon } from "lucide-react";
 import { Reorder, useDragControls } from "motion/react";
 import type { loader } from "./board-settings-standups-route";
+import type { loader as rootLoader } from "~/root";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,6 +72,7 @@ type FieldProps = {
   index?: number;
   defaultIsEditing?: boolean;
   isDraggable?: boolean;
+  disabled?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onDuplicate?: () => void;
@@ -99,6 +117,7 @@ function FieldCard({
   field,
   defaultIsEditing,
   isDraggable,
+  disabled = false,
   onMoveUp,
   onMoveDown,
   onDuplicate,
@@ -147,7 +166,7 @@ function FieldCard({
       }}
       className="group"
     >
-      {!isDraggable && <DragHandle controls={controls} />}
+      {!isDraggable && !disabled && <DragHandle controls={controls} />}
 
       <Flex
         direction="column"
@@ -287,14 +306,19 @@ function FieldCard({
         {isEditing ? (
           <Flex justify="end">
             <Flex gap="2">
-              <Button variant="soft" type="button" onClick={handleCancel}>
+              <Button
+                variant="soft"
+                type="button"
+                onClick={handleCancel}
+                disabled={disabled}
+              >
                 Cancel
               </Button>
               <Button
                 variant="soft"
                 type="submit"
                 onClick={handleSubmit(handleSave)}
-                disabled={!isDirty}
+                disabled={disabled || !isDirty}
               >
                 Save
               </Button>
@@ -310,17 +334,25 @@ function FieldCard({
                 gap="2"
               >
                 <Tooltip content="Move up">
-                  <IconButton variant="soft" onClick={onMoveUp}>
+                  <IconButton
+                    variant="soft"
+                    onClick={onMoveUp}
+                    disabled={disabled}
+                  >
                     <ArrowUpIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip content="Move down">
-                  <IconButton variant="soft" onClick={onMoveDown}>
+                  <IconButton
+                    variant="soft"
+                    onClick={onMoveDown}
+                    disabled={disabled}
+                  >
                     <ArrowDownIcon />
                   </IconButton>
                 </Tooltip>
               </Flex>
-              <Button variant="soft" onClick={onDuplicate}>
+              <Button variant="soft" onClick={onDuplicate} disabled={disabled}>
                 Duplicate
               </Button>
             </Flex>
@@ -331,11 +363,17 @@ function FieldCard({
                 onClick={() => {
                   setIsEditing(true);
                 }}
+                disabled={disabled}
               >
                 Edit
               </Button>
 
-              <Button variant="soft" onClick={onRemove} {...removeButtonProps}>
+              <Button
+                variant="soft"
+                onClick={onRemove}
+                {...removeButtonProps}
+                disabled={disabled || removeButtonProps?.disabled || false}
+              >
                 Remove
               </Button>
             </Flex>
@@ -363,11 +401,23 @@ function FieldCard({
 function FormBuilder({
   boardId,
   initialSchema,
+  collaborators,
+  currentUser,
 }: {
   boardId: number;
   initialSchema: StandupFormSchema | undefined;
+  collaborators: Collaborator[] | null;
+  currentUser: User | null;
 }) {
   const { toast } = useToast();
+
+  const isCurrentUserAdmin = useMemo(() => {
+    if (!currentUser || !collaborators) return false;
+    const userCollaborator = collaborators.find(
+      (c) => c.userId === currentUser.id
+    );
+    return userCollaborator?.role === "admin";
+  }, [currentUser, collaborators]);
 
   const [draftSchema, setDraftSchema] = useState<StandupFormSchema | undefined>(
     initialSchema
@@ -534,10 +584,21 @@ function FormBuilder({
 
   return (
     <Flex mt="5" direction="column" gap="5">
+      {!isCurrentUserAdmin && (
+        <Callout.Root size="1" variant="soft" className="py-2!">
+          <Callout.Icon>
+            <InfoCircledIcon />
+          </Callout.Icon>
+          <Callout.Text>
+            You will need admin privileges to update this setting.
+          </Callout.Text>
+        </Callout.Root>
+      )}
+
       <Reorder.Group
         axis="y"
         values={draftSchema.fields}
-        onReorder={handleReorder}
+        onReorder={isCurrentUserAdmin ? handleReorder : () => {}}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -552,6 +613,7 @@ function FormBuilder({
             key={field.name}
             field={field}
             index={index}
+            disabled={!isCurrentUserAdmin}
             onMoveUp={() => handleMoveUp(index)}
             onMoveDown={() => handleMoveDown(index)}
             onDuplicate={() => handleDuplicate(index)}
@@ -574,6 +636,7 @@ function FormBuilder({
             }}
             defaultIsEditing={true}
             isDraggable={true}
+            disabled={!isCurrentUserAdmin}
             onSave={handleAddingFieldSave}
             onCancel={handleAddingFieldCancel}
           />
@@ -582,7 +645,7 @@ function FormBuilder({
             <Button
               variant="soft"
               onClick={() => setIsAddingField(true)}
-              disabled={isAddingField}
+              disabled={!isCurrentUserAdmin || isAddingField}
             >
               <PlusIcon />
               Add field
@@ -613,7 +676,9 @@ function FormBuilder({
             variant="outline"
             onClick={handleCancelButtonClick}
             disabled={
-              !hasChanges || createBoardStandupFormFetcher.state !== "idle"
+              !isCurrentUserAdmin ||
+              !hasChanges ||
+              createBoardStandupFormFetcher.state !== "idle"
             }
           >
             Discard
@@ -624,7 +689,9 @@ function FormBuilder({
             size="2"
             type="submit"
             disabled={
-              !hasChanges || createBoardStandupFormFetcher.state !== "idle"
+              !isCurrentUserAdmin ||
+              !hasChanges ||
+              createBoardStandupFormFetcher.state !== "idle"
             }
             onClick={handleSaveButtonClick}
             loading={createBoardStandupFormFetcher.state !== "idle"}
@@ -644,11 +711,16 @@ function FormBuilderDataResolver({
   children: (data: {
     initialSchema: StandupFormSchema | undefined;
     board: Board | null;
+    collaborators: Collaborator[] | null;
+    currentUser: User | null;
   }) => React.ReactNode;
   fallback: React.ReactNode;
 }) {
-  const { boardActiveStandupFormPromise, boardPromise } =
+  const { boardActiveStandupFormPromise, boardPromise, collaboratorsPromise } =
     useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   return (
     <Suspense fallback={fallback}>
@@ -660,7 +732,22 @@ function FormBuilderDataResolver({
                 const initialSchema: StandupFormSchema | undefined =
                   validateStandupFormSchema(boardActiveStandupForm?.schema);
 
-                return children({ initialSchema, board });
+                return (
+                  <Await resolve={collaboratorsPromise}>
+                    {(collaborators) => (
+                      <Await resolve={currentUserPromise}>
+                        {(currentUser) =>
+                          children({
+                            initialSchema,
+                            board,
+                            collaborators,
+                            currentUser,
+                          })
+                        }
+                      </Await>
+                    )}
+                  </Await>
+                );
               }}
             </Await>
           );
@@ -688,11 +775,16 @@ function StandupFormSetting() {
         </Text>
       </Flex>
       <FormBuilderDataResolver fallback={<FormBuilderSkeleton />}>
-        {({ board, initialSchema }) => {
+        {({ board, initialSchema, collaborators, currentUser }) => {
           if (!board) return <FormBuilderSkeleton />;
           if (!initialSchema) return <FormBuilderSkeleton />;
           return (
-            <FormBuilder boardId={board.id} initialSchema={initialSchema} />
+            <FormBuilder
+              boardId={board.id}
+              initialSchema={initialSchema}
+              collaborators={collaborators}
+              currentUser={currentUser}
+            />
           );
         }}
       </FormBuilderDataResolver>

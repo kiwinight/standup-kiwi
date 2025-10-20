@@ -9,6 +9,7 @@ import {
   AlertDialog,
   Tooltip,
   useThemeContext,
+  Callout,
 } from "@radix-ui/themes";
 import {
   Await,
@@ -85,10 +86,10 @@ function CollaboratorsTable({
 
   const { appearance } = useThemeContext();
 
-  // Determine if the table is editable (current user is admin)
-  const isEditable = useMemo(() => {
+  // Check if current user is an admin
+  const isCurrentUserAdmin = useMemo(() => {
+    if (!currentUser) return false;
     return (
-      currentUser &&
       collaborators.find((c: Collaborator) => c.userId === currentUser.id)
         ?.role === "admin"
     );
@@ -129,14 +130,13 @@ function CollaboratorsTable({
 
   useEffect(() => {
     // Only update draft state when safe to do so:
-    // - If table is not editable (user can't make changes anyway)
-    // - If table is editable but user has no pending changes
-    // Note: When isEditable && hasEdited, we preserve user's draft changes
-    if (!isEditable || !hasEdited) {
+    // - Sync with server data when there are no pending edits
+    // - Preserve draft when there are pending edits (admin only can edit)
+    if (!hasEdited) {
       collaboratorsRef.current = collaborators;
       setDraftCollaborators(collaborators);
     }
-  }, [collaborators, isEditable, hasEdited]);
+  }, [collaborators, hasEdited]);
 
   const changeRole = useCallback(
     (collaborator: Collaborator, newRole: "admin" | "collaborator") => {
@@ -257,6 +257,17 @@ function CollaboratorsTable({
 
   return (
     <>
+      {!isCurrentUserAdmin && (
+        <Callout.Root size="1" variant="soft" className="py-2!" mt="5">
+          <Callout.Icon>
+            <InfoCircledIcon />
+          </Callout.Icon>
+          <Callout.Text>
+            You will need admin privileges to update this setting.
+          </Callout.Text>
+        </Callout.Root>
+      )}
+
       <Table.Root mt="5">
         <Table.Header>
           <Table.Row>
@@ -286,9 +297,7 @@ function CollaboratorsTable({
                 </Flex>
               </Tooltip>
             </Table.ColumnHeaderCell>
-            {isEditable && (
-              <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
-            )}
+            <Table.ColumnHeaderCell width="auto"></Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -318,8 +327,6 @@ function CollaboratorsTable({
                 draftCollaborators.filter((c) => c.role === "admin").length ===
                   1;
 
-              // Get current user's role on this board (for reference, actual editability is determined by isEditable)
-
               return (
                 <Table.Row key={collaborator.userId}>
                   <Table.RowHeaderCell
@@ -346,147 +353,140 @@ function CollaboratorsTable({
                   >
                     {role}
                   </Table.Cell>
-                  {isEditable && (
-                    <Table.Cell className="align-middle!">
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
-                          <Button variant="soft" highContrast>
-                            Edit
-                            <DropdownMenu.TriggerIcon />
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content>
-                          <DropdownMenu.Group>
-                            <DropdownMenu.Label>
-                              Select roles
-                            </DropdownMenu.Label>
-                            <DropdownMenu.CheckboxItem
-                              checked={role === "admin" && !hasRemoved}
-                              onCheckedChange={() =>
-                                changeRole(collaborator, "admin")
-                              }
-                            >
-                              Admin
-                            </DropdownMenu.CheckboxItem>
-                            <DropdownMenu.CheckboxItem
-                              checked={role === "collaborator" && !hasRemoved}
-                              onCheckedChange={() =>
-                                changeRole(collaborator, "collaborator")
-                              }
-                              disabled={isOnlyActiveAdmin}
-                            >
-                              Collaborator
-                            </DropdownMenu.CheckboxItem>
-                          </DropdownMenu.Group>
-                          <DropdownMenu.Separator />
-
-                          <DropdownMenu.Item
-                            onSelect={() => {
-                              removeCollaborator(collaborator);
-                            }}
-                            disabled={isCurrentUser || isOnlyActiveAdmin}
+                  <Table.Cell className="align-middle!">
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger disabled={!isCurrentUserAdmin}>
+                        <Button variant="soft" highContrast>
+                          Edit
+                          <DropdownMenu.TriggerIcon />
+                        </Button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Content>
+                        <DropdownMenu.Group>
+                          <DropdownMenu.Label>Select roles</DropdownMenu.Label>
+                          <DropdownMenu.CheckboxItem
+                            checked={role === "admin" && !hasRemoved}
+                            onCheckedChange={() =>
+                              changeRole(collaborator, "admin")
+                            }
                           >
-                            Remove access
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root>
-                    </Table.Cell>
-                  )}
+                            Admin
+                          </DropdownMenu.CheckboxItem>
+                          <DropdownMenu.CheckboxItem
+                            checked={role === "collaborator" && !hasRemoved}
+                            onCheckedChange={() =>
+                              changeRole(collaborator, "collaborator")
+                            }
+                            disabled={isOnlyActiveAdmin}
+                          >
+                            Collaborator
+                          </DropdownMenu.CheckboxItem>
+                        </DropdownMenu.Group>
+                        <DropdownMenu.Separator />
+
+                        <DropdownMenu.Item
+                          onSelect={() => {
+                            removeCollaborator(collaborator);
+                          }}
+                          disabled={isCurrentUser || isOnlyActiveAdmin}
+                        >
+                          Remove access
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                  </Table.Cell>
                 </Table.Row>
               );
             })}
         </Table.Body>
       </Table.Root>
       <Flex justify="end" mt="5" gap="3" align="center">
-        {isEditable && (
+        {hasEdited && (
           <>
-            {hasEdited && (
-              <>
-                <Text size="2" color="gray" className="italic">
-                  Pending changes
-                </Text>
-                <Button
-                  variant="outline"
-                  size="2"
-                  onClick={() => {
-                    collaboratorsRef.current = collaborators;
-                    setDraftCollaborators(collaborators);
-                  }}
-                >
-                  Cancel
-                </Button>
-              </>
-            )}
-
-            <AlertDialog.Root>
-              <AlertDialog.Trigger>
-                <Button
-                  highContrast
-                  size="2"
-                  loading={isSubmitting}
-                  disabled={!hasEdited || isSubmitting}
-                >
-                  Save
-                </Button>
-              </AlertDialog.Trigger>
-              <AlertDialog.Content maxWidth="450px">
-                <AlertDialog.Title>Save changes?</AlertDialog.Title>
-                <AlertDialog.Description size="2">
-                  <Text>Are you sure you want to save these changes?</Text>
-                  <br />
-                  <br />
-                  {warnings.length > 0 && (
-                    <div
-                      className={`prose prose-sm ${
-                        appearance === "dark" ? "prose-invert" : ""
-                      }`}
-                    >
-                      <ul style={{ marginTop: "0", paddingLeft: "16px" }}>
-                        {warnings.map((warning, index) => (
-                          <li key={index} style={{ marginBottom: "4px" }}>
-                            <Text size="2">{warning}</Text>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <br />
-                </AlertDialog.Description>
-
-                <Flex gap="3" mt="4" justify="end">
-                  <AlertDialog.Cancel>
-                    <Button variant="soft" color="gray">
-                      Cancel
-                    </Button>
-                  </AlertDialog.Cancel>
-                  <AlertDialog.Action
-                    onClick={() => {
-                      if (!boardId) return;
-
-                      fetcher.submit(
-                        {
-                          collaborators: draftCollaborators.map((c) => ({
-                            userId: c.userId,
-                            role: c.role,
-                          })),
-                        },
-                        {
-                          encType: "application/json",
-                          method: "POST",
-                          action: `/boards/${boardId}/collaborators/update`,
-                        }
-                      );
-                    }}
-                  >
-                    <Button variant="solid" highContrast loading={isSubmitting}>
-                      Save
-                    </Button>
-                  </AlertDialog.Action>
-                </Flex>
-              </AlertDialog.Content>
-            </AlertDialog.Root>
+            <Text size="2" color="gray" className="italic">
+              Pending changes
+            </Text>
+            <Button
+              variant="outline"
+              size="2"
+              onClick={() => {
+                collaboratorsRef.current = collaborators;
+                setDraftCollaborators(collaborators);
+              }}
+              disabled={!isCurrentUserAdmin}
+            >
+              Cancel
+            </Button>
           </>
         )}
+
+        <AlertDialog.Root>
+          <AlertDialog.Trigger>
+            <Button
+              highContrast
+              size="2"
+              loading={isSubmitting}
+              disabled={!isCurrentUserAdmin || !hasEdited || isSubmitting}
+            >
+              Save
+            </Button>
+          </AlertDialog.Trigger>
+          <AlertDialog.Content maxWidth="450px">
+            <AlertDialog.Title>Save changes?</AlertDialog.Title>
+            <AlertDialog.Description size="2">
+              <Text>Are you sure you want to save these changes?</Text>
+              <br />
+              <br />
+              {warnings.length > 0 && (
+                <div
+                  className={`prose prose-sm ${
+                    appearance === "dark" ? "prose-invert" : ""
+                  }`}
+                >
+                  <ul style={{ marginTop: "0", paddingLeft: "16px" }}>
+                    {warnings.map((warning, index) => (
+                      <li key={index} style={{ marginBottom: "4px" }}>
+                        <Text size="2">{warning}</Text>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <br />
+            </AlertDialog.Description>
+
+            <Flex gap="3" mt="4" justify="end">
+              <AlertDialog.Cancel>
+                <Button variant="soft" color="gray">
+                  Cancel
+                </Button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action
+                onClick={() => {
+                  if (!boardId) return;
+
+                  fetcher.submit(
+                    {
+                      collaborators: draftCollaborators.map((c) => ({
+                        userId: c.userId,
+                        role: c.role,
+                      })),
+                    },
+                    {
+                      encType: "application/json",
+                      method: "POST",
+                      action: `/boards/${boardId}/collaborators/update`,
+                    }
+                  );
+                }}
+              >
+                <Button variant="solid" highContrast loading={isSubmitting}>
+                  Save
+                </Button>
+              </AlertDialog.Action>
+            </Flex>
+          </AlertDialog.Content>
+        </AlertDialog.Root>
       </Flex>
     </>
   );

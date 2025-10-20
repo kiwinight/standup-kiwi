@@ -5,6 +5,7 @@ import { isErrorData, type ApiData, type Board } from "types";
 import NameSetting from "./name-setting";
 import TimezoneSetting from "./timezone-setting";
 import { commitSession } from "~/libs/auth-session.server";
+import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
 
 function getBoard(boardId: string, { accessToken }: { accessToken: string }) {
   return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
@@ -20,6 +21,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   );
 
   const boardId = params.boardId;
+  const parsedBoardId = parseInt(boardId, 10);
 
   const boardPromise = Promise.all([
     getBoard(boardId, { accessToken }).then((data) => {
@@ -32,8 +34,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     new Promise((resolve) => setTimeout(resolve, 50)),
   ]).then(([boardData]) => boardData);
 
+  const collaboratorsPromise = listCollaborators(parsedBoardId, {
+    accessToken,
+  }).then((data) => {
+    if (isErrorData(data)) {
+      return null;
+    }
+    return data;
+  });
+
   return data(
-    { boardPromise },
+    { boardPromise, collaboratorsPromise },
     {
       headers: {
         ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),

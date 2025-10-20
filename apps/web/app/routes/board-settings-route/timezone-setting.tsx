@@ -1,11 +1,26 @@
-import { Button, Card, Flex, Select, Text, Skeleton } from "@radix-ui/themes";
+import {
+  Button,
+  Card,
+  Flex,
+  Select,
+  Text,
+  Skeleton,
+  Callout,
+} from "@radix-ui/themes";
 import React, { useEffect, useMemo, Suspense } from "react";
-import { useFetcher, useLoaderData, Await } from "react-router";
+import {
+  useFetcher,
+  useLoaderData,
+  Await,
+  useRouteLoaderData,
+} from "react-router";
 import type { loader } from "./board-settings-route";
+import type { loader as rootLoader } from "~/root";
 import { type ActionType as UpdateBoardActionType } from "../update-board-route/update-board-route";
 import { useForm } from "react-hook-form";
 import { useToast } from "~/hooks/use-toast";
-import type { Board } from "types";
+import type { Board, Collaborator, User } from "types";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 function getTimezoneOptions() {
   // Get all timezone identifiers
@@ -108,25 +123,56 @@ function TimezoneFormDataResolver({
   children,
   fallback,
 }: {
-  children: (data: { board: Board | null }) => React.ReactNode;
+  children: (data: {
+    board: Board | null;
+    collaborators: Collaborator[] | null;
+    currentUser: User | null;
+  }) => React.ReactNode;
   fallback: React.ReactNode;
 }) {
-  const { boardPromise } = useLoaderData<typeof loader>();
+  const { boardPromise, collaboratorsPromise } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   return (
     <Suspense fallback={fallback}>
       <Await resolve={boardPromise}>
-        {(board) => {
-          return children({ board });
-        }}
+        {(board) => (
+          <Await resolve={collaboratorsPromise}>
+            {(collaborators) => (
+              <Await resolve={currentUserPromise}>
+                {(currentUser) =>
+                  children({ board, collaborators, currentUser })
+                }
+              </Await>
+            )}
+          </Await>
+        )}
       </Await>
     </Suspense>
   );
 }
 
-function TimezoneForm({ board }: { board: Board }) {
+function TimezoneForm({
+  board,
+  collaborators,
+  currentUser,
+}: {
+  board: Board;
+  collaborators: Collaborator[] | null;
+  currentUser: User | null;
+}) {
   const updateBoardTimezoneFetcher = useFetcher<UpdateBoardActionType>();
   const { toast } = useToast();
+
+  const isCurrentUserAdmin = useMemo(() => {
+    if (!currentUser || !collaborators) return false;
+    const userCollaborator = collaborators.find(
+      (c) => c.userId === currentUser.id
+    );
+    return userCollaborator?.role === "admin";
+  }, [currentUser, collaborators]);
 
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
 
@@ -188,11 +234,23 @@ function TimezoneForm({ board }: { board: Board }) {
         }
       }}
     >
-      <Flex direction="column">
+      <Flex direction="column" gap="5">
         <Text size="4" weight="bold">
           Timezone
         </Text>
-        <Flex direction="column" mt="5" gap="5">
+
+        {!isCurrentUserAdmin && (
+          <Callout.Root size="1" variant="soft" className="py-2!">
+            <Callout.Icon>
+              <InfoCircledIcon />
+            </Callout.Icon>
+            <Callout.Text>
+              You will need admin privileges to update this setting.
+            </Callout.Text>
+          </Callout.Root>
+        )}
+
+        <Flex direction="column" gap="5">
           <Flex key="timezone" direction="column" gap="2">
             <Text size="2" weight="medium">
               Standup timezone
@@ -203,9 +261,15 @@ function TimezoneForm({ board }: { board: Board }) {
               onValueChange={(value) => {
                 setValue("timezone", value);
               }}
+              disabled={!isCurrentUserAdmin}
             >
               <Select.Trigger
                 suppressHydrationWarning
+                className={
+                  !isCurrentUserAdmin
+                    ? "cursor-not-allowed! [&_button]:cursor-not-allowed!"
+                    : ""
+                }
                 onKeyDown={(event) => {
                   if (
                     event.key === "Enter" &&
@@ -246,7 +310,7 @@ function TimezoneForm({ board }: { board: Board }) {
           highContrast
           size="2"
           type="submit"
-          disabled={board.timezone === watch("timezone")}
+          disabled={!isCurrentUserAdmin || board.timezone === watch("timezone")}
           loading={updateBoardTimezoneFetcher.state !== "idle"}
         >
           Save
@@ -296,11 +360,17 @@ function TimezoneSetting({}: Props) {
       }}
     >
       <TimezoneFormDataResolver fallback={<TimezoneFormSkeleton />}>
-        {({ board }) => {
+        {({ board, collaborators, currentUser }) => {
           if (!board) {
             return <TimezoneFormSkeleton />;
           }
-          return <TimezoneForm board={board} />;
+          return (
+            <TimezoneForm
+              board={board}
+              collaborators={collaborators}
+              currentUser={currentUser}
+            />
+          );
         }}
       </TimezoneFormDataResolver>
     </Card>

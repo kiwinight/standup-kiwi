@@ -1,4 +1,4 @@
-import { Link2Icon } from "@radix-ui/react-icons";
+import { Link2Icon, InfoCircledIcon } from "@radix-ui/react-icons";
 import {
   Button,
   Card,
@@ -7,15 +7,24 @@ import {
   Skeleton,
   Text,
   TextField,
+  Callout,
+  type ButtonProps,
 } from "@radix-ui/themes";
-import { Suspense, useEffect, useState } from "react";
-import { useLoaderData, Await, useFetcher, useParams } from "react-router";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import {
+  useLoaderData,
+  Await,
+  useFetcher,
+  useParams,
+  useRouteLoaderData,
+} from "react-router";
 import { Controller, useForm } from "react-hook-form";
 import { DateTime } from "luxon";
 import type { loader } from "./board-settings-collaborators-route";
+import type { loader as rootLoader } from "~/root";
 import type { ActionType as RegenerateInvitationActionType } from "../regenerate-board-invitation/regenerate-board-invitation";
 import { useToast } from "~/hooks/use-toast";
-import type { Invitation } from "~/types";
+import type { Invitation, Collaborator, User } from "~/types";
 
 function InvitationLinkTextFieldSkeleton() {
   return (
@@ -29,14 +38,6 @@ function CopyButtonSkeleton() {
   return (
     <Button variant="soft" highContrast disabled>
       Copy
-    </Button>
-  );
-}
-
-function SettingsButtonSkeleton() {
-  return (
-    <Button variant="soft" highContrast disabled>
-      Settings
     </Button>
   );
 }
@@ -110,7 +111,7 @@ function CopyButton({ invitation }: { invitation: Invitation | null }) {
   );
 }
 
-function SettingsButton() {
+function SettingsButton(props: ButtonProps) {
   const regenerateInvitationFetcher =
     useFetcher<RegenerateInvitationActionType>({
       key: "regenerate-invitation",
@@ -121,7 +122,10 @@ function SettingsButton() {
       <Button
         variant="soft"
         highContrast
-        disabled={regenerateInvitationFetcher.state !== "idle"}
+        {...props}
+        disabled={
+          props.disabled || regenerateInvitationFetcher.state !== "idle"
+        }
       >
         Settings
       </Button>
@@ -162,6 +166,8 @@ interface InvitationDialogContentProps {
   timezone: string | undefined;
   boardId: number;
   onClose: () => void;
+  collaborators: Collaborator[] | null;
+  currentUser: User | null;
 }
 
 function InvitationDataLoader({
@@ -212,20 +218,6 @@ function CopyButtonDataLoader({
   );
 }
 
-function SettingsButtonDataLoader({
-  children,
-  fallback,
-}: {
-  children: (data: { invitation: Invitation | null }) => React.ReactNode;
-  fallback: React.ReactNode;
-}) {
-  return (
-    <InvitationDataLoader fallback={fallback}>
-      {({ invitation }) => children({ invitation })}
-    </InvitationDataLoader>
-  );
-}
-
 function ExpirationTextDataLoader({
   children,
   fallback,
@@ -261,10 +253,15 @@ function InvitationDialogContentDataLoader({
   children: (data: {
     invitation: Invitation | null;
     timezone: string | undefined;
+    collaborators: Collaborator[] | null;
+    currentUser: User | null;
   }) => React.ReactNode;
   fallback: React.ReactNode;
 }) {
-  const { boardPromise } = useLoaderData<typeof loader>();
+  const { boardPromise, collaboratorsPromise } = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<typeof rootLoader>("root");
+  const currentUserPromise =
+    rootData?.currentUserPromise ?? Promise.resolve(null);
 
   return (
     <Suspense fallback={fallback}>
@@ -273,7 +270,22 @@ function InvitationDialogContentDataLoader({
           const timezone = board?.timezone;
           return (
             <InvitationDataLoader fallback={fallback}>
-              {({ invitation }) => children({ invitation, timezone })}
+              {({ invitation }) => (
+                <Await resolve={collaboratorsPromise}>
+                  {(collaborators) => (
+                    <Await resolve={currentUserPromise}>
+                      {(currentUser) =>
+                        children({
+                          invitation,
+                          timezone,
+                          collaborators,
+                          currentUser,
+                        })
+                      }
+                    </Await>
+                  )}
+                </Await>
+              )}
             </InvitationDataLoader>
           );
         }}
@@ -287,6 +299,8 @@ function InvitationDialogContent({
   timezone,
   boardId,
   onClose,
+  collaborators,
+  currentUser,
 }: InvitationDialogContentProps) {
   const regenerateInvitationFetcher =
     useFetcher<RegenerateInvitationActionType>({
@@ -296,6 +310,14 @@ function InvitationDialogContent({
     invitation?.expiresAt && timezone
       ? getDaysFromNowAsNumber(invitation.expiresAt, timezone)
       : 7;
+
+  const isCurrentUserAdmin = useMemo(() => {
+    if (!currentUser || !collaborators) return false;
+    const userCollaborator = collaborators.find(
+      (c) => c.userId === currentUser.id
+    );
+    return userCollaborator?.role === "admin";
+  }, [currentUser, collaborators]);
 
   const {
     control,
@@ -318,6 +340,17 @@ function InvitationDialogContent({
       <Dialog.Description size="2">
         Edit the link settings for the invitation.
       </Dialog.Description>
+
+      {!isCurrentUserAdmin && (
+        <Callout.Root size="1" variant="soft" className="py-2!" mt="4">
+          <Callout.Icon>
+            <InfoCircledIcon />
+          </Callout.Icon>
+          <Callout.Text>
+            You will need admin privileges to update this setting.
+          </Callout.Text>
+        </Callout.Root>
+      )}
 
       <Flex direction="column" gap="3" mt="5">
         <Text size="2" weight="bold">
@@ -346,6 +379,12 @@ function InvitationDialogContent({
               value={value.toString()}
               onChange={(event) => onChange(event.target.value)}
               placeholder="Enter days"
+              disabled={!isCurrentUserAdmin}
+              className={
+                !isCurrentUserAdmin
+                  ? "cursor-not-allowed! [&_input]:cursor-not-allowed!"
+                  : ""
+              }
             >
               <TextField.Slot side="right">
                 <Text size="2" color="gray">
@@ -369,7 +408,11 @@ function InvitationDialogContent({
         </Dialog.Close>
         <Button
           highContrast
-          disabled={!isValid || watchedExpirationDays === currentExpirationDays}
+          disabled={
+            !isCurrentUserAdmin ||
+            !isValid ||
+            watchedExpirationDays === currentExpirationDays
+          }
           onClick={handleSubmit((data) => {
             onClose();
             regenerateInvitationFetcher.submit(
@@ -483,9 +526,7 @@ function InviteCollaboratorsSetting({}: Props) {
               open={isInvitationLinkSettingsOpen}
               onOpenChange={setIsInvitationLinkSettingsOpen}
             >
-              <SettingsButtonDataLoader fallback={<SettingsButtonSkeleton />}>
-                {() => <SettingsButton />}
-              </SettingsButtonDataLoader>
+              <SettingsButton />
               <Dialog.Content
                 size={{
                   initial: "3",
@@ -495,12 +536,14 @@ function InviteCollaboratorsSetting({}: Props) {
                 <InvitationDialogContentDataLoader
                   fallback={<InvitationDialogContentSkeleton />}
                 >
-                  {({ invitation, timezone }) => (
+                  {({ invitation, timezone, collaborators, currentUser }) => (
                     <InvitationDialogContent
                       invitation={invitation}
                       timezone={timezone}
                       boardId={boardId}
                       onClose={() => setIsInvitationLinkSettingsOpen(false)}
+                      collaborators={collaborators}
+                      currentUser={currentUser}
                     />
                   )}
                 </InvitationDialogContentDataLoader>

@@ -13,6 +13,7 @@ import { StandupFormsService } from './standup-forms.service';
 import { CreateStandupFormDto } from './dto/create-standup-form.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { BoardAccessGuard } from '../guards/board-access.guard';
+import { AdminRoleGuard } from '../guards/admin-role.guard';
 
 @Controller('boards/:boardId/standup-forms')
 @UseGuards(AuthGuard, BoardAccessGuard)
@@ -21,6 +22,7 @@ export class StandupFormsController {
 
   // POST /boards/:boardId/standup-forms
   @Post()
+  @UseGuards(AdminRoleGuard)
   async create(
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() createStandupFormDto: CreateStandupFormDto,
