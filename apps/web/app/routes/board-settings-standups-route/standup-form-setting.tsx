@@ -250,7 +250,7 @@ function FieldCard({
           </form>
         ) : (
           <Flex key={field.name} direction="column" gap="2">
-            <label htmlFor={field.name}>
+            <label>
               <Flex align="center" gap="2">
                 <Text size="2" className="font-semibold">
                   {field.label}
@@ -271,6 +271,8 @@ function FieldCard({
                 placeholder={field.placeholder}
                 value="" // Not allowing users to type
                 onChange={() => {}}
+                readOnly
+                onMouseDown={(e) => e.preventDefault()}
               />
             )}
 
