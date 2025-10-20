@@ -451,13 +451,14 @@ function InviteCollaboratorsSetting({}: Props) {
       <Flex direction="column">
         <Flex justify="between" align="center">
           <Text size="4" weight="bold">
-            Invite Collaborators
+            Invite collaborators
           </Text>
         </Flex>
 
-        <Text size="3" weight="bold" mt="5">
+        {/* TODO: I don't think this is necessary anymore. Consider removing it. */}
+        {/* <Text size="3" weight="bold" mt="5">
           Invitation Link
-        </Text>
+        </Text> */}
 
         <>
           <Text size="2" color="gray" mt="2">
