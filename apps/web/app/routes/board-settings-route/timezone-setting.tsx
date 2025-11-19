@@ -137,11 +137,11 @@ function TimezoneFormDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={boardPromise}>
+      <Await resolve={boardPromise} errorElement={fallback}>
         {(board) => (
-          <Await resolve={collaboratorsPromise}>
+          <Await resolve={collaboratorsPromise} errorElement={fallback}>
             {(collaborators) => (
-              <Await resolve={currentUserPromise}>
+              <Await resolve={currentUserPromise} errorElement={fallback}>
                 {(currentUser) =>
                   children({ board, collaborators, currentUser })
                 }
@@ -190,11 +190,10 @@ function TimezoneForm({
       updateBoardTimezoneFetcher.state === "idle" &&
       updateBoardTimezoneFetcher.data
     ) {
-      const error = updateBoardTimezoneFetcher.data.error;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-      } else {
+      if (updateBoardTimezoneFetcher.data.ok === false) {
+        toast.error(updateBoardTimezoneFetcher.data.error);
+        console.error(updateBoardTimezoneFetcher.data.error);
+      } else if (updateBoardTimezoneFetcher.data.ok === true) {
         toast.success("Board timezone has been saved");
       }
     }

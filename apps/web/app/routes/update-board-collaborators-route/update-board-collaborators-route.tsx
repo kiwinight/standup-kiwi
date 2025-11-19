@@ -1,50 +1,37 @@
 import { data, type ActionFunctionArgs } from "react-router";
 import requireAuthenticated from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
-import { isErrorData, type ApiData, type Collaborator } from "types";
+import type { Collaborator } from "types";
+import {
+  updateBoardCollaborators,
+  type UpdateBoardCollaboratorsRequestBody,
+} from "~/libs/api/collaborators";
+import type { ActionResponse } from "~/libs/action-response";
 
-export type UpdateBoardCollaboratorsRequestBody = {
-  collaborators: Array<{
-    userId: string;
-    role: "admin" | "collaborator";
-  }>;
-};
-
-export type ActionType = {
-  collaborators: Collaborator[] | null;
-  error: string | null;
-};
-
-function updateBoardCollaborators(
-  boardId: string,
-  body: UpdateBoardCollaboratorsRequestBody,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
-    {
-      method: "PUT",
-      body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
-}
+export type ActionType = typeof action;
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const { accessToken, refreshed, session } = await requireAuthenticated(
     request
   );
 
-  const boardId = params.boardId;
-
-  if (!boardId) {
-    return data(
+  if (!params.boardId) {
+    return data<ActionResponse<Collaborator[]>>(
       {
+        ok: false,
         error: "Board ID is required",
-        collaborators: null,
+      },
+      { status: 400 }
+    );
+  }
+
+  const boardId = parseInt(params.boardId, 10);
+
+  if (isNaN(boardId) || boardId <= 0) {
+    return data<ActionResponse<Collaborator[]>>(
+      {
+        ok: false,
+        error: "Board ID is required",
       },
       { status: 400 }
     );
@@ -52,26 +39,34 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const body = (await request.json()) as UpdateBoardCollaboratorsRequestBody;
 
-  const responseData = await updateBoardCollaborators(boardId, body, {
-    accessToken,
-  });
+  try {
+    const collaborators = await updateBoardCollaborators(boardId, body, {
+      accessToken,
+    });
 
-  return data(
-    {
-      ...(isErrorData(responseData)
-        ? {
-            error: responseData.message,
-            collaborators: null,
-          }
-        : {
-            collaborators: responseData,
-            error: null,
-          }),
-    },
-    {
-      headers: {
-        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+    return data<ActionResponse<Collaborator[]>>(
+      {
+        ok: true,
+        data: collaborators,
       },
-    }
-  );
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  } catch (error) {
+    return data<ActionResponse<Collaborator[]>>(
+      {
+        ok: false,
+        error: "Failed to update collaborators",
+      },
+      {
+        status: 500,
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 }

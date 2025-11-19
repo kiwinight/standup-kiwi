@@ -36,7 +36,7 @@ function EmailSignInRoute({}: Route.ComponentProps) {
   });
 
   useEffect(() => {
-    if (fetcher.data?.error) {
+    if (fetcher.data?.ok === false) {
       form.setError("otp", { message: fetcher.data.error });
     }
   }, [fetcher.data]);

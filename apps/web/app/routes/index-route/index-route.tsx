@@ -1,24 +1,18 @@
 import requireAuthenticated from "~/libs/auth";
 import type { Route } from "./+types/index-route";
-import { isErrorData, type ApiData, type Board, type User } from "types";
 import { redirect } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-import { listCurrentUserBoards } from "../board-layout-route/board-layout-route";
-import { getCurrentUser } from "~/root";
+import {
+  listCurrentUserBoards,
+  getCurrentUser,
+} from "~/libs/api/users";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
   );
 
-  const currentUserBoards = await listCurrentUserBoards({ accessToken }).then(
-    (data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
-    }
-  );
+  const currentUserBoards = await listCurrentUserBoards({ accessToken });
 
   if (!currentUserBoards || currentUserBoards.length === 0) {
     return redirect("/boards/create", {
@@ -28,12 +22,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     });
   }
 
-  const currentUser = await getCurrentUser(accessToken).then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data;
-  });
+  const currentUser = await getCurrentUser({ accessToken });
 
   if (!currentUser) {
     return redirect("/auth/email", {

@@ -1,5 +1,5 @@
 import { useFetcher, useRouteLoaderData, useLoaderData } from "react-router";
-import type { UpdateCurrentUserMetadataRequestBody } from "~/routes/update-current-user-metadata-route/update-current-user-metadata-route";
+import type { UpdateCurrentUserMetadataRequestBody } from "~/libs/api/users";
 import type { loader } from "~/root";
 import type { loader as boardLoader } from "~/routes/board-route/board-route";
 

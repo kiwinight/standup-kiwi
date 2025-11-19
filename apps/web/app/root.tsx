@@ -19,10 +19,10 @@ import {
   useColorScheme,
   colorSchemeFlickerPrevention,
 } from "./context/ColorSchemeContext";
-import { createErrorData, isErrorData, type User } from "types";
-import type { ApiData } from "types";
-import { verifyAndRefreshAccessToken } from "./libs/auth";
+import type { User } from "types";
+import { verifyAndRefreshAccessToken, handleAuthError } from "./libs/auth";
 import { commitSession, getSession } from "./libs/auth-session.server";
+import { getCurrentUser } from "./libs/api/users";
 import { useEffect } from "react";
 import posthog from "posthog-js";
 
@@ -100,41 +100,43 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function getCurrentUser(accessToken: string) {
-  return fetch(import.meta.env.VITE_API_URL + "/auth/users/me", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-    .then((response) => response.json() as Promise<ApiData<User>>)
-    .catch((error) => {
-      console.error(error);
-      return createErrorData(error.message, 500);
-    });
-}
-
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("Cookie"));
 
-  const {
-    isValid,
-    refreshed,
-    accessToken,
-    session: newSession,
-  } = await verifyAndRefreshAccessToken(session);
-
   let currentUser: User | null = null;
   let currentUserPromise: Promise<User | null> | null = null;
+  let refreshed = false;
+  let newSession = session;
 
-  if (isValid) {
-    currentUserPromise = getCurrentUser(accessToken).then((data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
-    });
-    currentUser = await currentUserPromise;
+  try {
+    const result = await verifyAndRefreshAccessToken(session);
+    const {
+      accessToken,
+      refreshed: wasRefreshed,
+      session: updatedSession,
+    } = result;
+
+    refreshed = wasRefreshed;
+    newSession = updatedSession;
+
+    try {
+      currentUserPromise = getCurrentUser({ accessToken });
+      currentUser = await currentUserPromise;
+    } catch (error) {
+      console.error("Failed to fetch current user:", error);
+      currentUser = null;
+      currentUserPromise = Promise.resolve(null);
+    }
+  } catch (error) {
+    const { session: errorSession, refreshed: wasRefreshed } = handleAuthError(
+      error,
+      session
+    );
+    newSession = errorSession;
+    refreshed = wasRefreshed;
   }
+
+  console.log("currentUser", currentUser);
 
   return data(
     {

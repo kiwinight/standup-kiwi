@@ -435,11 +435,10 @@ function FormBuilder({
         createBoardStandupFormFetcher.state === "idle" &&
         createBoardStandupFormFetcher.data
       ) {
-        const error = createBoardStandupFormFetcher.data.error;
-        if (error) {
-          toast.error(error);
-          console.error(error);
-        } else {
+        if (createBoardStandupFormFetcher.data.ok === false) {
+          toast.error(createBoardStandupFormFetcher.data.error);
+          console.error(createBoardStandupFormFetcher.data.error);
+        } else if (createBoardStandupFormFetcher.data.ok === true) {
           toast.success("Standup form has been saved");
         }
       }
@@ -724,18 +723,18 @@ function FormBuilderDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={boardPromise}>
+      <Await resolve={boardPromise} errorElement={fallback}>
         {(board) => {
           return (
-            <Await resolve={boardActiveStandupFormPromise}>
+            <Await resolve={boardActiveStandupFormPromise} errorElement={fallback}>
               {(boardActiveStandupForm) => {
                 const initialSchema: StandupFormSchema | undefined =
                   validateStandupFormSchema(boardActiveStandupForm?.schema);
 
                 return (
-                  <Await resolve={collaboratorsPromise}>
+                  <Await resolve={collaboratorsPromise} errorElement={fallback}>
                     {(collaborators) => (
-                      <Await resolve={currentUserPromise}>
+                      <Await resolve={currentUserPromise} errorElement={fallback}>
                         {(currentUser) =>
                           children({
                             initialSchema,

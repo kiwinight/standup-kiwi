@@ -1,14 +1,7 @@
 import { Container, Flex } from "@radix-ui/themes";
 
 import type { Route } from "./+types/board-route";
-import { ApiError } from "~/root";
-import {
-  isErrorData,
-  type ApiData,
-  type Board,
-  type Standup,
-  type StandupForm,
-} from "types";
+import type { Board, Standup, StandupForm } from "types";
 import requireAuthenticated from "~/libs/auth";
 
 import Toolbar from "./toolbar";
@@ -16,11 +9,18 @@ import { Suspense } from "react";
 import { Await, data, useLoaderData, useParams } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 import View from "./view";
-import { listCollaborators } from "../board-settings-collaborators-route/board-settings-collaborators-route";
+import { getBoard } from "~/libs/api/boards";
+import { listStandups } from "~/libs/api/standups";
+import { getStandupForm, listStandupFormsForStandups } from "~/libs/api/standup-forms";
+import {
+  countCollaborators,
+  listCollaborators,
+} from "~/libs/api/collaborators";
 import { type GridWidth } from "~/hooks/use-board-grid-view-settings";
 import { useBoardGridViewSettings } from "~/hooks/use-board-grid-view-settings";
 
 import { useBoardViewSettings } from "~/hooks/use-board-view-settings";
+import { streamable } from "~/libs/streamable";
 
 function getContainerMaxWidth(width: GridWidth): string {
   switch (width) {
@@ -38,58 +38,6 @@ function getContainerMaxWidth(width: GridWidth): string {
   }
 }
 
-export function getBoard(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then((response) => response.json() as Promise<ApiData<Board>>);
-}
-
-export function getStandupForm(
-  { standupFormId, boardId }: { standupFormId: number; boardId: number },
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    import.meta.env.VITE_API_URL +
-      `/boards/${boardId}/standup-forms/${standupFormId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((response) => response.json() as Promise<ApiData<StandupForm>>);
-}
-
-function listStandups(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/standups`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then((response) => response.json() as Promise<ApiData<Standup[]>>);
-}
-
-function countCollaborators(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    import.meta.env.VITE_API_URL +
-      `/boards/${boardId}/collaborators?view=count`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((response) => response.json() as Promise<ApiData<{ count: number }>>);
-}
-
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
     request
@@ -98,113 +46,56 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const boardId = parseInt(params.boardId, 10);
 
   if (isNaN(boardId) || boardId <= 0) {
-    throw new ApiError("Invalid board ID", 400);
+    throw data("Invalid board ID", { status: 400 });
   }
 
-  const boardDataPromise = getBoard(boardId, { accessToken });
+  const boardPromise = getBoard(boardId, { accessToken });
 
-  const boardPromise = boardDataPromise.then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data;
-  });
+  const boardNamePromise = streamable(boardPromise.then((board) => board.name));
 
-  const boardNamePromise = boardPromise.then((board) => {
-    if (!board) {
-      return null;
-    }
-    return board.name;
-  });
-
-  const boardTimezonePromise = boardPromise.then((board) => {
-    if (!board) {
-      return null;
-    }
-    return board.timezone;
-  });
-
-  const standupsPromise = listStandups(boardId, { accessToken }).then(
-    (data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
-    }
+  const boardTimezonePromise = streamable(
+    boardPromise.then((board) => board.timezone)
   );
 
-  const standupFormsPromise = standupsPromise.then((standups) => {
-    if (!standups) {
-      return null;
-    }
+  const standupsPromise = streamable(listStandups(boardId, { accessToken }));
 
-    const ids = standups.map((standup) => standup.formId);
-
-    return fetch(
-      import.meta.env.VITE_API_URL +
-        `/boards/${boardId}/standup-forms?ids=${ids.join(",")}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
+  const standupFormsPromise = streamable(
+    standupsPromise.then((standups) =>
+      listStandupFormsForStandups(boardId, standups, { accessToken })
     )
-      .then((response) => response.json() as Promise<ApiData<StandupForm[]>>)
-      .then((data) => {
-        if (isErrorData(data)) {
-          return null;
-        }
-        return data;
-      });
-  });
+  );
 
-  const boardActiveStandupFormPromise = boardPromise.then((board) => {
-    if (!board) {
-      return null;
-    }
-
-    if (!board.activeStandupFormId) {
-      return null;
-    }
-
-    return getStandupForm(
-      {
-        standupFormId: board.activeStandupFormId,
-        boardId: board.id,
-      },
-      { accessToken }
-    ).then((data) => {
-      if (isErrorData(data)) {
+  const boardActiveStandupFormPromise = streamable(
+    boardPromise.then((board) => {
+      if (!board.activeStandupFormId) {
         return null;
       }
-      return data;
-    });
-  });
 
-  const collaboratorsDataPromise = listCollaborators(boardId, { accessToken });
+      return getStandupForm(
+        {
+          standupFormId: board.activeStandupFormId,
+          boardId: board.id,
+        },
+        { accessToken }
+      );
+    })
+  );
 
-  const collaboratorsPromise = collaboratorsDataPromise.then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data;
-  });
+  const collaboratorsPromise = streamable(
+    listCollaborators(boardId, { accessToken })
+  );
 
-  const collaboratorsCountPromise = countCollaborators(boardId, {
-    accessToken,
-  }).then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data.count;
-  });
-
-  const collaboratorsCount = await collaboratorsCountPromise;
+  let collaboratorsCount = 0;
+  try {
+    collaboratorsCount = await countCollaborators(boardId, {
+      accessToken,
+    }).then((data) => data.count);
+  } catch (error) {
+    console.error("Failed to load collaborators count", error);
+  }
 
   return data(
     {
-      boardDataPromise,
       boardPromise,
       boardNamePromise,
       boardTimezonePromise,
@@ -219,23 +110,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
       },
     }
-  );
-}
-
-function BoardExistanceGuard() {
-  const { boardDataPromise } = useLoaderData<typeof loader>();
-
-  return (
-    <Suspense>
-      <Await resolve={boardDataPromise}>
-        {(data) => {
-          if (isErrorData(data)) {
-            throw new ApiError(data.message, data.statusCode);
-          }
-          return null;
-        }}
-      </Await>
-    </Suspense>
   );
 }
 
@@ -268,7 +142,6 @@ export default function BoardRoute({}: Route.ComponentProps) {
 
   return (
     <>
-      <BoardExistanceGuard />
       <ViewWidthSettingContainer boardId={boardId}>
         <Flex direction="column" gap="7">
           <Toolbar />

@@ -1,28 +1,13 @@
-import { isErrorData, type ApiData } from "types";
-import type { User } from "types";
-import type { ClientReadOnlyMetadata } from "types";
 import type { Route } from "./+types/update-current-user-metadata-route";
 import requireAuthenticated from "~/libs/auth";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-
-export interface UpdateCurrentUserMetadataRequestBody {
-  metadata: ClientReadOnlyMetadata;
-}
-
-function updateCurrentUserMetadata(
-  { metadata }: UpdateCurrentUserMetadataRequestBody,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(import.meta.env.VITE_API_URL + `/auth/users/me/metadata`, {
-    method: "PATCH",
-    body: JSON.stringify(metadata),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then((response) => response.json() as Promise<ApiData<User>>);
-}
+import {
+  updateCurrentUserMetadata,
+  type UpdateCurrentUserMetadataRequestBody,
+} from "~/libs/api/users";
+import type { ActionResponse } from "~/libs/action-response";
+import type { ClientReadOnlyMetadata } from "types";
 
 export type ActionType = typeof action;
 
@@ -34,27 +19,32 @@ export async function action({ request }: Route.ActionArgs) {
   const { metadata } =
     (await request.json()) as UpdateCurrentUserMetadataRequestBody;
 
-  const responseData = await updateCurrentUserMetadata(
-    { metadata },
-    { accessToken }
-  );
+  try {
+    const user = await updateCurrentUserMetadata({ metadata }, { accessToken });
 
-  return data(
-    {
-      ...(isErrorData(responseData)
-        ? {
-            error: responseData.message,
-            metadata: null,
-          }
-        : {
-            metadata: responseData.client_read_only_metadata,
-            error: null,
-          }),
-    },
-    {
-      headers: {
-        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+    return data<ActionResponse<ClientReadOnlyMetadata | null>>(
+      {
+        ok: true,
+        data: user.client_read_only_metadata,
       },
-    }
-  );
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  } catch (error) {
+    return data<ActionResponse<ClientReadOnlyMetadata | null>>(
+      {
+        ok: false,
+        error: "Failed to update user metadata",
+      },
+      {
+        status: 500,
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 }

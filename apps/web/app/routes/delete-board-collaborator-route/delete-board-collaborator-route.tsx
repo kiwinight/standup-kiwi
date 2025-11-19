@@ -1,44 +1,37 @@
 import { data, type ActionFunctionArgs } from "react-router";
 import requireAuthenticated from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
+import { deleteBoardCollaborator } from "~/libs/api/collaborators";
+import type { ActionResponse } from "~/libs/action-response";
 
 export type DeleteBoardCollaboratorRequestBody = {
   userId: string;
 };
 
-export type ActionType = {
-  success: boolean;
-  error: string | null;
-};
-
-function deleteBoardCollaborator(
-  boardId: string,
-  userId: string,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators/${userId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-}
+export type ActionType = typeof action;
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const { accessToken, refreshed, session } = await requireAuthenticated(
     request
   );
 
-  const boardId = params.boardId;
-
-  if (!boardId) {
-    return data(
+  if (!params.boardId) {
+    return data<ActionResponse>(
       {
-        success: false,
+        ok: false,
         error: "Board ID is required",
+      },
+      { status: 400 }
+    );
+  }
+
+  const boardId = parseInt(params.boardId, 10);
+
+  if (isNaN(boardId) || boardId <= 0) {
+    return data<ActionResponse>(
+      {
+        ok: false,
+        error: "Invalid board ID",
       },
       { status: 400 }
     );
@@ -46,23 +39,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const body = (await request.json()) as DeleteBoardCollaboratorRequestBody;
 
-  const response = await deleteBoardCollaborator(boardId, body.userId, {
-    accessToken,
-  });
+  try {
+    await deleteBoardCollaborator(boardId, body.userId, {
+      accessToken,
+    });
 
-  if (!response.ok) {
-    let errorMessage = "Failed to leave board";
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch {
-      // If response body can't be parsed, use default message
-    }
-
-    return data(
+    return data<ActionResponse>(
       {
-        success: false,
-        error: errorMessage,
+        ok: true,
       },
       {
         headers: {
@@ -70,17 +54,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
         },
       }
     );
-  }
-
-  return data(
-    {
-      success: true,
-      error: null,
-    },
-    {
-      headers: {
-        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+  } catch (error) {
+    return data<ActionResponse>(
+      {
+        ok: false,
+        error: "Failed to remove collaborator",
       },
-    }
-  );
+      {
+        status: 500,
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 }

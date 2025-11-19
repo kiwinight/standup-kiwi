@@ -38,15 +38,18 @@ export function ViewDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={currentUserPromise}>
+      <Await resolve={currentUserPromise} errorElement={fallback}>
         {(currentUser) => (
-          <Await resolve={boardTimezonePromise}>
+          <Await resolve={boardTimezonePromise} errorElement={fallback}>
             {(boardTimezone) => (
-              <Await resolve={standupsPromise}>
+              <Await resolve={standupsPromise} errorElement={fallback}>
                 {(standups) => (
-                  <Await resolve={standupFormsPromise}>
+                  <Await resolve={standupFormsPromise} errorElement={fallback}>
                     {(standupForms) => (
-                      <Await resolve={collaboratorsPromise}>
+                      <Await
+                        resolve={collaboratorsPromise}
+                        errorElement={fallback}
+                      >
                         {(collaborators) => {
                           if (
                             !currentUser ||

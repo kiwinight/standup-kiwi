@@ -1,44 +1,15 @@
-import { useLoaderData, data, Await, useParams } from "react-router";
-import type { Collaborator, Invitation } from "types";
-import { type ApiData, isErrorData } from "types";
+import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
 import requireAuthenticated from "~/libs/auth";
 import CollaboratorsSetting from "./collaborators-setting";
-import { Suspense } from "react";
 import { ApiError } from "~/root";
 import InviteCollaboratorsSetting from "./invite-collaborators-setting";
 import type { Route } from "./+types/board-settings-collaborators-route";
-import { getBoard } from "../board-route/board-route";
+import { getBoard } from "~/libs/api/boards";
+import { listCollaborators } from "~/libs/api/collaborators";
+import { ensureInvitation } from "~/libs/api/invitations";
+import { streamable } from "~/libs/streamable";
 import LeaveBoardSetting from "./leave-board-setting";
-
-export function listCollaborators(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(
-    `${import.meta.env.VITE_API_URL}/boards/${boardId}/collaborators`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((response) => response.json() as Promise<ApiData<Collaborator[]>>);
-}
-
-function ensureInvitation(
-  boardId: number,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(`${import.meta.env.VITE_API_URL}/boards/${boardId}/invitation`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then((response) => response.json() as Promise<ApiData<Invitation>>);
-}
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { accessToken, session, refreshed } = await requireAuthenticated(
@@ -54,37 +25,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const baseUrl = `${url.protocol}//${url.host}`;
 
-  const boardDataPromise = getBoard(boardId, { accessToken });
+  const boardPromise = streamable(getBoard(boardId, { accessToken }));
 
-  const boardPromise = getBoard(boardId, { accessToken }).then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data;
-  });
-
-  const collaboratorsPromise = listCollaborators(boardId, { accessToken }).then(
-    (data) => {
-      if (isErrorData(data)) {
-        return null;
-      }
-      return data;
-    }
+  const collaboratorsPromise = streamable(
+    listCollaborators(boardId, { accessToken })
   );
 
-  const ensureInvitationPromise = ensureInvitation(boardId, {
-    accessToken,
-  }).then((data) => {
-    if (isErrorData(data)) {
-      return null;
-    }
-    return data;
-  });
+  const ensureInvitationPromise = streamable(
+    ensureInvitation(boardId, {
+      accessToken,
+    })
+  );
 
   return data(
     {
       baseUrl,
-      boardDataPromise,
       boardPromise,
       collaboratorsPromise,
       ensureInvitationPromise,
@@ -97,28 +52,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   );
 }
 
-function BoardExistanceGuard() {
-  const { boardDataPromise } = useLoaderData<typeof loader>();
-
-  return (
-    <Suspense>
-      <Await resolve={boardDataPromise}>
-        {(data) => {
-          if (isErrorData(data)) {
-            throw new ApiError(data.message, data.statusCode);
-          }
-          return null;
-        }}
-      </Await>
-    </Suspense>
-  );
-}
-
 export default function BoardSettingsCollaboratorsRoute({}: Route.ComponentProps) {
   return (
     <>
-      <BoardExistanceGuard />
-
       <InviteCollaboratorsSetting />
 
       <CollaboratorsSetting />

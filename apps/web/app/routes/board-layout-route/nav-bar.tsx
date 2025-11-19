@@ -62,7 +62,7 @@ function BoardsMenuItemsDataLoader({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={currentUserBoardsPromise}>
+      <Await resolve={currentUserBoardsPromise} errorElement={fallback}>
         {(currentUserBoards) => {
           return children({ boards: currentUserBoards });
         }}
@@ -323,19 +323,22 @@ function NavBar() {
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger>
                 <PersonIcon />
-                <Text size="2">
-                  <Suspense fallback={<Skeleton>Loading</Skeleton>}>
-                    <Await resolve={currentUserPromise}>
-                      {(data) => {
-                        if (!data) {
-                          return <Skeleton>Loading</Skeleton>;
-                        }
+                  <Text size="2">
+                    <Suspense fallback={<Skeleton>Loading</Skeleton>}>
+                      <Await
+                        resolve={currentUserPromise}
+                        errorElement={<Skeleton>Loading</Skeleton>}
+                      >
+                        {(data) => {
+                          if (!data) {
+                            return <Skeleton>Loading</Skeleton>;
+                          }
 
-                        return <>{data.primary_email}</>;
-                      }}
-                    </Await>
-                  </Suspense>
-                </Text>
+                          return <>{data.primary_email}</>;
+                        }}
+                      </Await>
+                    </Suspense>
+                  </Text>
               </DropdownMenu.SubTrigger>
               <DropdownMenu.SubContent>
                 <DropdownMenu.Item

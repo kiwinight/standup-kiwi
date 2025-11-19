@@ -11,7 +11,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ActionType as SendAccessCodeActionType } from "../send-access-code-route/send-access-code-route";
-import { useEffect } from "react";
 import type { Route } from "./+types/email-auth-route";
 import { useSearchParams } from "react-router";
 
@@ -30,12 +29,6 @@ function EmailAuthRoute({}: Route.ComponentProps) {
       email: "",
     },
   });
-
-  useEffect(() => {
-    if (fetcher.data?.error) {
-      form.setError("email", { message: fetcher.data.error });
-    }
-  }, [fetcher.data]);
 
   return (
     <Container py="7" maxWidth="672px" px="4">
