@@ -38,7 +38,7 @@ function BoardNameDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={boardNamePromise}>
+      <Await resolve={boardNamePromise} errorElement={fallback}>
         {(name) => {
           return children({ name });
         }}

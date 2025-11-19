@@ -16,7 +16,7 @@ import {
 import requireAuthenticated from "~/libs/auth";
 import { commitSession } from "~/libs/auth-session.server";
 import type { Route } from "./+types/create-new-board-route";
-import { isErrorData, type ApiData, type Board } from "types";
+import { createBoard, type CreateBoardRequestBody } from "~/libs/api/boards";
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireAuthenticated(request);
@@ -61,19 +61,30 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const timezone = formData.get("timezone")?.toString().trim();
 
-  const boardData = await fetch(import.meta.env.VITE_API_URL + "/boards", {
-    method: "POST",
-    body: JSON.stringify({ name, timezone }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then(async (response) => {
-    const data: ApiData<Board> = await response.json();
-    return data;
-  });
+  if (!name || !timezone) {
+    return data(
+      {
+        errors: {
+          name: "Board name and timezone are required",
+        },
+      },
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 
-  if (isErrorData(boardData)) {
+  try {
+    const board = await createBoard({ name, timezone }, { accessToken });
+
+    return redirect("/boards/" + board.id, {
+      headers: {
+        ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
+      },
+    });
+  } catch (error) {
     return data(
       {
         errors: {
@@ -87,12 +98,6 @@ export async function action({ request }: ActionFunctionArgs) {
       }
     );
   }
-
-  return redirect("/boards/" + boardData.id, {
-    headers: {
-      ...(session ? { "Set-Cookie": await commitSession(session) } : {}),
-    },
-  });
 }
 
 type Props = {};

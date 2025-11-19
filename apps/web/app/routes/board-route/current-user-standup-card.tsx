@@ -36,10 +36,8 @@ import DynamicForm, {
   validateDynamicFormSchema,
   type DynamicFormValues,
 } from "./dynamic-form";
-import {
-  type ActionType as CreateStandupActionType,
-  type CreateStandupRequestBody,
-} from "../create-board-standup/create-board-standup";
+import type { ActionType as CreateStandupActionType } from "../create-board-standup/create-board-standup";
+import type { CreateStandupRequestBody } from "~/libs/api/standups";
 import { type ActionType as UpdateStandupActionType } from "../update-board-standup/update-board-standup";
 
 import type { Board, Standup, StandupForm, User } from "types";
@@ -183,11 +181,8 @@ function CardContentUI({
     }
   );
 
-  if (createStandupFetcher.data) {
-    const standup = createStandupFetcher.data?.standup;
-    if (standup) {
-      currentUserTodayStandup = standup;
-    }
+  if (createStandupFetcher.data?.ok === true && 'data' in createStandupFetcher.data) {
+    currentUserTodayStandup = createStandupFetcher.data.data;
   }
 
   if (createStandupFetcher.json) {
@@ -208,12 +203,11 @@ function CardContentUI({
   useEffect(
     function handleCreateStandupResponse() {
       if (createStandupFetcher.state !== "idle" && createStandupFetcher.data) {
-        const { error } = createStandupFetcher.data;
-        if (error) {
-          toast.error(error);
-          console.error(error);
+        if (createStandupFetcher.data.ok === false) {
+          toast.error(createStandupFetcher.data.error);
+          console.error(createStandupFetcher.data.error);
           setIsEditing(true);
-        } else {
+        } else if (createStandupFetcher.data.ok === true) {
           toast.success("Your standup has been saved");
         }
       }
@@ -221,11 +215,8 @@ function CardContentUI({
     [createStandupFetcher.state, createStandupFetcher.data]
   );
 
-  if (updateStandupFetcher.data) {
-    const standup = updateStandupFetcher.data?.standup;
-    if (standup) {
-      currentUserTodayStandup = standup;
-    }
+  if (updateStandupFetcher.data?.ok === true && 'data' in updateStandupFetcher.data) {
+    currentUserTodayStandup = updateStandupFetcher.data.data;
   }
 
   if (updateStandupFetcher.json) {
@@ -245,12 +236,11 @@ function CardContentUI({
   useEffect(
     function handleUpdateStandupResponse() {
       if (updateStandupFetcher.state !== "idle" && updateStandupFetcher.data) {
-        const error = updateStandupFetcher.data.error;
-        if (error) {
-          toast.error(error);
-          console.error(error);
+        if (updateStandupFetcher.data.ok === false) {
+          toast.error(updateStandupFetcher.data.error);
+          console.error(updateStandupFetcher.data.error);
           setIsEditing(true);
-        } else {
+        } else if (updateStandupFetcher.data.ok === true) {
           toast.success("Your standup has been saved");
         }
       }
@@ -425,13 +415,16 @@ function CardContentDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={currentUserPromise}>
+      <Await resolve={currentUserPromise} errorElement={fallback}>
         {(currentUser) => (
-          <Await resolve={boardPromise}>
+          <Await resolve={boardPromise} errorElement={fallback}>
             {(board) => (
-              <Await resolve={standupsPromise}>
+              <Await resolve={standupsPromise} errorElement={fallback}>
                 {(standups) => (
-                  <Await resolve={boardActiveStandupFormPromise}>
+                  <Await
+                    resolve={boardActiveStandupFormPromise}
+                    errorElement={fallback}
+                  >
                     {(structure) => {
                       if (!board || !standups || !structure) {
                         return fallback;

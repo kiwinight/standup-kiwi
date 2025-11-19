@@ -1,30 +1,13 @@
 import requireAuthenticated from "~/libs/auth";
 import type { Route } from "./+types/create-board-standup";
-import { isErrorData } from "types";
-import type { ApiData } from "types";
 import type { Standup } from "types";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-
-export interface CreateStandupRequestBody {
-  formData: Standup["formData"];
-  formId: number;
-}
-
-function createStandup(
-  boardId: string,
-  { formData, formId }: CreateStandupRequestBody,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}/standups`, {
-    method: "POST",
-    body: JSON.stringify({ formData, formId }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then((response) => response.json() as Promise<ApiData<Standup>>);
-}
+import {
+  createStandup,
+  type CreateStandupRequestBody,
+} from "~/libs/api/standups";
+import type { ActionResponse } from "~/libs/action-response";
 
 export type ActionType = typeof action;
 
@@ -36,32 +19,40 @@ export async function action({ request, params }: Route.ActionArgs) {
   const { formData, formId } =
     (await request.json()) as CreateStandupRequestBody;
 
-  const boardId = params.boardId;
+  const boardId = parseInt(params.boardId, 10);
 
-  const standupData = await createStandup(
-    boardId,
-    { formData, formId: Number(formId) },
-    {
-      accessToken,
-    }
-  );
+  try {
+    const standup = await createStandup(
+      boardId,
+      { formData, formId: Number(formId) },
+      {
+        accessToken,
+      }
+    );
 
-  return data(
-    {
-      ...(isErrorData(standupData)
-        ? {
-            error: standupData.message,
-            standup: null,
-          }
-        : {
-            standup: standupData,
-            error: null,
-          }),
-    },
-    {
-      headers: {
-        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+    return data<ActionResponse<Standup>>(
+      {
+        ok: true,
+        data: standup,
       },
-    }
-  );
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  } catch (error) {
+    return data<ActionResponse<Standup>>(
+      {
+        ok: false,
+        error: "Failed to create standup",
+      },
+      {
+        status: 500,
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 }

@@ -181,7 +181,7 @@ function InvitationDataLoader({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={ensureInvitationPromise}>
+      <Await resolve={ensureInvitationPromise} errorElement={fallback}>
         {(invitation) => {
           return children({ invitation });
         }}
@@ -232,7 +232,7 @@ function ExpirationTextDataLoader({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={boardPromise}>
+      <Await resolve={boardPromise} errorElement={fallback}>
         {(board) => {
           const timezone = board?.timezone;
           return (
@@ -265,15 +265,15 @@ function InvitationDialogContentDataLoader({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={boardPromise}>
+      <Await resolve={boardPromise} errorElement={fallback}>
         {(board) => {
           const timezone = board?.timezone;
           return (
             <InvitationDataLoader fallback={fallback}>
               {({ invitation }) => (
-                <Await resolve={collaboratorsPromise}>
+                <Await resolve={collaboratorsPromise} errorElement={fallback}>
                   {(collaborators) => (
-                    <Await resolve={currentUserPromise}>
+                    <Await resolve={currentUserPromise} errorElement={fallback}>
                       {(currentUser) =>
                         children({
                           invitation,
@@ -471,11 +471,10 @@ function InviteCollaboratorsSetting({}: Props) {
 
   useEffect(() => {
     if (regenerateInvitationFetcher.data) {
-      const { error } = regenerateInvitationFetcher.data;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-      } else {
+      if (regenerateInvitationFetcher.data.ok === false) {
+        toast.error(regenerateInvitationFetcher.data.error);
+        console.error(regenerateInvitationFetcher.data.error);
+      } else if (regenerateInvitationFetcher.data.ok === true) {
         toast.success("New invitation link generated successfully");
       }
     }

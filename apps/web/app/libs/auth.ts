@@ -1,127 +1,97 @@
-import { getSession } from "./auth-session.server";
+import { getSession, commitSession } from "./auth-session.server";
 
 import { redirect, type Session } from "react-router";
-import { isErrorData, type ApiData } from "types";
+import { verifyAccessToken, refreshAccessToken } from "./api/auth";
 
-function verifyAccessToken(accessToken: string) {
-  return fetch(import.meta.env.VITE_API_URL + "/auth/token/verify", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then(
-    (response) => response.json() as Promise<ApiData<{ valid: boolean }>>
-  );
+export class TokenRefreshError extends Error {
+  constructor(message: string, public readonly session: Session) {
+    super(message);
+    this.name = "TokenRefreshError";
+  }
 }
 
-function refreshAccessToken(refreshToken: string) {
-  return fetch(
-    import.meta.env.VITE_API_URL + `/auth/sessions/${refreshToken}/refresh`,
-    {
-      method: "POST",
-    }
-  ).then(
-    (response) => response.json() as Promise<ApiData<{ access_token: string }>>
-  );
+/**
+ * Helper function to handle auth errors consistently across loaders.
+ * Extracts session from TokenRefreshError, returns default session otherwise.
+ */
+export function handleAuthError(
+  error: unknown,
+  fallbackSession: Session
+): { session: Session; refreshed: boolean } {
+  if (error instanceof TokenRefreshError) {
+    return { session: error.session, refreshed: true };
+  }
+  return { session: fallbackSession, refreshed: false };
 }
-
-type TokenVerificationResult =
-  | { isValid: true; accessToken: string; refreshed: boolean; session: Session }
-  | {
-      isValid: false;
-      accessToken: string | null;
-      refreshed: boolean;
-      session: Session;
-    };
 
 export async function verifyAndRefreshAccessToken(
   session: Session
-): Promise<TokenVerificationResult> {
+): Promise<{ accessToken: string; refreshed: boolean; session: Session }> {
   const accessToken = session.get("access_token") as string | null;
 
   if (!accessToken) {
-    return {
-      accessToken: null,
-      isValid: false,
-      refreshed: false,
-      session,
-    };
+    throw new Error("Access token not found");
   }
 
-  const verificationResponse = await verifyAccessToken(accessToken);
-
-  if (!isErrorData(verificationResponse)) {
+  try {
+    await verifyAccessToken(accessToken);
     return {
       accessToken,
-      isValid: true,
       refreshed: false,
       session,
     };
+  } catch {
+    // Token is invalid or expired, try to refresh
   }
 
   const refreshToken = session.get("refresh_token") as string | null;
 
   if (!refreshToken) {
-    return {
-      accessToken: null,
-      isValid: false,
-      refreshed: false,
-      session,
-    };
+    throw new Error("Refresh token not found");
   }
 
-  const refreshAccessTokenData = await refreshAccessToken(refreshToken);
-
-  if (!isErrorData(refreshAccessTokenData)) {
-    const newAccessToken = refreshAccessTokenData.access_token;
+  try {
+    const result = await refreshAccessToken(refreshToken);
+    const newAccessToken = result.access_token;
     session.set("access_token", newAccessToken);
+
     return {
       accessToken: newAccessToken,
-      isValid: true,
       refreshed: true,
       session,
     };
+  } catch {
+    session.unset("access_token");
+    session.unset("refresh_token");
+    throw new TokenRefreshError("Token refresh failed", session);
   }
-
-  if (refreshAccessTokenData.statusCode === 503) {
-    console.warn(
-      "Network connectivity issue during token refresh, maintaining current session"
-    );
-    return {
-      accessToken: accessToken!,
-      isValid: true,
-      refreshed: false,
-      session,
-    };
-  }
-
-  session.unset("access_token");
-  session.unset("refresh_token");
-  return {
-    accessToken: null,
-    isValid: false,
-    refreshed: true,
-    session,
-  };
 }
 
 export default async function requireAuthenticated(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
-  const {
-    isValid,
-    refreshed,
-    accessToken,
-    session: newSession,
-  } = await verifyAndRefreshAccessToken(session);
 
-  if (!isValid) {
-    // throw redirect("/access");
+  try {
+    const {
+      accessToken,
+      refreshed,
+      session: newSession,
+    } = await verifyAndRefreshAccessToken(session);
+
+    return {
+      accessToken,
+      refreshed,
+      session: newSession,
+    };
+  } catch (error) {
+    // If tokens were cleared during refresh, commit the modified session
+    if (error instanceof TokenRefreshError) {
+      throw redirect("/auth/email", {
+        headers: {
+          "Set-Cookie": await commitSession(error.session),
+        },
+      });
+    }
+    // Other errors (no access token, no refresh token) - session unchanged
     throw redirect("/auth/email");
   }
-
-  return {
-    accessToken,
-    refreshed,
-    session: newSession,
-  };
 }

@@ -52,10 +52,10 @@ function CollaboratorsTableDataResolver({
 
   return (
     <Suspense fallback={fallback}>
-      <Await resolve={collaboratorsPromise}>
+      <Await resolve={collaboratorsPromise} errorElement={fallback}>
         {(collaborators) => {
           return (
-            <Await resolve={currentUserPromise}>
+            <Await resolve={currentUserPromise} errorElement={fallback}>
               {(currentUser) => {
                 return children({ collaborators, currentUser });
               }}
@@ -98,17 +98,14 @@ function CollaboratorsTable({
   // Handle fetcher response and toast notifications
   useEffect(() => {
     if (fetcher.data) {
-      const error = fetcher.data.error;
-      if (error) {
-        toast.error(error);
-        console.error(error);
-      } else {
+      if (fetcher.data.ok === false) {
+        toast.error(fetcher.data.error);
+        console.error(fetcher.data.error);
+      } else if (fetcher.data.ok === true && 'data' in fetcher.data) {
         toast.success("Collaborator settings updated");
         // Reset draft state on success (server data will update automatically)
-        if (fetcher.data.collaborators) {
-          collaboratorsRef.current = fetcher.data.collaborators;
-          setDraftCollaborators(fetcher.data.collaborators);
-        }
+        collaboratorsRef.current = fetcher.data.data;
+        setDraftCollaborators(fetcher.data.data);
       }
     }
   }, [fetcher.data]);

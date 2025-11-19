@@ -1,33 +1,10 @@
-import { isErrorData, type ApiData } from "types";
-import type { Board } from "types";
 import type { Route } from "./+types/update-board-route";
 import requireAuthenticated from "~/libs/auth";
 import { data } from "react-router";
 import { commitSession } from "~/libs/auth-session.server";
-
-interface UpdateBoardRequestBody {
-  name: Board["name"];
-  timezone: Board["timezone"];
-}
-
-function updateBoard(
-  boardId: string,
-  { name, timezone }: UpdateBoardRequestBody,
-  { accessToken }: { accessToken: string }
-) {
-  return fetch(import.meta.env.VITE_API_URL + `/boards/${boardId}`, {
-    method: "PATCH",
-    body: JSON.stringify({ name, timezone }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).then(async (response) => {
-    const data: ApiData<Board> = await response.json();
-
-    return data;
-  });
-}
+import { updateBoard, type UpdateBoardRequestBody } from "~/libs/api/boards";
+import type { ActionResponse } from "~/libs/action-response";
+import type { Board } from "types";
 
 export type ActionType = typeof action;
 
@@ -36,32 +13,36 @@ export async function action({ request, params }: Route.ActionArgs) {
     request
   );
 
-  const boardId = params.boardId;
+  const boardId = parseInt(params.boardId, 10);
 
   const { name, timezone } = (await request.json()) as UpdateBoardRequestBody;
 
-  const responseData = await updateBoard(
-    boardId,
-    { name, timezone },
-    { accessToken }
-  );
+  try {
+    const board = await updateBoard(boardId, { name, timezone }, { accessToken });
 
-  return data(
-    {
-      ...(isErrorData(responseData)
-        ? {
-            error: responseData.message,
-            board: null,
-          }
-        : {
-            board: responseData,
-            error: null,
-          }),
-    },
-    {
-      headers: {
-        ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+    return data<ActionResponse<Board>>(
+      {
+        ok: true,
+        data: board,
       },
-    }
-  );
+      {
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  } catch (error) {
+    return data<ActionResponse<Board>>(
+      {
+        ok: false,
+        error: "Failed to update board",
+      },
+      {
+        status: 500,
+        headers: {
+          ...(refreshed ? { "Set-Cookie": await commitSession(session) } : {}),
+        },
+      }
+    );
+  }
 }
